@@ -7,13 +7,17 @@
   Oreol CLI
 </h1> 
 
- ```odev``` is the CLI for heterogenious computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` extends device-centric workflows with [Metaflow](https://metaflow.org) orchestration to help scientists and engineers build and manage real-life AI and ML systems across Slurm and Kubernetes. Start here to experience the Just Work™ workflows!
+ ```odev``` is the CLI for hetero*genious* computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` extends device-centric workflows with [Metaflow](https://metaflow.org) orchestration to help scientists and engineers build and manage real-life AI and ML systems across Slurm and Kubernetes. [Start here](#start-here) to experience the Just Work™ workflows!
 
 ## Sections
-* [Usage](#usage)
-* [License](#license)
+* [Start here](#start-here)
+* [Ecosystem](#ecosystem)
 
-# Collaborations
+# Start Here
+For installing...
+
+## Ecosystem 
+Academic, industrial, and investment partners supporting odev.
 
 # License
 Copyright (C) 2025 Oreol KLG
