@@ -7,7 +7,7 @@
   Oreol CLI
 </h1> 
 
-```odev``` is the CLI for hetero*genious* computing.
+```odev``` is the CLI for hetero*genious* computing. Just Work™
 
 ## Sections
 * [Usage](#usage)
