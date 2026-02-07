@@ -14,6 +14,7 @@ var newCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(newCmd)
 
-	// Attach: odev new nccl
+	// Command list
 	newCmd.AddCommand(newcmd.NcclCmd)
+	newCmd.AddCommand(newcmd.VllmCmd)
 }
