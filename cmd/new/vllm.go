@@ -9,8 +9,8 @@ import (
 var vllmName string
 
 var VllmCmd = &cobra.Command{
-	Use:   "vllm",
-	Short: "Create vLLM project",
+	Use: "vllm",
+	//Short: "Create vLLM project",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Creating vLLM project:", vllmName)
 	},

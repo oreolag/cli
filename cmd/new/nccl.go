@@ -9,10 +9,10 @@ import (
 var name string
 
 var NcclCmd = &cobra.Command{
-	Use:   "nccl",
-	Short: "Create NCCL project",
+	Use: "nccl",
+	//Short: "Create NCCL project",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("", name) // fmt.Println("Creating NCCL project:", name)
+		fmt.Println("Creating NCCL project:", name)
 	},
 }
 
