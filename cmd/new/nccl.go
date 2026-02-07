@@ -12,7 +12,7 @@ var NcclCmd = &cobra.Command{
 	Use:   "nccl",
 	Short: "Create NCCL project",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Creating NCCL project:", name)
+		fmt.Println("", name) // fmt.Println("Creating NCCL project:", name)
 	},
 }
 
