@@ -18,8 +18,30 @@ func init() {
 }
 
 func Execute() {
+	// 1) Capture Cobra's default help template BEFORE overriding anything.
+	defaultTemplate := rootCmd.HelpTemplate()
+
+	// 2) Use your custom landing page ONLY for `odev`
 	rootCmd.SetHelpTemplate(helpTemplate)
+
+	// 3) Restore default help for all subcommands (so `odev new --help` is correct)
+	applyHelpTemplateRecursively(rootCmd, defaultTemplate, true)
+
 	_ = rootCmd.Execute()
+}
+
+// If skipRoot=true, it won't overwrite root's custom landing page.
+func applyHelpTemplateRecursively(cmd *cobra.Command, tmpl string, skipRoot bool) {
+	for _, c := range cmd.Commands() {
+		// skipRoot only matters for the first level when cmd == rootCmd
+		if !(skipRoot && cmd == rootCmd) {
+			c.SetHelpTemplate(tmpl)
+		} else {
+			// root's direct children should get default template
+			c.SetHelpTemplate(tmpl)
+		}
+		applyHelpTemplateRecursively(c, tmpl, false)
+	}
 }
 
 const helpTemplate = `{{with .Short}}{{.}}
@@ -30,6 +52,7 @@ const helpTemplate = `{{with .Short}}{{.}}
 ` + bold + `COMMANDS` + reset + `
 {{range .Commands}}{{if .IsAvailableCommand}}  {{rpad .Name 12}}{{.Short}}
 {{end}}{{end}}
+
 ` + bold + `FLAGS` + reset + `
   {{rpad "--help" 12}}Show help for command
   {{rpad "--version" 12}}Show odev version
