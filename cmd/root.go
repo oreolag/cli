@@ -13,6 +13,10 @@ var rootCmd = &cobra.Command{
 	Short: "The CLI for hetero" + italic + "genius" + reset + " computing.",
 }
 
+func init() {
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+}
+
 func Execute() {
 	rootCmd.SetHelpTemplate(helpTemplate)
 	_ = rootCmd.Execute()
