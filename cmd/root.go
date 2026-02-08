@@ -24,20 +24,21 @@ func Execute() {
 
 const helpTemplate = `{{with .Short}}{{.}}
 
-{{end}}` + bold + `USAGE` + reset + `
+{{end}}` + "\x1b[1m" + `USAGE` + "\x1b[0m" + `
   {{.CommandPath}} <command> <subcommand> [flags]
 
-` + bold + `COMMANDS` + reset + `
+` + "\x1b[1m" + `COMMANDS` + "\x1b[0m" + `
 {{range .Commands}}{{if .IsAvailableCommand}}  {{rpad .Name .NamePadding }}{{.Short}}
-{{end}}{{end}}` + bold + `FLAGS` + reset + `
+{{end}}{{end}}
+` + "\x1b[1m" + `FLAGS` + "\x1b[0m" + `
   --help      Show help for command
   --version   Show odev version
 
-` + bold + `EXAMPLES` + reset + `
+` + "\x1b[1m" + `EXAMPLES` + "\x1b[0m" + `
   $ odev new nccl
   $ odev examine
 
-` + bold + `LEARN MORE` + reset + `
+` + "\x1b[1m" + `LEARN MORE` + "\x1b[0m" + `
   Use ` + "`odev <command> <subcommand> --help`" + ` for more information about a command.
   Read the manual at https://books.oreol.ch/6/cli
 `
