@@ -28,7 +28,7 @@ const helpTemplate = `{{with .Short}}{{.}}
   {{.CommandPath}} <command> <subcommand> [flags]
 
 ` + "\x1b[1m" + `COMMANDS` + "\x1b[0m" + `
-{{range .Commands}}{{if .IsAvailableCommand}}  {{.Name}}
+{{range .Commands}}{{if .IsAvailableCommand}}  {{rpad .Name .NamePadding }}{{.Short}}
 {{end}}{{end}}
 ` + "\x1b[1m" + `FLAGS` + "\x1b[0m" + `
   --help      Show help for command
