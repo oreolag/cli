@@ -18,7 +18,7 @@ const helpTemplate = `{{with .Short}}{{.}}
   {{.CommandPath}} <command> [flags]
 
 COMMANDS
-{{range .Commands}}{{if (and .IsAvailableCommand (not .IsHelpCommand))}}
+{{range .Commands}}{{if .IsAvailableCommand}}
   {{rpad .Name .NamePadding }}{{.Short}}{{end}}{{end}}
 
 Run "{{.CommandPath}} <command> --help" for more information.
