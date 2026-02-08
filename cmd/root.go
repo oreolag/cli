@@ -2,9 +2,14 @@ package cmd
 
 import "github.com/spf13/cobra"
 
+const (
+	italic = "\x1b[3m"
+	reset  = "\x1b[0m"
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "odev",
-	Short: "Work seamlessly with heterogeneous systems from the command line.",
+	Short: "The CLI for hetero" + italic + "genius" + reset + " computing.",
 }
 
 func Execute() {
