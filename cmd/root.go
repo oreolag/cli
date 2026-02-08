@@ -31,8 +31,8 @@ const helpTemplate = `{{with .Short}}{{.}}
 {{range .Commands}}{{if .IsAvailableCommand}}  {{rpad .Name .NamePadding }}{{.Short}}
 {{end}}{{end}}
 ` + "\x1b[1m" + `FLAGS` + "\x1b[0m" + `
-  --help      Show help for command
-  --version   Show odev version
+  --help         Show help for command
+  --version      Show odev version
 
 ` + "\x1b[1m" + `EXAMPLES` + "\x1b[0m" + `
   $ odev new nccl
