@@ -29,7 +29,8 @@ const helpTemplate = `{{with .Short}}{{.}}
 
 ` + bold + `COMMANDS` + reset + `
 {{range .Commands}}{{if .IsAvailableCommand}}  {{rpad .Name 12}}{{.Short}}
-{{end}}{{end}}` + bold + `FLAGS` + reset + `
+{{end}}{{end}}
+` + bold + `FLAGS` + reset + `
   {{rpad "--help" 12}}Show help for command
   {{rpad "--version" 12}}Show odev version
 
