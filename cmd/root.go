@@ -3,6 +3,7 @@ package cmd
 import "github.com/spf13/cobra"
 
 const (
+	bold   = "\x1b[1m"
 	italic = "\x1b[3m"
 	reset  = "\x1b[0m"
 )
@@ -19,12 +20,12 @@ func Execute() {
 
 const helpTemplate = `{{with .Short}}{{.}}
 
-{{end}}USAGE
+{{end}}` + "\x1b[1m" + `USAGE` + "\x1b[0m" + `
   {{.CommandPath}} <command> [flags]
 
-COMMANDS
+` + "\x1b[1m" + `COMMANDS` + "\x1b[0m" + `
 {{range .Commands}}{{if .IsAvailableCommand}}
-  {{rpad .Name .NamePadding }}{{.Short}}{{end}}{{end}}
+  {{.Name}}{{end}}{{end}}
 
 Run "{{.CommandPath}} <command> --help" for more information.
 `
