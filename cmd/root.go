@@ -26,7 +26,6 @@ const helpTemplate = `{{with .Short}}{{.}}
 ` + "\x1b[1m" + `COMMANDS` + "\x1b[0m" + `
 {{range .Commands}}{{if .IsAvailableCommand}}  {{.Name}}
 {{end}}{{end}}
-
 ` + "\x1b[1m" + `FLAGS` + "\x1b[0m" + `
   --help      Show help for command
   --version   Show odev version
