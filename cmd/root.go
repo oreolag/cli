@@ -21,11 +21,11 @@ func Execute() {
 const helpTemplate = `{{with .Short}}{{.}}
 
 {{end}}` + "\x1b[1m" + `USAGE` + "\x1b[0m" + `
-  {{.CommandPath}} <command> [flags]
+  {{.CommandPath}} <command> <subcommand> [flags]
 
 ` + "\x1b[1m" + `COMMANDS` + "\x1b[0m" + `
-{{range .Commands}}{{if .IsAvailableCommand}}
-  {{.Name}}{{end}}{{end}}
+{{range .Commands}}{{if .IsAvailableCommand}}  {{.Name}}
+{{end}}{{end}}
 
 Run "{{.CommandPath}} <command> --help" for more information.
 `
