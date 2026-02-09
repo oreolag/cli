@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-vars_get.py
+constants_get.py
 
 Read a vars.yml-style YAML file and print a value.
 
 Usage:
-  vars_get.py <section> <key> [--db PATH] [--sep SEP]
+  constants_get.py <section> <key> [--db PATH] [--sep SEP]
 
 Examples:
-  ./vars_get.py paths tmp
-  ./vars_get.py --db /opt/vars.yml users docker # -> jmoya82,helen
+  ./constants_get.py paths tmp
+  ./constants_get.py --db /opt/vars.yml users docker # -> jmoya82,helen
 """
 
 from __future__ import annotations
