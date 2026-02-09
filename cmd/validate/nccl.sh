@@ -21,3 +21,12 @@ mkdir -p "$VALIDATION_PROJECT_PATH"
 
 # copy files from template
 cp -r "$ODEV_ROOT/src/templates/nvidia/nccl-tests/." "$VALIDATION_PROJECT_PATH"
+
+# build tets
+cd "$VALIDATION_PROJECT_PATH"
+make #make MPI=1
+
+
+# run
+cd "$VALIDATION_PROJECT_PATH/build"
+./all_gather_perf -g 1 -b 8M -e 1G -f 2
