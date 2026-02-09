@@ -33,13 +33,18 @@ func Execute() {
 // If skipRoot=true, it won't overwrite root's custom landing page.
 func applyHelpTemplateRecursively(cmd *cobra.Command, tmpl string, skipRoot bool) {
 	for _, c := range cmd.Commands() {
-		// skipRoot only matters for the first level when cmd == rootCmd
-		if !(skipRoot && cmd == rootCmd) {
-			c.SetHelpTemplate(tmpl)
-		} else {
-			// root's direct children should get default template
-			c.SetHelpTemplate(tmpl)
+
+		// ✅ TINY FIX: only overwrite if the command is inheriting the parent's template
+		if c.HelpTemplate() == cmd.HelpTemplate() {
+			// skipRoot only matters for the first level when cmd == rootCmd
+			if !(skipRoot && cmd == rootCmd) {
+				c.SetHelpTemplate(tmpl)
+			} else {
+				// root's direct children should get default template
+				c.SetHelpTemplate(tmpl)
+			}
 		}
+
 		applyHelpTemplateRecursively(c, tmpl, false)
 	}
 }
