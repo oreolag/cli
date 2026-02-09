@@ -8,7 +8,7 @@ import (
 
 var NcclCmd = &cobra.Command{
 	Use:   "nccl",
-	Short: "Validate an NCCL project",
+	Short: "Benchmark NCCL collective primitives across your network fabric",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("validate nccl")
 	},

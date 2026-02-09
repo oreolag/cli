@@ -8,7 +8,7 @@ import (
 
 var validateCmd = &cobra.Command{
 	Use:   "validate",
-	Short: "Validate a project",
+	Short: "Infrastructure functionality assessment",
 }
 
 func init() {
