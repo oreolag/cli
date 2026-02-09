@@ -13,9 +13,14 @@ var rootCmd = &cobra.Command{
 	Short: "The CLI for hetero" + italic + "genius" + reset + " computing.",
 }
 
-//func init() {
-//	rootCmd.CompletionOptions.DisableDefaultCmd = true
-//}
+func init() {
+	// Hide "completion" AFTER Cobra registers default commands
+	cobra.OnInitialize(func() {
+		if c, _, err := rootCmd.Find([]string{"completion"}); err == nil && c != nil {
+			c.Hidden = true
+		}
+	})
+}
 
 func Execute() {
 	// 1) Capture Cobra's default help template BEFORE overriding anything.
@@ -34,7 +39,7 @@ func Execute() {
 func applyHelpTemplateRecursively(cmd *cobra.Command, tmpl string, skipRoot bool) {
 	for _, c := range cmd.Commands() {
 
-		// ✅ TINY FIX: only overwrite if the command is inheriting the parent's template
+		// Only overwrite if the command is inheriting the parent's template
 		if c.HelpTemplate() == cmd.HelpTemplate() {
 			// skipRoot only matters for the first level when cmd == rootCmd
 			if !(skipRoot && cmd == rootCmd) {
