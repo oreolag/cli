@@ -12,8 +12,12 @@ url="${HOSTNAME}"
 hostname="${url%%.*}"
 
 # constants
+CMDB_PATH="$(eval echo "$("$ODEV_ROOT/src/constants_get.py" --db "$ODEV_ROOT/src/constants.yml" paths cmdb)")"
 PROJECTS_PATH="$(eval echo "$("$ODEV_ROOT/src/constants_get.py" --db "$ODEV_ROOT/src/constants.yml" paths projects)")"
 VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$WORKFLOW.$hostname"
+
+# derived
+MPI_HOME="$(eval echo "$("$ODEV_ROOT/src/constants_get.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
 
 # create folders
 rm -rf "$VALIDATION_PROJECT_PATH"
@@ -22,11 +26,10 @@ mkdir -p "$VALIDATION_PROJECT_PATH"
 # copy files from template
 cp -r "$ODEV_ROOT/src/templates/nvidia/nccl-tests/." "$VALIDATION_PROJECT_PATH"
 
-# build tets
+# build tets (for local tests, MPI flag is not needed)
 cd "$VALIDATION_PROJECT_PATH"
-make #make MPI=1
-
+make MPI=1 MPI_HOME=$MPI_HOME
 
 # run
-cd "$VALIDATION_PROJECT_PATH/build"
-./all_gather_perf -g 1 -b 8M -e 1G -f 2
+#cd "$VALIDATION_PROJECT_PATH/build"
+#./all_gather_perf -g 1 -b 8M -e 1G -f 2

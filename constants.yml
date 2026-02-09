@@ -2,6 +2,7 @@
 
 #paths
 paths:
-  tmp: /tmp
+  cmdb: /opt
   models: "${HOME}/odev/models"
   projects: "${HOME}/odev/projects"
+  tmp: /tmp
