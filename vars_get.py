@@ -8,10 +8,8 @@ Usage:
   vars_get.py <section> <key> [--db PATH] [--sep SEP]
 
 Examples:
-  ./vars_get.py nvidia CUDA_HOME
-  ./vars_get.py users docker                 # -> jmoya82,helen
-  ./vars_get.py network mtu_default
-  ./vars_get.py --db /opt/vars.yml users docker
+  ./vars_get.py paths tmp
+  ./vars_get.py --db /opt/vars.yml users docker # -> jmoya82,helen
 """
 
 from __future__ import annotations
