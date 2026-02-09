@@ -12,8 +12,24 @@ var validateCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(validateCmd)
+	// Use a simple, aligned help for `odev validate`
+	validateCmd.SetHelpTemplate(validateHelpTemplate)
 
-	// Attach subcommands: odev validate nccl
+	rootCmd.AddCommand(validateCmd)
 	validateCmd.AddCommand(validatecmd.NcclCmd)
 }
+
+const validateHelpTemplate = `{{with .Short}}{{.}}
+
+{{end}}Usage:
+  {{.CommandPath}} [command]
+
+Available Commands:
+{{range .Commands}}{{if .IsAvailableCommand}}  {{rpad .Name 12}}{{.Short}}
+{{end}}{{end}}
+
+Flags:
+  {{rpad "-h, --help" 12}}help for {{.Name}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.
+`
