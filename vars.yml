@@ -1,0 +1,7 @@
+---
+
+#paths
+paths:
+  tmp: /tmp
+  models: "${HOME}/odev/models"
+  projects: "${HOME}/odev/projects"
