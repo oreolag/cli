@@ -27,7 +27,6 @@ const validateHelpTemplate = `{{with .Short}}{{.}}
 Available Commands:
 {{range .Commands}}{{if .IsAvailableCommand}}  {{rpad .Name 12}}{{.Short}}
 {{end}}{{end}}
-
 Flags:
   {{rpad "-h, --help" 12}}help for {{.Name}}
 
