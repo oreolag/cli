@@ -12,7 +12,6 @@ var validateCmd = &cobra.Command{
 }
 
 func init() {
-	// Custom help template for `odev validate` (aligned)
 	validateCmd.SetHelpTemplate(validateHelpTemplate)
 
 	rootCmd.AddCommand(validateCmd)
