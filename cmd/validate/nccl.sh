@@ -13,6 +13,11 @@ hostname="${url%%.*}"
 
 # constants
 PROJECTS_PATH="$(eval echo "$("$ODEV_ROOT/src/constants_get.py" --db "$ODEV_ROOT/src/constants.yml" paths projects)")"
+VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$WORKFLOW.$hostname"
 
 # create folders
-mkdir -p "$PROJECTS_PATH/validate_$WORKFLOW_$hostname"
+rm -rf "$VALIDATION_PROJECT_PATH"
+mkdir -p "$VALIDATION_PROJECT_PATH"
+
+# copy files from template
+cp -r "$ODEV_ROOT/src/templates/nvidia/nccl-tests/." "$VALIDATION_PROJECT_PATH"
