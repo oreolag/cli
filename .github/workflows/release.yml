@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute release metadata
+        id: meta
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          DATE="$(date -u +%F)"
+          echo "ver=$VER" >> "$GITHUB_OUTPUT"
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+
+      # ---------- A) Put VERSION + RELEASE_DATE into the release artifact ----------
+      - name: Write VERSION and RELEASE_DATE (for artifact)
+        run: |
+          echo "${{ steps.meta.outputs.ver }}" > VERSION
+          echo "${{ steps.meta.outputs.date }}" > RELEASE_DATE
+
+      - name: Build release bundle
+        run: |
+          mkdir -p dist/cli
+          # Adjust these paths to what you want to ship:
+          cp -a odev dist/cli/ 2>/dev/null || true
+          cp -a cmd dist/cli/ 2>/dev/null || true
+          cp -a validate dist/cli/ 2>/dev/null || true
+          cp -a VERSION RELEASE_DATE dist/cli/
+          tar -C dist -czf "cli_${GITHUB_REF_NAME}.tar.gz" cli
+
+      # ---------- B) Commit VERSION + RELEASE_DATE back to main ----------
+      - name: Update main with VERSION and RELEASE_DATE
+        run: |
+          git fetch origin main:main
+          git switch main
+
+          echo "${{ steps.meta.outputs.ver }}" > VERSION
+          echo "${{ steps.meta.outputs.date }}" > RELEASE_DATE
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add VERSION RELEASE_DATE
+          git commit -m "Release ${GITHUB_REF_NAME}" || exit 0
+          git push origin main
+
+      # ---------- Create/Update GitHub Release and upload artifact ----------
+      - name: Create GitHub Release and upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: cli_${{ github.ref_name }}.tar.gz
