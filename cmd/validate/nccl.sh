@@ -7,41 +7,59 @@ WORKFLOW="$(basename "${BASH_SOURCE[0]}" .sh)"
 # usage:       $CLI_PATH/hdev validate opennic --commit $commit_name_shell $commit_name_driver --device $device_index --fec $fec_option --version $vivado_version
 # example: /opt/hdev/cli/hdev validate opennic --commit            8077751             1cf2578 --device             1 --fec 1           --version          2022.2
 
-# help
+# name,short,default,description
+PARAMS=(
+  "ngpus,g,1,Number of GPUs"
+  "nthreads,t,10,Number of Threads"
+  "minbytes,b,8M,Minimum Bytes"
+  "maxbytes,e,100M,Maximum Bytes"
+)
+
+declare -A V
+
+# init defaults
+for p in "${PARAMS[@]}"; do
+  IFS=',' read -r name short def desc <<< "$p"
+  V["$name"]="$def"
+done
+
 print_help() {
   echo "Usage: odev validate nccl [options]"
   echo ""
   echo "Options:"
-  echo "  --gpus N        Number of GPUs (default: 1)"
-  echo "  -b SIZE         Bandwidth / message size (default: 8M)"
+  for p in "${PARAMS[@]}"; do
+    IFS=',' read -r name short def desc <<< "$p"
+    printf "  --%-12s -%-2s %-28s (default: %s)\n" "$name" "$short" "$desc" "$def"
+  done
   echo "  -h, --help      Show this help"
 }
 
-# parse flags
+# parse
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --gpus|-g)
-      gpus="$2"
-      shift 2
-      ;;
-    -b)
-      b="$2"
-      shift 2
-      ;;
-    -h|--help)
-      print_help
-      exit 0
-      ;;
-    *)
-      echo "Unknown option: $1"
-      exit 1
-      ;;
+    -h|--help) print_help; exit 0 ;;
   esac
+
+  matched=false
+  for p in "${PARAMS[@]}"; do
+    IFS=',' read -r name short def desc <<< "$p"
+    if [[ "$1" == "--$name" || "$1" == "-$short" ]]; then
+      V["$name"]="${2:-}"
+      shift 2
+      matched=true
+      break
+    fi
+  done
+
+  if [[ "$matched" == false ]]; then
+    echo "Unknown option: $1"
+    exit 1
+  fi
 done
 
-# print received values
-echo "GPUs      : $gpus"
-echo "Bandwidth : $b"
+# Example: print received values
+echo "ngpus=${V[ngpus]}"
+echo "minbytes=${V[minbytes]}"
 
 echo "hola"
 exit
