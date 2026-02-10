@@ -11,7 +11,7 @@ if [[ -z "$cmd" || -z "$subcmd" ]]; then
     exit 1
 fi
 
-script="${ODEV_PATH}/${cmd}/${subcmd}.sh"
+script="${ODEV_PATH}/${cmd}/cmd/${subcmd}.sh"
 
 if [[ ! -x "$script" ]]; then
     echo "Error: command not found: $cmd $subcmd"
