@@ -12,7 +12,7 @@ cmd="${1:-}"
 subcmd="${2:-}"
 
 if [[ -z "$cmd" || -z "$subcmd" ]]; then
-    echo "The CLI for hetero${italic}genius${normal} computing"
+    echo "The CLI for hetero${italic}genius${normal} computing."
     echo ""
     echo "${bold}USAGE${normal}"
     echo "  odev <command> <subcommand> [flags]"
