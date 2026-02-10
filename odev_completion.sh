@@ -79,3 +79,5 @@ if ! declare -F _init_completion >/dev/null 2>&1; then
     return 0
   }
 fi
+
+complete -F _odev_completions odev
