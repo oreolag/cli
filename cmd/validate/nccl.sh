@@ -12,12 +12,12 @@ url="${HOSTNAME}"
 hostname="${url%%.*}"
 
 # constants
-CMDB_PATH="$(eval echo "$("$ODEV_ROOT/src/constants_get.py" --db "$ODEV_ROOT/src/constants.yml" paths cmdb)")"
-PROJECTS_PATH="$(eval echo "$("$ODEV_ROOT/src/constants_get.py" --db "$ODEV_ROOT/src/constants.yml" paths projects)")"
+CMDB_PATH="$(eval echo "$("$ODEV_ROOT/src/read_yml.py" --db "$ODEV_ROOT/src/constants.yml" paths cmdb)")"
+PROJECTS_PATH="$(eval echo "$("$ODEV_ROOT/src/read_yml.py" --db "$ODEV_ROOT/src/constants.yml" paths projects)")"
 VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$WORKFLOW.$hostname"
 
 # derived
-MPI_HOME="$(eval echo "$("$ODEV_ROOT/src/constants_get.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
+MPI_HOME="$(eval echo "$("$ODEV_ROOT/src/read_yml.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
 
 # create folders
 rm -rf "$VALIDATION_PROJECT_PATH"
