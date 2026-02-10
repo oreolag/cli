@@ -48,7 +48,8 @@ _odev_completions() {
   _init_completion -n : || return
 
   local root
-  root="$(_odev_script_dir)"
+  #root="$(_odev_script_dir)"
+  root="$(_odev_script_dir)/cmd"
 
   # Completing the 1st arg: command
   if [[ $cword -eq 1 ]]; then
