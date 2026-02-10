@@ -1,14 +1,21 @@
 #!/bin/bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# usage:       $CLI_PATH/hdev validate opennic --commit $commit_name_shell $commit_name_driver --device $device_index --fec $fec_option --version $vivado_version
+# example: /opt/hdev/cli/hdev validate opennic --commit            8077751             1cf2578 --device             1 --fec 1           --version          2022.2
 
+# get script location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKFLOW="$(basename "${BASH_SOURCE[0]}" .sh)"
+
+# derive from SCRIPT_DIR
 CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
-WORKFLOW="$(basename "${BASH_SOURCE[0]}" .sh)"
 
-# usage:       $CLI_PATH/hdev validate opennic --commit $commit_name_shell $commit_name_driver --device $device_index --fec $fec_option --version $vivado_version
-# example: /opt/hdev/cli/hdev validate opennic --commit            8077751             1cf2578 --device             1 --fec 1           --version          2022.2
+# format
+bold=$(tput bold)
+italic=$(tput sitm 2>/dev/null || true)
+normal=$(tput sgr0)
 
 # command description and parameters
 COMMAND_DESCRIPTION="Validate NCCL"
@@ -28,14 +35,18 @@ for p in "${PARAMS[@]}"; do
 done
 
 print_help() {
-  echo "USAGE:"
-  echo "  odev validate nccl [flags]"
+  echo "$COMMAND_DESCRIPTION"
   echo ""
-  echo "Options:"
+  echo "${bold}USAGE:${normal}"
+  echo "  $CLI_NAME $COMMAND $WORKFLOW [flags]"
+  echo ""
+  echo "${bold}FLAGS:${normal}"
   for p in "${PARAMS[@]}"; do
     IFS=',' read -r name short def desc <<< "$p"
     printf "  --%-12s -%-2s %-28s (default: %s)\n" "$name" "$short" "$desc" "$def"
   done
+  echo ""
+  echo "${bold}INHERITED FLAGS:${normal}"
   echo "  -h, --help      Show this help"
 }
 
