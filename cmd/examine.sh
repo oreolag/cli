@@ -1,7 +1,6 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-#ODEV_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 ODEV_ROOT="${ODEV_ROOT:-"$(dirname "$SCRIPT_DIR")"}"
 WORKFLOW="$(basename "${BASH_SOURCE[0]}" .sh)"
 
