@@ -48,7 +48,7 @@ print_help() {
   done
   echo ""
   echo "${bold}INHERITED FLAGS:${normal}"
-  echo "  -h, --help      Show this help"
+  echo "  -h, --help       Show this help"
 }
 
 # parse
