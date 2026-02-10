@@ -49,10 +49,12 @@ print_version() {
   fi
 
   echo "odev version ${ver} (${date})"
-  echo "https://github.com/oreol/odev/releases/tag/v${ver}"
+  echo "https://github.com/oreolag/cli/releases/tag/v${ver}"
 }
 
-# Handle global flags / single-word commands early
+# ------------------------------------------------------------
+# Global flags / help / version
+# ------------------------------------------------------------
 case "${1:-}" in
   ""|-h|--help)
     print_help
@@ -62,29 +64,31 @@ case "${1:-}" in
     print_version
     exit 0
     ;;
-  examine)
-    script="${ODEV_PATH}/cmd/examine.sh"
-    if [[ -x "$script" ]]; then
-      exec "$script" "${@:2}"
-    fi
-    echo "Error: command not found: examine"
-    exit 1
-    ;;
 esac
 
 cmd="${1:-}"
 subcmd="${2:-}"
 
-if [[ -z "$cmd" || -z "$subcmd" ]]; then
+# ------------------------------------------------------------
+# Script resolution with flag support
+# ------------------------------------------------------------
+if [[ -z "$cmd" || "$cmd" == -* ]]; then
   print_help
-  exit 1
+  exit 0
 fi
 
-script="${ODEV_PATH}/cmd/${cmd}/${subcmd}.sh"
+# Single-command scripts: odev examine [flags]
+if [[ -z "$subcmd" || "$subcmd" == -* ]]; then
+  script="${ODEV_PATH}/cmd/${cmd}.sh"
+  shift 1
+else
+  script="${ODEV_PATH}/cmd/${cmd}/${subcmd}.sh"
+  shift 2
+fi
 
 if [[ ! -x "$script" ]]; then
-  echo "Error: command not found: $cmd $subcmd"
+  echo "Error: command not found: ${cmd} ${subcmd:-}"
   exit 1
 fi
 
-exec "$script" "${@:3}"
+exec "$script" "$@"
