@@ -3,8 +3,6 @@ set -euo pipefail
 
 ODEV_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "ODEV_PATH=$ODEV_PATH"
-
 # format
 bold=$(tput bold)
 italic=$(tput sitm 2>/dev/null || true)
