@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 
 # Bash completion for odev
-# Usage:
-#   source /path/to/odev_completion.sh
-#   complete -F _odev_completions odev
 #
-# Optional:
-#   alias odev="/path/to/odev.sh"
+# Supports:
+#   - Folder-based commands:   /opt/odev/cmd/<cmd>/<subcmd>.sh
+#   - Virtual commands:        examine, etc.
+#   - Global flags:            --help, --version, ...
+#
+# Requires:
+#   export ODEV_ROOT=/opt/odev
+#   (or odev available on PATH)
 
+# ------------------------------------------------------------
+# Resolve odev root directory
+# ------------------------------------------------------------
 _odev_script_dir() {
-  # Best effort: locate directory containing odev.sh
-  # 1) If odev is a function/alias, this may not work; use ODEV_ROOT env var then.
-  # 2) If installed on PATH as "odev", use its resolved path.
   local odev_path
   odev_path="$(command -v odev 2>/dev/null || true)"
 
@@ -25,13 +28,14 @@ _odev_script_dir() {
     return
   fi
 
-  # Fallback: current directory
   pwd
 }
 
+# ------------------------------------------------------------
+# Filesystem-based commands
+# ------------------------------------------------------------
 _odev_list_commands() {
   local root="$1"
-  # Commands are directories directly under root that contain any *.sh file (or just exist)
   find "$root" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort
 }
 
@@ -43,33 +47,52 @@ _odev_list_subcommands() {
     | sort
 }
 
+# ------------------------------------------------------------
+# Completion function
+# ------------------------------------------------------------
 _odev_completions() {
   local cur prev words cword
   _init_completion -n : || return
 
-  local root
-  #root="$(_odev_script_dir)"
-  root="$(_odev_script_dir)/cmd"
+  local base root
+  base="$(_odev_script_dir)"
+  root="$base/cmd"
 
-  # Completing the 1st arg: command
-  if [[ $cword -eq 1 ]]; then
-    COMPREPLY=( $(compgen -W "$(_odev_list_commands "$root")" -- "$cur") )
+  # -----------------------------
+  # Global flags
+  # -----------------------------
+  if [[ $cword -eq 1 && "$cur" == -* ]]; then
+    COMPREPLY=( $(compgen -W "--help -h --version -v" -- "$cur") )
     return 0
   fi
 
-  # Completing the 2nd arg: subcommand (based on command)
+  # -----------------------------
+  # Top-level commands
+  # -----------------------------
+  if [[ $cword -eq 1 ]]; then
+    local extra_cmds="examine"
+    local cmds
+
+    cmds="$(_odev_list_commands "$root") $extra_cmds"
+    COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
+    return 0
+  fi
+
+  # -----------------------------
+  # Subcommands
+  # -----------------------------
   if [[ $cword -eq 2 ]]; then
     local cmd="${words[1]}"
     COMPREPLY=( $(compgen -W "$(_odev_list_subcommands "$root" "$cmd")" -- "$cur") )
     return 0
   fi
 
-  # After subcommand: no opinion (let bash complete files, etc.)
   return 0
 }
 
-# If bash-completion is not loaded, _init_completion won't exist.
-# Provide a tiny fallback so this still works in minimal environments.
+# ------------------------------------------------------------
+# Minimal fallback if bash-completion is not loaded
+# ------------------------------------------------------------
 if ! declare -F _init_completion >/dev/null 2>&1; then
   _init_completion() {
     COMPREPLY=()
@@ -81,4 +104,7 @@ if ! declare -F _init_completion >/dev/null 2>&1; then
   }
 fi
 
+# ------------------------------------------------------------
+# Register completion
+# ------------------------------------------------------------
 complete -F _odev_completions odev
