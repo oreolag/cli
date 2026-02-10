@@ -31,7 +31,6 @@ print_help() {
   echo "${bold}LEARN MORE${normal}"
   echo "  Use ${bold}odev <command> <subcommand> --help${normal} for more information about a command."
   echo "  Read the manual at https://books.oreol.ch/6/cli"
-  echo ""
 }
 
 print_version() {
