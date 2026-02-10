@@ -7,6 +7,15 @@ WORKFLOW="$(basename "${BASH_SOURCE[0]}" .sh)"
 # usage:       $CLI_PATH/hdev validate opennic --commit $commit_name_shell $commit_name_driver --device $device_index --fec $fec_option --version $vivado_version
 # example: /opt/hdev/cli/hdev validate opennic --commit            8077751             1cf2578 --device             1 --fec 1           --version          2022.2
 
+# help
+print_help() {
+  echo "Usage: odev validate nccl [options]"
+  echo ""
+  echo "Options:"
+  echo "  --gpus N        Number of GPUs (default: 1)"
+  echo "  -b SIZE         Bandwidth / message size (default: 8M)"
+  echo "  -h, --help      Show this help"
+}
 
 # parse flags
 while [[ $# -gt 0 ]]; do
@@ -20,7 +29,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     -h|--help)
-      echo "Usage: odev validate nccl [--gpus N] [-b SIZE]"
+      print_help
       exit 0
       ;;
     *)
