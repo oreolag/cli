@@ -43,7 +43,8 @@ print_help() {
   echo "${bold}FLAGS:${normal}"
   for p in "${PARAMS[@]}"; do
     IFS=',' read -r name short def desc <<< "$p"
-    printf "  --%-12s -%-2s %-28s (default: %s)\n" "$name" "$short" "$desc" "$def"
+    printf "  -%-1s, --%-10s %-1s (default: %s)\n" \
+      "$short" "$name" "$desc" "$def"
   done
   echo ""
   echo "${bold}INHERITED FLAGS:${normal}"
