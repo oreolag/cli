@@ -8,7 +8,7 @@
 #   - Global flags:            --help, --version, ...
 #
 # Requires:
-#   export ODEV_ROOT=/opt/odev
+#   export ODEV_PATH=/opt/odev
 #   (or odev available on PATH)
 
 # ------------------------------------------------------------
@@ -18,8 +18,8 @@ _odev_script_dir() {
   local odev_path
   odev_path="$(command -v odev 2>/dev/null || true)"
 
-  if [[ -n "${ODEV_ROOT:-}" && -d "$ODEV_ROOT" ]]; then
-    echo "$ODEV_ROOT"
+  if [[ -n "${ODEV_PATH:-}" && -d "$ODEV_PATH" ]]; then
+    echo "$ODEV_PATH"
     return
   fi
 

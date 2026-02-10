@@ -1,13 +1,19 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ODEV_ROOT="${ODEV_ROOT:-"$(dirname "$SCRIPT_DIR")"}"
+
+CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
+COMMAND="$(basename "$SCRIPT_DIR")"
+ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 WORKFLOW="$(basename "${BASH_SOURCE[0]}" .sh)"
+
+echo "ODEV_PATH=$ODEV_PATH"
 
 # usage:       $CLI_PATH/hdev validate opennic --commit $commit_name_shell $commit_name_driver --device $device_index --fec $fec_option --version $vivado_version
 # example: /opt/hdev/cli/hdev validate opennic --commit            8077751             1cf2578 --device             1 --fec 1           --version          2022.2
 
-# name,short,default,description
+# command description and parameters
+COMMAND_DESCRIPTION="Validate NCCL"
 PARAMS=(
   "ngpus,g,1,Number of GPUs"
   "nthreads,t,10,Number of Threads"
@@ -24,7 +30,8 @@ for p in "${PARAMS[@]}"; do
 done
 
 print_help() {
-  echo "Usage: odev validate nccl [options]"
+  echo "USAGE:"
+  echo "  odev validate nccl [flags]"
   echo ""
   echo "Options:"
   for p in "${PARAMS[@]}"; do
@@ -70,19 +77,19 @@ url="${HOSTNAME}"
 hostname="${url%%.*}"
 
 # constants
-CMDB_PATH="$(eval echo "$("$ODEV_ROOT/src/read_yml.py" --db "$ODEV_ROOT/constants.yml" paths cmdb)")"
-PROJECTS_PATH="$(eval echo "$("$ODEV_ROOT/src/read_yml.py" --db "$ODEV_ROOT/constants.yml" paths projects)")"
+CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
+PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths projects)")"
 VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$WORKFLOW.$hostname"
 
 # derived
-MPI_HOME="$(eval echo "$("$ODEV_ROOT/src/read_yml.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
+MPI_HOME="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
 
 # create folders
 rm -rf "$VALIDATION_PROJECT_PATH"
 mkdir -p "$VALIDATION_PROJECT_PATH"
 
 # copy files from template
-cp -r "$ODEV_ROOT/templates/nvidia/nccl-tests/." "$VALIDATION_PROJECT_PATH"
+cp -r "$ODEV_PATH/templates/nvidia/nccl-tests/." "$VALIDATION_PROJECT_PATH"
 
 # build tets (for local tests, MPI flag is not needed)
 cd "$VALIDATION_PROJECT_PATH"

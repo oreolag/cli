@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ODEV_ROOT="${ODEV_ROOT:-"$(dirname "$SCRIPT_DIR")"}"
+ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 WORKFLOW="$(basename "${BASH_SOURCE[0]}" .sh)"
 
 # usage:       $CLI_PATH/hdev validate opennic --commit $commit_name_shell $commit_name_driver --device $device_index --fec $fec_option --version $vivado_version
