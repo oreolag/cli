@@ -36,16 +36,22 @@ print_help() {
 }
 
 print_version() {
-  # Option A: git describe if repo exists
-  if command -v git >/dev/null 2>&1 && [[ -d "$ODEV_PATH/.git" ]]; then
-    git -C "$ODEV_PATH" describe --tags --always 2>/dev/null && return 0
-  fi
-  # Option B: VERSION file (optional)
+  local ver date
+
   if [[ -f "$ODEV_PATH/VERSION" ]]; then
-    cat "$ODEV_PATH/VERSION" && return 0
+    ver="$(cat "$ODEV_PATH/VERSION")"
+  else
+    ver="unknown"
   fi
-  # Fallback
-  echo "odev (version unknown)"
+
+  if [[ -f "$ODEV_PATH/RELEASE_DATE" ]]; then
+    date="$(cat "$ODEV_PATH/RELEASE_DATE")"
+  else
+    date="unknown"
+  fi
+
+  echo "odev version ${ver} (${date})"
+  echo "https://github.com/oreol/odev/releases/tag/v${ver}"
 }
 
 # Handle global flags / single-word commands early
