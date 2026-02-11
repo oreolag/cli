@@ -21,16 +21,16 @@ normal=$(tput sgr0)
 KEY="VALIDATE_NCCL"
 result="$("$ODEV_ROOT/src/cmd_flags_read.sh" "$ODEV_ROOT" "$KEY")"
 COMMAND_DESCRIPTION="$(echo "$result" | sed -n 's/^DESCRIPTION=//p' | head -n1)"
-PARAMS=()
+FLAGS=()
 while IFS= read -r line; do
-  PARAMS+=("$line")
+  FLAGS+=("$line")
 done < <(echo "$result" | sed -n 's/^FLAG=//p')
 
 # (maybe) print help
 "$ODEV_ROOT/src/cmd_help_print.sh" --maybe \
   "$CLI_NAME" "$COMMAND" "$WORKFLOW" "$COMMAND_DESCRIPTION" \
   "0" "0" "1" \
-  "${PARAMS[@]}" -- "$@" && exit 0 || true
+  "${FLAGS[@]}" -- "$@" && exit 0 || true
 
 # parse
 declare -A V
@@ -38,7 +38,7 @@ while IFS='=' read -r k v; do
   V["$k"]="$v"
 done < <(
   "$ODEV_ROOT/src/cmd_parse.sh" \
-    --params "${PARAMS[@]}" -- "$@"
+    --params "${FLAGS[@]}" -- "$@"
 )
 
 # Example: print received values
