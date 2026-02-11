@@ -1,6 +1,32 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Usage:
+#   cmd_help_print.sh --maybe <CLI_NAME> <COMMAND> <WORKFLOW> <DESCRIPTION> \
+#                     <print_range> <print_default> <print_both> \
+#                     <param1> <param2> ... -- <argv...>
+#     Output:
+#       prints help and exits 0 if -h|--help is found in <argv...>
+#       exits 2 if no help flag is found
+#
+#   cmd_help_print.sh <CLI_NAME> <COMMAND> <WORKFLOW> <DESCRIPTION> \
+#                     <print_range> <print_default> <print_both> \
+#                     <param1> <param2> ...
+#     Output:
+#       always prints help and exits 0
+
+# ---------------------------------------
+# Mode handling
+# ---------------------------------------
+mode="--print"
+if [[ "${1:-}" == "--maybe" || "${1:-}" == "--print" ]]; then
+  mode="$1"
+  shift
+fi
+
+# ---------------------------------------
+# Fixed arguments
+# ---------------------------------------
 CLI_NAME="$1"
 COMMAND="$2"
 WORKFLOW="$3"
@@ -10,11 +36,46 @@ print_default="$6"
 print_both="$7"
 shift 7
 
-PARAMS=("$@")
+# ---------------------------------------
+# Read PARAMS until --
+# ---------------------------------------
+PARAMS=()
+while [[ $# -gt 0 && "$1" != "--" ]]; do
+  PARAMS+=("$1")
+  shift
+done
 
+# Consume "--" if present
+if [[ "${1:-}" == "--" ]]; then
+  shift
+fi
+
+# Remaining args (original CLI argv)
+ARGV=("$@")
+
+# ---------------------------------------
+# Maybe-mode: detect help flags
+# ---------------------------------------
+if [[ "$mode" == "--maybe" ]]; then
+  found=0
+  for a in "${ARGV[@]}"; do
+    if [[ "$a" == "-h" || "$a" == "--help" ]]; then
+      found=1
+      break
+    fi
+  done
+  [[ "$found" == "1" ]] || exit 2
+fi
+
+# ---------------------------------------
+# Formatting
+# ---------------------------------------
 bold=$(tput bold 2>/dev/null || true)
 normal=$(tput sgr0 2>/dev/null || true)
 
+# ---------------------------------------
+# Print help
+# ---------------------------------------
 echo "$COMMAND_DESCRIPTION"
 echo ""
 echo "${bold}USAGE:${normal}"
