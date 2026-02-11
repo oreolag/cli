@@ -20,6 +20,9 @@ bold=$(tput bold)
 italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
+# constants
+LOCAL_TEST="1"
+
 # get command description and parameters
 KEY="$(printf '%s_%s' "$COMMAND" "$WORKFLOW" | tr '[:lower:]' '[:upper:]')"
 result="$("$ODEV_ROOT/src/cmd_flags_read.sh" "$ODEV_ROOT" "$KEY")"
@@ -53,12 +56,6 @@ maxbytes=${V[maxbytes]}
 iters=${V[iters]}
 datatype=${V[datatype]}
 
-# print command
-echo ""
-echo "${bold}$CLI_NAME $COMMAND $WORKFLOW --ngpus $ngpus --nthreads $nthreads --minbytes $minbytes --maxbytes $maxbytes --iters $iters --datatype $datatype${normal}"
-echo ""
-exit
-
 # constants
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
 PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths projects)")"
@@ -68,16 +65,46 @@ VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$WORKFLOW.$hostname"
 MPI_HOME="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
 
 # create folders
-rm -rf "$VALIDATION_PROJECT_PATH"
-mkdir -p "$VALIDATION_PROJECT_PATH"
+step_1="rm -rf $VALIDATION_PROJECT_PATH"
+step_2="mkdir -p $VALIDATION_PROJECT_PATH"
 
 # copy files from template
-cp -r "$ODEV_PATH/templates/nvidia/nccl-tests/." "$VALIDATION_PROJECT_PATH"
+step_3="cp -r $ODEV_PATH/templates/nvidia/nccl-tests/. $VALIDATION_PROJECT_PATH"
 
-# build tets (for local tests, MPI flag is not needed)
-cd "$VALIDATION_PROJECT_PATH"
-make MPI=1 MPI_HOME=$MPI_HOME
+# build tets
+step_4="cd $VALIDATION_PROJECT_PATH"
+if [ "$LOCAL_TEST" = "1" ]; then
+    step_5="make"
+else
+    step_5="make MPI=1 MPI_HOME=$MPI_HOME"
+fi
 
 # run
-#cd "$VALIDATION_PROJECT_PATH/build"
-#./all_gather_perf -g 1 -b 8M -e 1G -f 2
+step_6="cd $VALIDATION_PROJECT_PATH/build"
+step_7="./all_gather_perf -g 1 -b 8M -e 1G -f 2"
+
+# echo steps
+echo ""
+echo "${bold}$CLI_NAME $COMMAND $WORKFLOW --ngpus $ngpus --nthreads $nthreads --minbytes $minbytes --maxbytes $maxbytes --iters $iters --datatype $datatype${normal}"
+echo ""
+echo "Just Work™ workflow:"
+echo ""
+echo "$step_1"
+echo "$step_2"
+echo "$step_3"
+echo "$step_4"
+echo "$step_5"
+echo "$step_6"
+echo "${italics}$step_7${normal}"
+echo ""
+
+# eval steps
+eval $step_1
+eval $step_2
+eval $step_3
+eval $step_4
+eval $step_5
+eval $step_6
+eval $step_7
+
+#./all_gather_perf --ngpus $ngpus --nthreads $nthreads --minbytes $minbytes --maxbytes $maxbytes --iters $iters --datatype $datatype
