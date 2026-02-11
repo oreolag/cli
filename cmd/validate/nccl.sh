@@ -48,31 +48,12 @@ fi
 
 # parse
 declare -A V
-
-# init defaults
-for p in "${PARAMS[@]}"; do
-  IFS=',' read -r name short desc range def <<< "$p"
-  V["$name"]="$def"
-done
-
-# parse
-while [[ $# -gt 0 ]]; do
-  matched=false
-  for p in "${PARAMS[@]}"; do
-    IFS=',' read -r name short desc range def <<< "$p"
-    if [[ "$1" == "--$name" || "$1" == "-$short" ]]; then
-      V["$name"]="${2:-}"
-      shift 2
-      matched=true
-      break
-    fi
-  done
-
-  if [[ "$matched" == false ]]; then
-    echo "Unknown option: $1"
-    exit 1
-  fi
-done
+while IFS='=' read -r k v; do
+  V["$k"]="$v"
+done < <(
+  "$ODEV_ROOT/src/cmd_parse.sh" \
+    --params "${PARAMS[@]}" -- "$@"
+)
 
 # Example: print received values
 echo "ngpus=${V[ngpus]}"
