@@ -17,16 +17,16 @@ bold=$(tput bold)
 italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
-# command description and parameters
-COMMAND_DESCRIPTION="Validate NCCL"
-PARAMS=(
-  "ngpus,g,Number of GPUs,1-10,1"
-  "nthreads,t,Number of Threads,1-1024,10"
-  "minbytes,b,Minimum Bytes,1B-1G,8M"
-  "maxbytes,e,Maximum Bytes,1B-16G,100M"
-)
+# get command description and parameters
+KEY="VALIDATE_NCCL"
+result="$("$ODEV_ROOT/src/cmd_flags_read.sh" "$ODEV_ROOT" "$KEY")"
+COMMAND_DESCRIPTION="$(echo "$result" | sed -n 's/^DESCRIPTION=//p' | head -n1)"
+PARAMS=()
+while IFS= read -r line; do
+  PARAMS+=("$line")
+done < <(echo "$result" | sed -n 's/^FLAG=//p')
 
-# print help
+# (maybe) print help
 "$ODEV_ROOT/src/cmd_help_print.sh" --maybe \
   "$CLI_NAME" "$COMMAND" "$WORKFLOW" "$COMMAND_DESCRIPTION" \
   "0" "0" "1" \
