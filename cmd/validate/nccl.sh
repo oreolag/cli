@@ -30,7 +30,7 @@ while IFS= read -r line; do
 done < <(echo "$result" | sed -n 's/^FLAG=//p')
 
 # (maybe) print help
-print_range="0"
+print_range="1"
 print_default="0"
 print_both="0"
 "$ODEV_ROOT/src/cmd_help_print.sh" --maybe \
@@ -38,14 +38,12 @@ print_both="0"
   "$print_range" "$print_default" "$print_both" \
   "${FLAGS[@]}" -- "$@" && exit 0 || true
 
-# parse
+# parse and check flag values
+parsed_flags="$("$ODEV_ROOT/src/cmd_parse.sh" --params "${FLAGS[@]}" -- "$@")" || exit 1
 declare -A V
 while IFS='=' read -r k v; do
   V["$k"]="$v"
-done < <(
-  "$ODEV_ROOT/src/cmd_parse.sh" \
-    --params "${FLAGS[@]}" -- "$@"
-)
+done <<< "$parsed_flags"
 
 # read flags
 ngpus=${V[ngpus]}
