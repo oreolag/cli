@@ -18,7 +18,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # get command description and parameters
-KEY="VALIDATE_NCCL"
+KEY="$(printf '%s_%s' "$COMMAND" "$WORKFLOW" | tr '[:lower:]' '[:upper:]')"
 result="$("$ODEV_ROOT/src/cmd_flags_read.sh" "$ODEV_ROOT" "$KEY")"
 COMMAND_DESCRIPTION="$(echo "$result" | sed -n 's/^DESCRIPTION=//p' | head -n1)"
 FLAGS=()
@@ -27,9 +27,12 @@ while IFS= read -r line; do
 done < <(echo "$result" | sed -n 's/^FLAG=//p')
 
 # (maybe) print help
+print_range="0"
+print_default="0"
+print_both="0"
 "$ODEV_ROOT/src/cmd_help_print.sh" --maybe \
   "$CLI_NAME" "$COMMAND" "$WORKFLOW" "$COMMAND_DESCRIPTION" \
-  "0" "0" "1" \
+  "$print_range" "$print_default" "$print_both" \
   "${FLAGS[@]}" -- "$@" && exit 0 || true
 
 # parse
