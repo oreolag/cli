@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Usage:
-#   parse_cmd.sh --params "${PARAMS[@]}" -- "$@"
+#   cmd_parse.sh --params "${PARAMS[@]}" -- "$@"
 #
 # Output:
 #   key=value   (one per line)
