@@ -15,7 +15,3 @@ VALIDATE_NCCL_FLAGS=(
   "iters,n,Timed iterations,1-1000,20"
   "datatype,d,Specify which datatype to use,int8|half|bfloat16|float,float"
 )
-VALIDATE_NCCL_FLAGS_MANDATORY=(
-  "ngpus"
-  "maxbytes"
-)
