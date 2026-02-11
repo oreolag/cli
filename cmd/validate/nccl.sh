@@ -26,25 +26,11 @@ PARAMS=(
   "maxbytes,e,Maximum Bytes,1B-16G,100M"
 )
 
-# find if help
-show_help=0
-for a in "$@"; do
-  if [[ "$a" == "-h" || "$a" == "--help" ]]; then
-    show_help=1
-    break
-  fi
-done
-
-if [[ "$show_help" == "1" ]]; then
-  "$ODEV_ROOT/src/cmd_help_print.sh" \
-    "$CLI_NAME" \
-    "$COMMAND" \
-    "$WORKFLOW" \
-    "$COMMAND_DESCRIPTION" \
-    "0" "0" "1" \
-    "${PARAMS[@]}"
-  exit 0
-fi
+# print help
+"$ODEV_ROOT/src/cmd_help_print.sh" --maybe \
+  "$CLI_NAME" "$COMMAND" "$WORKFLOW" "$COMMAND_DESCRIPTION" \
+  "0" "0" "1" \
+  "${PARAMS[@]}" -- "$@" && exit 0 || true
 
 # parse
 declare -A V
