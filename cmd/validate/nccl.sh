@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# usage:       $CLI_PATH/hdev validate opennic --commit $commit_name_shell $commit_name_driver --device $device_index --fec $fec_option --version $vivado_version
-# example: /opt/hdev/cli/hdev validate opennic --commit            8077751             1cf2578 --device             1 --fec 1           --version          2022.2
+# example: odev validate nccl --ngpus 1 --nthreads 1 --minbytes 8M --maxbytes 1G --iters 20 --datatype float
+
+# early exit
+url="${HOSTNAME}"
+hostname="${url%%.*}"
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -44,15 +47,19 @@ done < <(
     --params "${FLAGS[@]}" -- "$@"
 )
 
-# Example: print received values
-echo "ngpus=${V[ngpus]}"
-echo "minbytes=${V[minbytes]}"
+# read flags
+ngpus=${V[ngpus]}
+nthreads=${V[nthreads]}
+minbytes=${V[minbytes]}
+maxbytes=${V[maxbytes]}
+iters=${V[iters]}
+datatype=${V[datatype]}
+
+# print command
+echo ""
+echo "${bold}$CLI_NAME $COMMAND $WORKFLOW --ngpus $ngpus --nthreads $nthreads --minbytes $minbytes --maxbytes $maxbytes --iters $iters --datatype $datatype${normal}"
+echo ""
 exit
-
-
-# early exit
-url="${HOSTNAME}"
-hostname="${url%%.*}"
 
 # constants
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
