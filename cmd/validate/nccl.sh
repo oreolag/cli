@@ -36,7 +36,7 @@ for a in "$@"; do
 done
 
 if [[ "$show_help" == "1" ]]; then
-  "$ODEV_ROOT/src/print_cmd_help.sh" \
+  "$ODEV_ROOT/src/cmd_help_print.sh" \
     "$CLI_NAME" \
     "$COMMAND" \
     "$WORKFLOW" \
