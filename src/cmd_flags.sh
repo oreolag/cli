@@ -14,4 +14,5 @@ VALIDATE_NCCL_FLAGS=(
   "maxbytes,e,Maximum message size,1B|4K|1G|16G,1G"
   "iters,n,Timed iterations,1-1000,20"
   "datatype,d,Specify which datatype to use,int8|half|bfloat16|float,float"
+  "stepfactor,f,Multiplication factor between sizes,2|4|8,2"
 )
