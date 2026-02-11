@@ -62,11 +62,10 @@ minbytes=${V[minbytes]}
 maxbytes=${V[maxbytes]}
 iters=${V[iters]}
 datatype=${V[datatype]}
+stepfactor=${V[stepfactor]}
 
 # ------------------------------------------------------------
-echo ""
-echo "${bold}$CLI_NAME $COMMAND $WORKFLOW --ngpus $ngpus --nthreads $nthreads --minbytes $minbytes --maxbytes $maxbytes --iters $iters --datatype $datatype${normal}"
-echo ""
+flags="--ngpus $ngpus --nthreads $nthreads --minbytes $minbytes --maxbytes $maxbytes --iters $iters --datatype $datatype --stepfactor $stepfactor"
 # ------------------------------------------------------------
 
 # create folders
@@ -86,9 +85,14 @@ fi
 
 # run
 step_6="cd $VALIDATION_PROJECT_PATH/build"
-step_7="./all_gather_perf -g 1 -b 8M -e 1G -f 2"
+step_7="./all_gather_perf $flags"
+#step_7=$command
+#step_7="./all_gather_perf -g 1 -b 8M -e 1G -f 2"
 
 # echo steps
+echo ""
+echo -e "${bold}$CLI_NAME $COMMAND $WORKFLOW $flags${normal}"
+echo ""
 echo -e "${COLOR_OREOL}$step_1${normal}"
 echo -e "${COLOR_OREOL}$step_2${normal}"
 echo -e "${COLOR_OREOL}$step_3${normal}"
@@ -106,5 +110,11 @@ eval $step_4
 eval $step_5
 eval $step_6
 eval $step_7
+#eval "$command -f 2"
 
 #./all_gather_perf --ngpus $ngpus --nthreads $nthreads --minbytes $minbytes --maxbytes $maxbytes --iters $iters --datatype $datatype
+
+
+
+#./odev validate nccl --ngpus 1 --nthreads 1 --minbytes 8M --maxbytes 1G --iters 20 --datatype float
+#./all_gather_perf -g 1 -b 8M -e 1G -f 2
