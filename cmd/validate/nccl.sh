@@ -21,7 +21,14 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
+CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
+COLOR_OREOL=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_OREOL)
 LOCAL_TEST="1"
+PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths projects)")"
+VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$WORKFLOW.$hostname"
+
+# derived
+MPI_HOME="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
 
 # get command description and parameters
 KEY="$(printf '%s_%s' "$COMMAND" "$WORKFLOW" | tr '[:lower:]' '[:upper:]')"
@@ -56,13 +63,11 @@ maxbytes=${V[maxbytes]}
 iters=${V[iters]}
 datatype=${V[datatype]}
 
-# constants
-CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
-PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths projects)")"
-VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$WORKFLOW.$hostname"
-
-# derived
-MPI_HOME="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
+# ------------------------------------------------------------
+echo ""
+echo "${bold}$CLI_NAME $COMMAND $WORKFLOW --ngpus $ngpus --nthreads $nthreads --minbytes $minbytes --maxbytes $maxbytes --iters $iters --datatype $datatype${normal}"
+echo ""
+# ------------------------------------------------------------
 
 # create folders
 step_1="rm -rf $VALIDATION_PROJECT_PATH"
@@ -84,18 +89,13 @@ step_6="cd $VALIDATION_PROJECT_PATH/build"
 step_7="./all_gather_perf -g 1 -b 8M -e 1G -f 2"
 
 # echo steps
-echo ""
-echo "${bold}$CLI_NAME $COMMAND $WORKFLOW --ngpus $ngpus --nthreads $nthreads --minbytes $minbytes --maxbytes $maxbytes --iters $iters --datatype $datatype${normal}"
-echo ""
-echo "Just Work™ workflow:"
-echo ""
-echo "$step_1"
-echo "$step_2"
-echo "$step_3"
-echo "$step_4"
-echo "$step_5"
-echo "$step_6"
-echo "${italics}$step_7${normal}"
+echo -e "${COLOR_OREOL}$step_1${normal}"
+echo -e "${COLOR_OREOL}$step_2${normal}"
+echo -e "${COLOR_OREOL}$step_3${normal}"
+echo -e "${COLOR_OREOL}$step_4${normal}"
+echo -e "${COLOR_OREOL}$step_5${normal}"
+echo -e "${COLOR_OREOL}$step_6${normal}"
+echo -e "${COLOR_OREOL}$step_7${normal}"
 echo ""
 
 # eval steps
