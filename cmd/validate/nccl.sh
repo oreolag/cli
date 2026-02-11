@@ -26,69 +26,40 @@ PARAMS=(
   "maxbytes,e,Maximum Bytes,1B-16G,100M"
 )
 
+# find if help
+show_help=0
+for a in "$@"; do
+  if [[ "$a" == "-h" || "$a" == "--help" ]]; then
+    show_help=1
+    break
+  fi
+done
+
+if [[ "$show_help" == "1" ]]; then
+  "$ODEV_ROOT/src/print_cmd_help.sh" \
+    "$CLI_NAME" \
+    "$COMMAND" \
+    "$WORKFLOW" \
+    "$COMMAND_DESCRIPTION" \
+    "0" "0" "1" \
+    "${PARAMS[@]}"
+  exit 0
+fi
+
+# parse
 declare -A V
 
 # init defaults
 for p in "${PARAMS[@]}"; do
-  IFS=',' read -r name short def desc <<< "$p"
+  IFS=',' read -r name short desc range def <<< "$p"
   V["$name"]="$def"
 done
 
-# help formatting toggles (0|1)
-print_range=1
-print_default=1
-print_range_and_default=1  # if 1, overrides the two above and prints both when available
-
-print_help() {
-  echo "$COMMAND_DESCRIPTION"
-  echo ""
-  echo "${bold}USAGE:${normal}"
-  echo "  $CLI_NAME $COMMAND $WORKFLOW [flags]"
-  echo ""
-  echo "${bold}FLAGS:${normal}"
-  for p in "${PARAMS[@]}"; do
-    IFS=',' read -r name short desc range def <<< "$p"
-
-    suffix=""
-    if [[ "${print_range_and_default:-0}" == "1" ]]; then
-      if [[ -n "$range" && -n "$def" ]]; then
-        suffix=" (range: $range, default: $def)"
-      elif [[ -n "$range" ]]; then
-        suffix=" (range: $range)"
-      elif [[ -n "$def" ]]; then
-        suffix=" (default: $def)"
-      fi
-    else
-      if [[ "${print_range:-0}" == "1" && -n "$range" ]]; then
-        suffix+=" (range: $range)"
-      fi
-      if [[ "${print_default:-0}" == "1" && -n "$def" ]]; then
-        if [[ -n "$suffix" ]]; then
-          suffix="${suffix%)}"
-          suffix+=", default: $def)"
-        else
-          suffix=" (default: $def)"
-        fi
-      fi
-    fi
-
-    printf "  -%-1s, --%-10s %-1s%s\n" \
-      "$short" "$name" "$desc" "$suffix"
-  done
-  echo ""
-  echo "${bold}INHERITED FLAGS:${normal}"
-  echo "  -h, --help      Show this help"
-}
-
 # parse
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    -h|--help) print_help; exit 0 ;;
-  esac
-
   matched=false
   for p in "${PARAMS[@]}"; do
-    IFS=',' read -r name short def desc <<< "$p"
+    IFS=',' read -r name short desc range def <<< "$p"
     if [[ "$1" == "--$name" || "$1" == "-$short" ]]; then
       V["$name"]="${2:-}"
       shift 2
@@ -106,8 +77,6 @@ done
 # Example: print received values
 echo "ngpus=${V[ngpus]}"
 echo "minbytes=${V[minbytes]}"
-
-echo "hola"
 exit
 
 
