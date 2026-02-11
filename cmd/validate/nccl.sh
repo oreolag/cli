@@ -20,10 +20,10 @@ normal=$(tput sgr0)
 # command description and parameters
 COMMAND_DESCRIPTION="Validate NCCL"
 PARAMS=(
-  "ngpus,g,1,Number of GPUs"
-  "nthreads,t,10,Number of Threads"
-  "minbytes,b,8M,Minimum Bytes"
-  "maxbytes,e,100M,Maximum Bytes"
+  "ngpus,g,Number of GPUs,1-10,1"
+  "nthreads,t,Number of Threads,1-1024,10"
+  "minbytes,b,Minimum Bytes,1B-1G,8M"
+  "maxbytes,e,Maximum Bytes,1B-16G,100M"
 )
 
 declare -A V
@@ -34,6 +34,11 @@ for p in "${PARAMS[@]}"; do
   V["$name"]="$def"
 done
 
+# help formatting toggles (0|1)
+print_range=1
+print_default=1
+print_range_and_default=1  # if 1, overrides the two above and prints both when available
+
 print_help() {
   echo "$COMMAND_DESCRIPTION"
   echo ""
@@ -42,13 +47,37 @@ print_help() {
   echo ""
   echo "${bold}FLAGS:${normal}"
   for p in "${PARAMS[@]}"; do
-    IFS=',' read -r name short def desc <<< "$p"
-    printf "  -%-1s, --%-10s %-1s (default: %s)\n" \
-      "$short" "$name" "$desc" "$def"
+    IFS=',' read -r name short desc range def <<< "$p"
+
+    suffix=""
+    if [[ "${print_range_and_default:-0}" == "1" ]]; then
+      if [[ -n "$range" && -n "$def" ]]; then
+        suffix=" (range: $range, default: $def)"
+      elif [[ -n "$range" ]]; then
+        suffix=" (range: $range)"
+      elif [[ -n "$def" ]]; then
+        suffix=" (default: $def)"
+      fi
+    else
+      if [[ "${print_range:-0}" == "1" && -n "$range" ]]; then
+        suffix+=" (range: $range)"
+      fi
+      if [[ "${print_default:-0}" == "1" && -n "$def" ]]; then
+        if [[ -n "$suffix" ]]; then
+          suffix="${suffix%)}"
+          suffix+=", default: $def)"
+        else
+          suffix=" (default: $def)"
+        fi
+      fi
+    fi
+
+    printf "  -%-1s, --%-10s %-1s%s\n" \
+      "$short" "$name" "$desc" "$suffix"
   done
   echo ""
   echo "${bold}INHERITED FLAGS:${normal}"
-  echo "  -h, --help       Show this help"
+  echo "  -h, --help      Show this help"
 }
 
 # parse
