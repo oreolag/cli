@@ -42,7 +42,10 @@ total_memory=$(awk -F'[()]' '/^Machine/ {print $2}' "$TMP_PATH/lstopo_output" | 
 
 # lscpu
 model_name=$(lscpu | awk -F: '/Model name/ {print $2}' | xargs)
-[[ "$model_name" =~ Cortex- ]] && model_name=$(echo "$model_name" | awk '{print $1}')
+if [[ "$model_name" == *Cortex-* ]]; then
+    model_name=$(echo "$model_name" | awk '{print $1}')
+    model_name="ARM $model_name"
+fi
 cpu_count=$(lscpu | grep -i "^CPU(s):" | awk '{print $2}')
 online_cpus=$(lscpu | grep -i "On-line CPU(s) list" | awk -F: '{print $2}' | xargs)
 
