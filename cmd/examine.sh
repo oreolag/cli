@@ -19,7 +19,20 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
+CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
+
+# check on cmdb_get.py
+if [[ ! -f "$CMDB_PATH/cmdb_get.py" ]]; then
+    echo "Error: $CMDB_PATH/cmdb_get.py not found"
+    exit 1
+fi
+
+# check on CMDB
+if [[ ! -f "$CMDB_PATH/$hostname.yml" ]]; then
+    echo "Error: $CMDB_PATH/$hostname.yml not found"
+    exit 1
+fi
 
 # helper functions
 print_numa_header (){
@@ -28,6 +41,19 @@ print_numa_header (){
   echo "+-----------------------------------------------------------------------------------------+"
 }
 
+cmdb_print() {
+    local cmdb="$1"
+    local topo="$2"
+
+    if [[ -z "$cmdb" && -z "$topo" ]]; then
+        echo "na"
+    elif [[ -n "$cmdb" && "$cmdb" == "$topo" ]]; then
+        echo "$cmdb"
+    else
+        local val="${topo:-$cmdb}"
+        printf "%b%s%b\n" "$italic" "$val" "$normal"
+    fi
+}
 
 # print operating system information
 . /etc/os-release
@@ -65,8 +91,13 @@ echo "Total memory: $total_memory"
 # lstopo loop 
 numa_nodes=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
 for ((i=0; i<numa_nodes; i++)); do
-    # Get the CPUs for the current NUMA node
-    numa_cpus=$(lscpu | grep -i "NUMA node${i} CPU(s)" | awk -F: '{print $2}' | xargs)
+    # CPU list
+    numa_cpus_lstopo=$(lscpu | grep -i "NUMA node${i} CPU(s)" | awk -F: '{print $2}' | xargs)
+    numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu 0 list)
+    
+    numa_cpus_lstopo="0-10"
+    numa_cpus=$(cmdb_print "$numa_cpus_cmdb" "$numa_cpus_lstopo")
+    
     numa_memory=$(lstopo-no-graphics 2>/dev/null | grep -i "NUMANode L#$i" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
     numa_nvme=$(awk "/NUMANode L#$i/,/NUMANode L#/ " "$TMP_PATH/lstopo_output" | grep -c 'Block(Disk) "nvme')
     numa_nics=$(awk -v i="$i" '$0~("NUMANode L#"i){f=1;next} f&&/^NUMANode L#/{exit} f' "$TMP_PATH/lstopo_output" | grep -iE '\(Ethernet\)|\(Network\)' | wc -l)
@@ -75,6 +106,8 @@ for ((i=0; i<numa_nodes; i++)); do
     
     
     
+    echo $numa_cpus_lstopo
+    echo $numa_cpus_cmdb
     echo $numa_cpus
     echo $numa_memory
     echo $numa_nvme
