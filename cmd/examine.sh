@@ -20,6 +20,7 @@ normal=$(tput sgr0)
 
 # constants
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
+STORAGE_UNIT="TB"
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
 
 # check on cmdb_get.py
@@ -55,6 +56,26 @@ cmdb_print() {
     fi
 }
 
+get_total_storage() {
+    local unit="${1:-GB}"
+    local total_bytes=0 sectors
+
+    for d in /sys/block/nvme*n1; do
+        [[ -f "$d/size" ]] || continue
+        sectors=$(<"$d/size")           # 512B sectors
+        total_bytes=$(( total_bytes + sectors*512 ))
+    done
+
+    case "$unit" in
+        B)  printf "%sB\n"  "$total_bytes" ;;
+        KB) printf "%.0fKB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024}')" ;;
+        MB) printf "%.0fMB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024}')" ;;
+        GB) printf "%.0fGB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024/1024}')" ;;
+        TB) printf "%.1fTB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024/1024/1024}')" ;;
+        *)  echo "$total_bytes" ;;
+    esac
+}
+
 # print operating system information
 . /etc/os-release
 echo "${bold}${NAME} ${VERSION}${normal}"
@@ -71,9 +92,6 @@ echo "Uptime      : ${bold}$uptime_info${normal}"
 rm -rf $TMP_PATH/lstopo_output
 lstopo-no-graphics 2>/dev/null > $TMP_PATH/lstopo_output
 
-# get total memory
-
-
 # CPU model
 model_name_lscpu=$(lscpu | awk -F: '/Model name/ {print $2}' | xargs)
 if [[ "$model_name_lscpu" == *Cortex-* ]]; then
@@ -89,15 +107,18 @@ cpu_list_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu 0 list)
 cpu_list=$(cmdb_print "$cpu_list_lscpu" "$cpu_list_cmdb")
 
 # total memory
-
 total_memory_lstopo=$(awk -F'[()]' '/^Machine/ {print $2}' "$TMP_PATH/lstopo_output" | awk '{print $1}')
 total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu 0 memory)
 total_memory=$(cmdb_print "$total_memory_lstopo" "$total_memory_cmdb")
 
+# total storage
+total_storage_sys=$(get_total_storage "$STORAGE_UNIT")
+
 echo ""
 echo "${bold}$model_name${normal}"
-echo "CPU(s): $cpu_list"
-echo "Total memory: $total_memory"
+echo "CPU(s)       : $cpu_list"
+echo "Total memory : $total_memory"
+echo "Total storage: $total_storage_sys"
 
 # lstopo loop 
 numa_nodes=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
