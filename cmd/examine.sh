@@ -42,8 +42,8 @@ print_numa_header (){
 }
 
 cmdb_print() {
-    local cmdb="$1"
-    local topo="$2"
+    local topo="$1"
+    local cmdb="$2"
 
     if [[ -z "$cmdb" && -z "$topo" ]]; then
         echo "na"
@@ -72,20 +72,31 @@ rm -rf $TMP_PATH/lstopo_output
 lstopo-no-graphics 2>/dev/null > $TMP_PATH/lstopo_output
 
 # get total memory
-total_memory=$(awk -F'[()]' '/^Machine/ {print $2}' "$TMP_PATH/lstopo_output" | awk '{print $1}')
 
-# lscpu
-model_name=$(lscpu | awk -F: '/Model name/ {print $2}' | xargs)
-if [[ "$model_name" == *Cortex-* ]]; then
-    model_name=$(echo "$model_name" | awk '{print $1}')
-    model_name="ARM $model_name"
+
+# CPU model
+model_name_lscpu=$(lscpu | awk -F: '/Model name/ {print $2}' | xargs)
+if [[ "$model_name_lscpu" == *Cortex-* ]]; then
+    model_name_lscpu=$(echo "$model_name_lscpu" | awk '{print $1}')
+    model_name_lscpu="ARM $model_name_lscpu"
 fi
-cpu_count=$(lscpu | grep -i "^CPU(s):" | awk '{print $2}')
-online_cpus=$(lscpu | grep -i "On-line CPU(s) list" | awk -F: '{print $2}' | xargs)
+model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu 0 model)
+model_name=$(cmdb_print "$model_name_lscpu" "$model_name_cmdb")
+
+# CPU list
+cpu_list_lscpu=$(lscpu | grep -i "On-line CPU(s) list" | awk -F: '{print $2}' | xargs)
+cpu_list_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu 0 list)
+cpu_list=$(cmdb_print "$cpu_list_lscpu" "$cpu_list_cmdb")
+
+# total memory
+
+total_memory_lstopo=$(awk -F'[()]' '/^Machine/ {print $2}' "$TMP_PATH/lstopo_output" | awk '{print $1}')
+total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu 0 memory)
+total_memory=$(cmdb_print "$total_memory_lstopo" "$total_memory_cmdb")
 
 echo ""
 echo "${bold}$model_name${normal}"
-echo "CPU(s): $cpu_count ($online_cpus)"
+echo "CPU(s): $cpu_list"
 echo "Total memory: $total_memory"
 
 # lstopo loop 
@@ -93,12 +104,13 @@ numa_nodes=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
 for ((i=0; i<numa_nodes; i++)); do
     # CPU list
     numa_cpus_lstopo=$(lscpu | grep -i "NUMA node${i} CPU(s)" | awk -F: '{print $2}' | xargs)
-    numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu 0 list)
+    numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i list)
+    numa_cpus=$(cmdb_print "$numa_cpus_lstopo" "$numa_cpus_cmdb")
+    # total memory
+    numa_memory_lstopo=$(lstopo-no-graphics 2>/dev/null | grep -i "NUMANode L#$i" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
+    numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i memory)
+    numa_memory=$(cmdb_print "$numa_memory_lstopo" "$numa_memory_cmdb")
     
-    numa_cpus_lstopo="0-10"
-    numa_cpus=$(cmdb_print "$numa_cpus_cmdb" "$numa_cpus_lstopo")
-    
-    numa_memory=$(lstopo-no-graphics 2>/dev/null | grep -i "NUMANode L#$i" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
     numa_nvme=$(awk "/NUMANode L#$i/,/NUMANode L#/ " "$TMP_PATH/lstopo_output" | grep -c 'Block(Disk) "nvme')
     numa_nics=$(awk -v i="$i" '$0~("NUMANode L#"i){f=1;next} f&&/^NUMANode L#/{exit} f' "$TMP_PATH/lstopo_output" | grep -iE '\(Ethernet\)|\(Network\)' | wc -l)
     numa_gpus=????
@@ -106,10 +118,8 @@ for ((i=0; i<numa_nodes; i++)); do
     
     
     
-    echo $numa_cpus_lstopo
-    echo $numa_cpus_cmdb
     echo $numa_cpus
     echo $numa_memory
     echo $numa_nvme
-    echo $numa_nics
+    #echo $numa_nics
 done
