@@ -21,6 +21,14 @@ normal=$(tput sgr0)
 # constants
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
 
+# helper functions
+print_numa_header (){
+  echo "+-----------------------------------------------------------------------------------------+"
+  echo "| NUMA $i | CPUs: $numa_cpus | $numa_memory | NVMe: $numa_nvme | NICs: $numa_nics | GPUs: $numa_gpus | ADs: $numa_ads |            Driver Version: 580.126.09     CUDA Version: 13.0     |"
+  echo "+-----------------------------------------------------------------------------------------+"
+}
+
+
 # print operating system information
 . /etc/os-release
 echo "${bold}${NAME} ${VERSION}${normal}"
@@ -56,5 +64,19 @@ echo "Total memory: $total_memory"
 
 # lstopo loop 
 numa_nodes=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
-
-echo $numa_nodes
+for ((i=0; i<numa_nodes; i++)); do
+    # Get the CPUs for the current NUMA node
+    numa_cpus=$(lscpu | grep -i "NUMA node${i} CPU(s)" | awk -F: '{print $2}' | xargs)
+    numa_memory=$(lstopo-no-graphics 2>/dev/null | grep -i "NUMANode L#$i" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
+    numa_nvme=$(awk "/NUMANode L#$i/,/NUMANode L#/ " "$TMP_PATH/lstopo_output" | grep -c 'Block(Disk) "nvme')
+    numa_nics=$(awk -v i="$i" '$0~("NUMANode L#"i){f=1;next} f&&/^NUMANode L#/{exit} f' "$TMP_PATH/lstopo_output" | grep -iE '\(Ethernet\)|\(Network\)' | wc -l)
+    numa_gpus=????
+    numa_ads=???
+    
+    
+    
+    echo $numa_cpus
+    echo $numa_memory
+    echo $numa_nvme
+    echo $numa_nics
+done
