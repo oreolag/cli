@@ -76,6 +76,42 @@ get_total_storage() {
     esac
 }
 
+get_numa_storage() {
+    local numa_index="$1"
+    local unit="${2:-GB}"
+    local lstopo_file="${TMP_PATH:-/tmp}/lstopo_output"
+    local total_bytes=0
+    local sectors dev size
+
+    [[ -f "$lstopo_file" ]] || { printf "0%s\n" "$unit"; return; }
+
+    # extract block device names (e.g. nvme0n1) within NUMANode L#<numa_index>
+    devs=$(awk -v i="$numa_index" '
+      $0 ~ ("NUMANode L#" i) {f=1; next}
+      f && $0 ~ /^NUMANode L#/ {exit}
+      f { print }
+    ' "$lstopo_file" | sed -nE 's/.*Block\(Disk\)[[:space:]]+"([^"]+)".*/\1/p' | tr '\n' ' ')
+
+    for dev in $devs; do
+        [[ -f "/sys/block/$dev/size" ]] || continue
+        sectors=$(</sys/block/"$dev"/size)
+        total_bytes=$(( total_bytes + sectors * 512 ))
+    done
+
+    case "$unit" in
+        B)  printf "%sB\n" "$total_bytes" ;;
+        KB) printf "%.0fKB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024}')" ;;
+        MB) printf "%.0fMB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024}')" ;;
+        GB) printf "%.0fGB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024/1024}')" ;;
+        TB) printf "%.2fTB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024/1024/1024}')" ;;
+        *)  printf "%s\n" "$total_bytes" ;;
+    esac
+}
+
+first_decimal() {
+    echo "$1" | sed -E 's/^([0-9]+\.[0-9]).*/\1/'
+}
+
 # print operating system information
 . /etc/os-release
 echo "${bold}${NAME} ${VERSION}${normal}"
@@ -113,6 +149,7 @@ total_memory=$(cmdb_print "$total_memory_lstopo" "$total_memory_cmdb")
 
 # total storage
 total_storage_sys=$(get_total_storage "$STORAGE_UNIT")
+total_storage_sys=$(first_decimal "$total_storage_sys")$STORAGE_UNIT
 
 echo ""
 echo "${bold}$model_name${normal}"
@@ -127,20 +164,28 @@ for ((i=0; i<numa_nodes; i++)); do
     numa_cpus_lstopo=$(lscpu | grep -i "NUMA node${i} CPU(s)" | awk -F: '{print $2}' | xargs)
     numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i list)
     numa_cpus=$(cmdb_print "$numa_cpus_lstopo" "$numa_cpus_cmdb")
-    # total memory
+    # memory
     numa_memory_lstopo=$(lstopo-no-graphics 2>/dev/null | grep -i "NUMANode L#$i" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
     numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i memory)
     numa_memory=$(cmdb_print "$numa_memory_lstopo" "$numa_memory_cmdb")
-    
-    numa_nvme=$(awk "/NUMANode L#$i/,/NUMANode L#/ " "$TMP_PATH/lstopo_output" | grep -c 'Block(Disk) "nvme')
-    numa_nics=$(awk -v i="$i" '$0~("NUMANode L#"i){f=1;next} f&&/^NUMANode L#/{exit} f' "$TMP_PATH/lstopo_output" | grep -iE '\(Ethernet\)|\(Network\)' | wc -l)
-    numa_gpus=????
-    numa_ads=???
+    # storage
+    numa_storage_lstopo=$(get_numa_storage $i "$STORAGE_UNIT")
+    numa_storage_lstopo=$(first_decimal "$numa_storage_lstopo")$STORAGE_UNIT
+    numa_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i storage)
+    numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
+
+    #numa_storage_lstopo=$(fmt_bytes "$numa_storage_lstopo" "$STORAGE_UNIT")
+
+
+    #numa_nvme=$(awk "/NUMANode L#$i/,/NUMANode L#/ " "$TMP_PATH/lstopo_output" | grep -c 'Block(Disk) "nvme')
+    #numa_nics=$(awk -v i="$i" '$0~("NUMANode L#"i){f=1;next} f&&/^NUMANode L#/{exit} f' "$TMP_PATH/lstopo_output" | grep -iE '\(Ethernet\)|\(Network\)' | wc -l)
+    #numa_gpus=????
+    #numa_ads=???
     
     
     
     echo $numa_cpus
     echo $numa_memory
-    echo $numa_nvme
+    echo $numa_storage
     #echo $numa_nics
 done
