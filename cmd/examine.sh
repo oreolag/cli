@@ -36,9 +36,17 @@ if [[ ! -f "$CMDB_PATH/$hostname.yml" ]]; then
 fi
 
 # helper functions
-print_numa_header (){
+print_numa_header() {
+  local id="$1"
+  local cpus="$2"
+  local mem="$3"
+  local nvme="$4"
+  local nics="$5"
+  local gpus="$6"
+  local ads="$7"
+
   echo "+-----------------------------------------------------------------------------------------+"
-  echo "| NUMA $i | CPUs: $numa_cpus | $numa_memory | NVMe: $numa_nvme | NICs: $numa_nics | GPUs: $numa_gpus | ADs: $numa_ads |            Driver Version: 580.126.09     CUDA Version: 13.0     |"
+  echo "| NUMA $id | CPUs: $cpus | $mem | NVMe: $nvme | NICs: $nics | GPUs: $gpus | ADs: $ads |"
   echo "+-----------------------------------------------------------------------------------------+"
 }
 
@@ -176,7 +184,7 @@ echo "CPU(s)       : $cpu_list"
 echo "Total memory : $total_memory"
 echo "Total storage: $total_storage_sys"
 
-# lstopo loop 
+# NUMA lstopo loop 
 numa_nodes_lscpu=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
 for ((i=0; i<numa_nodes_lscpu; i++)); do
     # CPU list
@@ -231,7 +239,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
             #echo "ip_mask_i_ifconfig: $ip_mask_i_ifconfig"
         done
     done
-    echo "endata_num_ifconfig: $endata_num_ifconfig"
+    
     # GPUs
     gpu_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i gpu)
     gpu_num_cmdb=$(wc -w <<< "$gpu_idx_cmdb")
@@ -245,21 +253,17 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
             ((gpu_num_lspci++))
         fi
     done
-    echo "gpu_num_lspci: $gpu_num_lspci"
-
-
-    #numa_storage_lstopo=$(fmt_bytes "$numa_storage_lstopo" "$STORAGE_UNIT")
-
-
-    #numa_nvme=$(awk "/NUMANode L#$i/,/NUMANode L#/ " "$TMP_PATH/lstopo_output" | grep -c 'Block(Disk) "nvme')
-    #numa_nics=$(awk -v i="$i" '$0~("NUMANode L#"i){f=1;next} f&&/^NUMANode L#/{exit} f' "$TMP_PATH/lstopo_output" | grep -iE '\(Ethernet\)|\(Network\)' | wc -l)
-    #numa_gpus=????
-    #numa_ads=???
     
+    # ADs
+    # ...
+    ad_num_lspci=0
     
-    
-    echo $numa_cpus
-    echo $numa_memory
-    echo $numa_storage
+    # print numa header
+    print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
+
+
+    #echo $numa_cpus
+    #echo $numa_memory
+    #echo $numa_storage
     #echo $numa_nics
 done
