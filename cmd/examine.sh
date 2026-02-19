@@ -165,10 +165,7 @@ model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model
 model_name=$(cmdb_print "$model_name_lscpu" "$model_name_cmdb")
 
 # CPU count
-#cpu_list_lscpu=$(lscpu | grep -i "On-line CPU(s) list" | awk -F: '{print $2}' | xargs)
-
 cpu_count_lscpu=$(lscpu | grep -i "^CPU(s):" | awk '{print $2}')
-
 cpu_count_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu count)
 cpu_count=$(cmdb_print "$cpu_count_lscpu" "$cpu_count_cmdb")
 
@@ -187,6 +184,9 @@ echo "CPU(s)       : $cpu_count"
 echo "Total memory : $total_memory"
 echo "Total storage: $total_storage_sys"
 echo ""
+
+# remove examine files
+rm -rf $TMP_PATH/examine_*
 
 # NUMA lstopo loop 
 numa_nodes_lscpu=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
@@ -208,6 +208,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     endata_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i endata)
     endata_num_cmdb=$(wc -w <<< "$endata_idx_cmdb")
     # device loop
+    touch $TMP_PATH/examine_endata_$i
     for ((j=0; j<endata_num_cmdb; j++)); do
         ports_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ports)
         # port loop
@@ -215,7 +216,6 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
         for ((k=0; k<ports_i_cmdb; k++)); do
             # cmdb values
             name_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j name $k)
-            #bdf_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j bdf $k)
             mac_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j mac $k)
             ip_address_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_address $k)
             ip_mask_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_mask $k)
@@ -226,7 +226,19 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
             ip_mask_i_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/inet /{print $4}')
             # compare
             if [[ "$mac_i_cmdb" == "$mac_i_ifconfig" && "$ip_address_i_cmdb" == "$ip_address_i_ifconfig" && "$ip_mask_i_cmdb" == "$ip_mask_i_ifconfig" ]]; then
+                # increase counter
                 ((endata_num_ifconfig++))
+
+                # add to file
+                device_index="$j"
+                port_index="$k"
+                model=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j model)
+                serial_number="-"
+                bdf=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j bdf $k)
+                ip_address="$ip_address_i_ifconfig"
+                mac_address="$mac_i_ifconfig"
+                connection_name="$name_i_cmdb"
+                echo "$device_index $port_index $model $serial_number $bdf $ip_address $mac_address $connection_name" >> "$TMP_PATH/examine_endata_$i"
             fi
             # format
             #numa_storage=$(cmdb_print "$mac_i_ifconfig" "$mac_i_cmdb")
@@ -248,13 +260,26 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     gpu_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i gpu)
     gpu_num_cmdb=$(wc -w <<< "$gpu_idx_cmdb")
     # device loop
+    touch $TMP_PATH/examine_gpus_$i
     gpu_num_lspci=0
     for ((j=0; j<gpu_num_cmdb; j++)); do
         vendor_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j vendor)
         bdf_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j bdf)
         bdf_i_lspci=$(lspci -D | grep -i "^$bdf_i_cmdb.*$vendor_i_cmdb")
         if [ ! "$bdf_i_lspci" = "" ]; then
+            # increase counter
             ((gpu_num_lspci++))
+
+            # add to file
+            device_index="$j"
+            port_index="-"
+            model=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j model)
+            serial_number=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j uuid)
+            bdf=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j bdf)
+            ip_address="-"
+            mac_address="-"
+            connection_name="-"
+            echo "$device_index $port_index $model $serial_number $bdf $ip_address $mac_address $connection_name" >> "$TMP_PATH/examine_gpus_$i"
         fi
     done
     
