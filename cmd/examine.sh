@@ -198,7 +198,6 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     # device loop
     for ((j=0; j<endata_num_cmdb; j++)); do
         ports_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ports)
-        echo "ports_i_cmdb: $ports_i_cmdb"
         # port loop
         endata_num_ifconfig=0
         for ((k=0; k<ports_i_cmdb; k++)); do
@@ -237,6 +236,17 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     gpu_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i gpu)
     gpu_num_cmdb=$(wc -w <<< "$gpu_idx_cmdb")
     echo "gpu_num_cmdb: $gpu_num_cmdb"
+    # device loop
+    gpu_num_lspci=0
+    for ((j=0; j<gpu_num_cmdb; j++)); do
+        vendor_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j vendor)
+        bdf_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j bdf)
+        bdf_i_lspci=$(lspci -D | grep -i "^$bdf_i_cmdb.*$vendor_i_cmdb")
+        if [ ! "$bdf_i_lspci" = "" ]; then
+            ((gpu_num_lspci++))
+        fi
+    done
+    echo "gpu_num_lspci: $gpu_num_lspci"
 
 
     #numa_storage_lstopo=$(fmt_bytes "$numa_storage_lstopo" "$STORAGE_UNIT")
