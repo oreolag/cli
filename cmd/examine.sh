@@ -235,7 +235,6 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     # GPUs
     gpu_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i gpu)
     gpu_num_cmdb=$(wc -w <<< "$gpu_idx_cmdb")
-    echo "gpu_num_cmdb: $gpu_num_cmdb"
     # device loop
     gpu_num_lspci=0
     for ((j=0; j<gpu_num_cmdb; j++)); do
