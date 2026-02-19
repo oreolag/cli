@@ -112,6 +112,25 @@ first_decimal() {
     echo "$1" | sed -E 's/^([0-9]+\.[0-9]).*/\1/'
 }
 
+bits_to_mask() {
+    local p="$1"
+    local full=$((p/8))
+    local rem=$((p%8))
+    local mask=()
+
+    for ((i=0;i<4;i++)); do
+        if ((i<full)); then
+            mask+=(255)
+        elif ((i==full)); then
+            mask+=($((256 - 2**(8-rem))))
+        else
+            mask+=(0)
+        fi
+    done
+
+    printf "%d.%d.%d.%d\n" "${mask[@]}"
+}
+
 # print operating system information
 . /etc/os-release
 echo "${bold}${NAME} ${VERSION}${normal}"
@@ -177,10 +196,36 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     endata_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i endata)
     endata_num_cmdb=$(wc -w <<< "$endata_idx_cmdb")
     echo "endata_num_cmdb: $endata_num_cmdb"
-    #for ((j=0; j<endata_num_cmdb; j++)); do
+    # device loop
+    for ((j=0; j<endata_num_cmdb; j++)); do
+        ports_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ports)
+        echo "ports_i_cmdb: $ports_i_cmdb"
+        # port loop
+        for ((k=0; k<ports_i_cmdb; k++)); do
+            # cmdb values
+            name_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j name $k)
+            bdf_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j bdf $k)
+            mac_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j mac $k)
+            ip_address_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_address $k)
+            ip_mask_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_mask $k)
+            ip_mask_i_cmdb=$(bits_to_mask "$ip_mask_i_cmdb")
+            # ifconfig values
+            mac_address_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/ether/{print $2}')
+            ip_address_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/inet /{print $2}')
+            ip_mask_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/inet /{print $4}')
 
+            echo $i,$j,$k
+            echo "name_i_cmdb: $name_i_cmdb"
+            echo "bdf_i_cmdb: $bdf_i_cmdb"
+            echo "mac_i_cmdb: $mac_i_cmdb"
+            echo "ip_address_i_cmdb: $ip_address_i_cmdb"
+            echo "ip_mask_i_cmdb: $ip_mask_i_cmdb"
+            echo "mac_address_ifconfig: $mac_address_ifconfig"
+            echo "ip_address_ifconfig: $ip_address_ifconfig"
+            echo "ip_mask_ifconfig: $ip_mask_ifconfig"
 
-    #done
+        done
+    done
 
 
     #numa_storage_lstopo=$(fmt_bytes "$numa_storage_lstopo" "$STORAGE_UNIT")
