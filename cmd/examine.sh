@@ -134,17 +134,17 @@ if [[ "$model_name_lscpu" == *Cortex-* ]]; then
     model_name_lscpu=$(echo "$model_name_lscpu" | awk '{print $1}')
     model_name_lscpu="ARM $model_name_lscpu"
 fi
-model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu 0 model)
+model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model)
 model_name=$(cmdb_print "$model_name_lscpu" "$model_name_cmdb")
 
 # CPU list
 cpu_list_lscpu=$(lscpu | grep -i "On-line CPU(s) list" | awk -F: '{print $2}' | xargs)
-cpu_list_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu 0 list)
+cpu_list_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu list)
 cpu_list=$(cmdb_print "$cpu_list_lscpu" "$cpu_list_cmdb")
 
 # total memory
 total_memory_lstopo=$(awk -F'[()]' '/^Machine/ {print $2}' "$TMP_PATH/lstopo_output" | awk '{print $1}')
-total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu 0 memory)
+total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu memory)
 total_memory=$(cmdb_print "$total_memory_lstopo" "$total_memory_cmdb")
 
 # total storage
@@ -162,19 +162,19 @@ numa_nodes=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
 for ((i=0; i<numa_nodes; i++)); do
     # CPU list
     numa_cpus_lscpu=$(lscpu | grep -i "NUMA node${i} CPU(s)" | awk -F: '{print $2}' | xargs)
-    numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i list)
+    numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml numa $i list)
     numa_cpus=$(cmdb_print "$numa_cpus_lscpu" "$numa_cpus_cmdb")
     # memory
     numa_memory_lstopo=$(grep -i "NUMANode L#$i" "$TMP_PATH/lstopo_output" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
-    numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i memory)
+    numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml numa $i memory)
     numa_memory=$(cmdb_print "$numa_memory_lstopo" "$numa_memory_cmdb")
     # storage
     numa_storage_lstopo=$(get_numa_storage $i "$STORAGE_UNIT")
     numa_storage_lstopo=$(first_decimal "$numa_storage_lstopo")$STORAGE_UNIT
-    numa_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i storage)
+    numa_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml numa $i storage)
     numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
     #NICs
-
+    #endata_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i endata)
 
 
     #numa_storage_lstopo=$(fmt_bytes "$numa_storage_lstopo" "$STORAGE_UNIT")
