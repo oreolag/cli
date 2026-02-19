@@ -161,11 +161,11 @@ echo "Total storage: $total_storage_sys"
 numa_nodes=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
 for ((i=0; i<numa_nodes; i++)); do
     # CPU list
-    numa_cpus_lstopo=$(lscpu | grep -i "NUMA node${i} CPU(s)" | awk -F: '{print $2}' | xargs)
+    numa_cpus_lscpu=$(lscpu | grep -i "NUMA node${i} CPU(s)" | awk -F: '{print $2}' | xargs)
     numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i list)
-    numa_cpus=$(cmdb_print "$numa_cpus_lstopo" "$numa_cpus_cmdb")
+    numa_cpus=$(cmdb_print "$numa_cpus_lscpu" "$numa_cpus_cmdb")
     # memory
-    numa_memory_lstopo=$(lstopo-no-graphics 2>/dev/null | grep -i "NUMANode L#$i" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
+    numa_memory_lstopo=$(grep -i "NUMANode L#$i" "$TMP_PATH/lstopo_output" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
     numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i memory)
     numa_memory=$(cmdb_print "$numa_memory_lstopo" "$numa_memory_cmdb")
     # storage
@@ -173,6 +173,9 @@ for ((i=0; i<numa_nodes; i++)); do
     numa_storage_lstopo=$(first_decimal "$numa_storage_lstopo")$STORAGE_UNIT
     numa_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu $i storage)
     numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
+    #NICs
+
+
 
     #numa_storage_lstopo=$(fmt_bytes "$numa_storage_lstopo" "$STORAGE_UNIT")
 
