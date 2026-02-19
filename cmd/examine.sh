@@ -164,10 +164,13 @@ fi
 model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model)
 model_name=$(cmdb_print "$model_name_lscpu" "$model_name_cmdb")
 
-# CPU list
-cpu_list_lscpu=$(lscpu | grep -i "On-line CPU(s) list" | awk -F: '{print $2}' | xargs)
-cpu_list_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu list)
-cpu_list=$(cmdb_print "$cpu_list_lscpu" "$cpu_list_cmdb")
+# CPU count
+#cpu_list_lscpu=$(lscpu | grep -i "On-line CPU(s) list" | awk -F: '{print $2}' | xargs)
+
+cpu_count_lscpu=$(lscpu | grep -i "^CPU(s):" | awk '{print $2}')
+
+cpu_count_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu count)
+cpu_count=$(cmdb_print "$cpu_count_lscpu" "$cpu_count_cmdb")
 
 # total memory
 total_memory_lstopo=$(awk -F'[()]' '/^Machine/ {print $2}' "$TMP_PATH/lstopo_output" | awk '{print $1}')
@@ -180,9 +183,10 @@ total_storage_sys=$(first_decimal "$total_storage_sys")$STORAGE_UNIT
 
 echo ""
 echo "${bold}$model_name${normal}"
-echo "CPU(s)       : $cpu_list"
+echo "CPU(s)       : $cpu_count"
 echo "Total memory : $total_memory"
 echo "Total storage: $total_storage_sys"
+echo ""
 
 # NUMA lstopo loop 
 numa_nodes_lscpu=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
@@ -258,6 +262,14 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     # ...
     ad_num_lspci=0
     
+    echo "${bold}NUMA $i${normal}"
+    echo "On-line CPU(s) list: $numa_cpus"
+    echo "Memory             : $numa_memory"
+    echo "Storage            : $numa_storage"
+    echo "GbE interfaces     : $endata_num_ifconfig"
+    echo "GPUs               : $gpu_num_lspci"
+    echo "ADs                : $ad_num_lspci"
+
     # print numa header
     print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
 
