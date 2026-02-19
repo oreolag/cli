@@ -201,30 +201,42 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
         ports_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ports)
         echo "ports_i_cmdb: $ports_i_cmdb"
         # port loop
+        endata_num_ifconfig=0
         for ((k=0; k<ports_i_cmdb; k++)); do
             # cmdb values
             name_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j name $k)
-            bdf_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j bdf $k)
+            #bdf_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j bdf $k)
             mac_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j mac $k)
             ip_address_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_address $k)
             ip_mask_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_mask $k)
             ip_mask_i_cmdb=$(bits_to_mask "$ip_mask_i_cmdb")
             # ifconfig values
-            mac_address_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/ether/{print $2}')
-            ip_address_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/inet /{print $2}')
-            ip_mask_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/inet /{print $4}')
+            mac_i_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/ether/{print $2}')
+            ip_address_i_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/inet /{print $2}')
+            ip_mask_i_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/inet /{print $4}')
+            # compare
+            if [[ "$mac_i_cmdb" == "$mac_i_ifconfig" && "$ip_address_i_cmdb" == "$ip_address_i_ifconfig" && "$ip_mask_i_cmdb" == "$ip_mask_i_ifconfig" ]]; then
+                ((endata_num_ifconfig++))
+            fi
+            # format
+            #numa_storage=$(cmdb_print "$mac_i_ifconfig" "$mac_i_cmdb")
+            #numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
+            #numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
 
             echo $i,$j,$k
             echo "name_i_cmdb: $name_i_cmdb"
-            echo "bdf_i_cmdb: $bdf_i_cmdb"
+            #echo "bdf_i_cmdb: $bdf_i_cmdb"
             echo "mac_i_cmdb: $mac_i_cmdb"
             echo "ip_address_i_cmdb: $ip_address_i_cmdb"
             echo "ip_mask_i_cmdb: $ip_mask_i_cmdb"
-            echo "mac_address_ifconfig: $mac_address_ifconfig"
-            echo "ip_address_ifconfig: $ip_address_ifconfig"
-            echo "ip_mask_ifconfig: $ip_mask_ifconfig"
+            echo "mac_i_ifconfig: $mac_i_ifconfig"
+            echo "ip_address_i_ifconfig: $ip_address_i_ifconfig"
+            echo "ip_mask_i_ifconfig: $ip_mask_i_ifconfig"
 
         done
+
+        echo "endata_num_ifconfig: $endata_num_ifconfig"
+
     done
 
 
