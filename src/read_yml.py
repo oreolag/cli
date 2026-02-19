@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-constants_get.py
+read_yml.py
 
 Read a constants.yml-style YAML file and print a value.
 
 Usage:
-  constants_get.py <section> <key> [--db PATH] [--sep SEP]
+  read_yml.py <section> <key> [--db PATH] [--sep SEP]
 
 Examples:
-  ./constants_get.py paths tmp
-  ./constants_get.py --db /opt/vars.yml users docker  # -> jmoya82,helen
+  ./read_yml.py paths tmp
+  ./read_yml.py --db /opt/vars.yml users docker  # -> jmoya82,helen
 """
 
 from __future__ import annotations
