@@ -195,7 +195,6 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     # endata NICs
     endata_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i endata)
     endata_num_cmdb=$(wc -w <<< "$endata_idx_cmdb")
-    echo "endata_num_cmdb: $endata_num_cmdb"
     # device loop
     for ((j=0; j<endata_num_cmdb; j++)); do
         ports_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ports)
@@ -222,22 +221,22 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
             #numa_storage=$(cmdb_print "$mac_i_ifconfig" "$mac_i_cmdb")
             #numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
             #numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
-
-            echo $i,$j,$k
-            echo "name_i_cmdb: $name_i_cmdb"
-            #echo "bdf_i_cmdb: $bdf_i_cmdb"
-            echo "mac_i_cmdb: $mac_i_cmdb"
-            echo "ip_address_i_cmdb: $ip_address_i_cmdb"
-            echo "ip_mask_i_cmdb: $ip_mask_i_cmdb"
-            echo "mac_i_ifconfig: $mac_i_ifconfig"
-            echo "ip_address_i_ifconfig: $ip_address_i_ifconfig"
-            echo "ip_mask_i_ifconfig: $ip_mask_i_ifconfig"
-
+            #echo $i,$j,$k
+            #echo "name_i_cmdb: $name_i_cmdb"
+            ##echo "bdf_i_cmdb: $bdf_i_cmdb"
+            #echo "mac_i_cmdb: $mac_i_cmdb"
+            #echo "ip_address_i_cmdb: $ip_address_i_cmdb"
+            #echo "ip_mask_i_cmdb: $ip_mask_i_cmdb"
+            #echo "mac_i_ifconfig: $mac_i_ifconfig"
+            #echo "ip_address_i_ifconfig: $ip_address_i_ifconfig"
+            #echo "ip_mask_i_ifconfig: $ip_mask_i_ifconfig"
         done
-
-        echo "endata_num_ifconfig: $endata_num_ifconfig"
-
     done
+    echo "endata_num_ifconfig: $endata_num_ifconfig"
+    # GPUs
+    gpu_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i gpu)
+    gpu_num_cmdb=$(wc -w <<< "$gpu_idx_cmdb")
+    echo "gpu_num_cmdb: $gpu_num_cmdb"
 
 
     #numa_storage_lstopo=$(fmt_bytes "$numa_storage_lstopo" "$STORAGE_UNIT")
