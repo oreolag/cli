@@ -113,13 +113,13 @@ rm -rf $TMP_PATH/lstopo_output
 lstopo-no-graphics 2>/dev/null > $TMP_PATH/lstopo_output
 
 # CPU model
-model_name_lscpu=$(lscpu | awk -F: '/Model name/ {print $2}' | xargs)
-if [[ "$model_name_lscpu" == *Cortex-* ]]; then
-    model_name_lscpu=$(echo "$model_name_lscpu" | awk '{print $1}')
-    model_name_lscpu="ARM $model_name_lscpu"
-fi
+#model_name_lscpu=$(lscpu | awk -F: '/Model name/ {print $2}' | xargs)
+#if [[ "$model_name_lscpu" == *Cortex-* ]]; then
+#    model_name_lscpu=$(echo "$model_name_lscpu" | awk '{print $1}')
+#    model_name_lscpu="ARM $model_name_lscpu"
+#fi
 model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model)
-model_name=$(cmdb_print "$model_name_lscpu" "$model_name_cmdb")
+#model_name=$(cmdb_print "$model_name_lscpu" "$model_name_cmdb")
 
 # CPU count
 #cpu_count_lscpu=$(lscpu | grep -i "^CPU(s):" | awk '{print $2}')
@@ -137,7 +137,7 @@ total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu mem
 total_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
 
 echo ""
-echo "${bold}$model_name${normal}"
+echo "${bold}$model_name_cmdb${normal}"
 echo "CPU(s)       : $cpu_count_cmdb"
 echo "Total memory : $total_memory_cmdb"
 echo "Total storage: $total_storage_cmdb"
