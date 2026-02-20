@@ -74,26 +74,6 @@ cmdb_print() {
     fi
 }
 
-get_total_storage() {
-    local unit="${1:-GB}"
-    local total_bytes=0 sectors
-
-    for d in /sys/block/nvme*n1; do
-        [[ -f "$d/size" ]] || continue
-        sectors=$(<"$d/size")           # 512B sectors
-        total_bytes=$(( total_bytes + sectors*512 ))
-    done
-
-    case "$unit" in
-        B)  printf "%sB\n"  "$total_bytes" ;;
-        KB) printf "%.0fKB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024}')" ;;
-        MB) printf "%.0fMB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024}')" ;;
-        GB) printf "%.0fGB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024/1024}')" ;;
-        TB) printf "%.1fTB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024/1024/1024}')" ;;
-        *)  echo "$total_bytes" ;;
-    esac
-}
-
 get_numa_storage() {
     local numa_index="$1"
     local unit="${2:-GB}"
@@ -185,14 +165,15 @@ total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu mem
 total_memory=$(cmdb_print "$total_memory_lstopo" "$total_memory_cmdb")
 
 # total storage
-total_storage_sys=$(get_total_storage "$STORAGE_UNIT")
-total_storage_sys=$(first_decimal "$total_storage_sys")$STORAGE_UNIT
+#total_storage_sys=$(get_total_storage "$STORAGE_UNIT")
+#total_storage_sys=$(first_decimal "$total_storage_sys")$STORAGE_UNIT
+total_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
 
 echo ""
 echo "${bold}$model_name${normal}"
 echo "CPU(s)       : $cpu_count"
 echo "Total memory : $total_memory"
-echo "Total storage: $total_storage_sys"
+echo "Total storage: $total_storage_cmdb"
 echo ""
 
 # remove examine files
