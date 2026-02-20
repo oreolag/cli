@@ -111,6 +111,23 @@ bits_to_mask() {
     printf "%d.%d.%d.%d\n" "${mask[@]}"
 }
 
+is_consecutive_bdf() {
+    local prev="$1"
+    local curr="$2"
+
+    local prefix_prev=${prev%.*}
+    local prefix_curr=${curr%.*}
+
+    local idx_prev=${prev##*.}
+    local idx_curr=${curr##*.}
+
+    if [[ "$prefix_prev" == "$prefix_curr" && $idx_curr -eq $((idx_prev + 1)) ]]; then
+        echo "1"
+    else
+        echo "0"
+    fi
+}
+
 # print operating system information
 . /etc/os-release
 echo "${bold}${NAME} ${VERSION}${normal}"
@@ -206,6 +223,17 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
                 ip_address="$ip_address_i_ifconfig/$ip_mask_i_cmdb"
                 mac_address="$mac_i_ifconfig"
                 connection_name="$name_i_cmdb"
+                # read previous line
+                last_line=$(tail -n 1 "$TMP_PATH/examine_endata_$i" 2>/dev/null || true)
+                if [[ -n "$last_line" ]]; then
+                    bdf_0=$(awk 'END{print $5}' "$TMP_PATH/examine_endata_$i")
+                    is_consecutive=$(is_consecutive_bdf "$bdf_0" "$bdf")
+                    if [ "$is_consecutive" = "1" ]; then
+                        device_index="-"
+                        model="-"
+                    fi
+                fi
+                # add to file
                 echo "$device_index $port_index $model $serial_number $bdf $ip_address $mac_address $connection_name" >> "$TMP_PATH/examine_endata_$i"
             fi
         done
