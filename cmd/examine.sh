@@ -66,7 +66,7 @@ print_numa() {
     awk '{
         dev=$1; port=$2; model=$3; serial=$4; bdf=$5; ip=$6; mac=$7; ifc=$8;
 
-        printf("| %-11s : %-9s : %-9s : %-12s : %-11s : %-16s : %-16s : %-13s |\n",
+        printf("| %-12s : %-10s : %-10s : %-13s : %-12s : %-17s : %-17s : %-13s |\n",
                dev, port, model, serial, bdf, ip, mac, ifc);
     }' "$file"
 
