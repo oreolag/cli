@@ -151,9 +151,13 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i list)
     numa_cpus=$(cmdb_print "$numa_cpus_system" "$numa_cpus_cmdb")
     # memory
+    numa_memory_system=$($CMDB_PATH/cmdb_get_memory.sh $i)
     numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i memory)
+    numa_memory=$(cmdb_print "$numa_memory_system" "$numa_memory_cmdb")
     # storage
+    numa_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT" "$i")
     numa_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i storage)
+    numa_storage=$(cmdb_print "$numa_storage_system" "$numa_storage_cmdb")
     # endata NICs
     endata_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i endata)
     endata_num_cmdb=$(wc -w <<< "$endata_idx_cmdb")
@@ -225,6 +229,6 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     ad_num_lspci=0
 
     # print numa header
-    print_numa_header "$i" "$numa_cpus" "$numa_memory_cmdb" "$numa_storage_cmdb" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
+    print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
 
 done
