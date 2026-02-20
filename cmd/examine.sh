@@ -187,13 +187,13 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
             mac_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j mac $k)
             ip_address_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_address $k)
             ip_mask_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_mask $k)
-            ip_mask_i_cmdb=$(bits_to_mask "$ip_mask_i_cmdb")
+            ip_mask_i_cmdb_mask=$(bits_to_mask "$ip_mask_i_cmdb")
             # ifconfig values
             mac_i_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/ether/{print $2}')
             ip_address_i_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/inet /{print $2}')
             ip_mask_i_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/inet /{print $4}')
             # compare
-            if [[ "$mac_i_cmdb" == "$mac_i_ifconfig" && "$ip_address_i_cmdb" == "$ip_address_i_ifconfig" && "$ip_mask_i_cmdb" == "$ip_mask_i_ifconfig" ]]; then
+            if [[ "$mac_i_cmdb" == "$mac_i_ifconfig" && "$ip_address_i_cmdb" == "$ip_address_i_ifconfig" && "$ip_mask_i_cmdb_mask" == "$ip_mask_i_ifconfig" ]]; then
                 # increase counter
                 ((endata_num_ifconfig++))
 
@@ -203,7 +203,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
                 model=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j model)
                 serial_number="-"
                 bdf=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j bdf $k)
-                ip_address="$ip_address_i_ifconfig"
+                ip_address="$ip_address_i_ifconfig/$ip_mask_i_cmdb"
                 mac_address="$mac_i_ifconfig"
                 connection_name="$name_i_cmdb"
                 echo "$device_index $port_index $model $serial_number $bdf $ip_address $mac_address $connection_name" >> "$TMP_PATH/examine_endata_$i"
