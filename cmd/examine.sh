@@ -20,6 +20,7 @@ normal=$(tput sgr0)
 
 # constants
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
+COLOR_NIC=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_NIC)
 STORAGE_UNIT="TB"
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
 
@@ -64,15 +65,16 @@ print_numa_header() {
 
 print_numa() {
     local file="$1"
+    local color="${2:-}"
     [[ -f "$file" ]] || return
 
-    awk '{
+    awk -v color="$color" -v reset="$normal" '{
         for(i=1;i<=NF;i++) if($i=="-") $i=" ";
 
         dev=$1; port=$2; model=$3; serial=$4; bdf=$5; ip=$6; mac=$7; ifc=$8;
 
-        printf("| %-12s : %-10s : %-10s : %-13s : %-12s : %-18s : %-17s : %-13s |\n",
-               dev, port, model, serial, bdf, ip, mac, ifc);
+        printf("|%s %-12s : %-10s : %-10s : %-13s : %-12s : %-18s : %-17s : %-13s %s|\n",
+               color, dev, port, model, serial, bdf, ip, mac, ifc, reset);
     }' "$file"
 
     echo "+--------------------------------------------------------------------------------------------------------------------------------+"
@@ -277,5 +279,5 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
 
     # print numa header
     print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
-    print_numa "$TMP_PATH/examine_endata_$i"
+    print_numa "$TMP_PATH/examine_endata_$i" "$COLOR_NIC"
 done
