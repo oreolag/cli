@@ -68,6 +68,7 @@ cmdb_print() {
     elif [[ -n "$cmdb" && "$cmdb" == "$topo" ]]; then
         echo "$cmdb"
     else
+        # topo wins
         local val="${topo:-$cmdb}"
         printf "%b%s%b\n" "$italic" "$val" "$normal"
     fi
@@ -113,22 +114,30 @@ rm -rf $TMP_PATH/lstopo_output
 lstopo-no-graphics 2>/dev/null > $TMP_PATH/lstopo_output
 
 # CPU model
+model_name_system=$($CMDB_PATH/cmdb_get_model.sh)
 model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model)
+model_name=$(cmdb_print "$model_name_system" "$model_name_cmdb")
 
 # CPU count
+cpu_count_system=$($CMDB_PATH/cmdb_get_cpu.sh)
 cpu_count_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu count)
+cpu_count=$(cmdb_print "$cpu_count_system" "$cpu_count_cmdb")
 
 # total memory
+total_memory_system=$($CMDB_PATH/cmdb_get_memory.sh)
 total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu memory)
+total_memory=$(cmdb_print "$total_memory_system" "$total_memory_cmdb")
 
 # total storage
+total_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT")
 total_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
+total_storage=$(cmdb_print "$total_storage_system" "$total_storage_cmdb")
 
 echo ""
-echo "${bold}$model_name_cmdb${normal}"
-echo "CPU(s)       : $cpu_count_cmdb"
-echo "Total memory : $total_memory_cmdb"
-echo "Total storage: $total_storage_cmdb"
+echo "${bold}$model_name${normal}"
+echo "CPU(s)       : $cpu_count"
+echo "Total memory : $total_memory"
+echo "Total storage: $total_storage"
 echo ""
 
 # remove examine files
