@@ -74,38 +74,6 @@ cmdb_print() {
     fi
 }
 
-get_numa_storage() {
-    local numa_index="$1"
-    local unit="${2:-GB}"
-    local lstopo_file="${TMP_PATH:-/tmp}/lstopo_output"
-    local total_bytes=0
-    local sectors dev size
-
-    [[ -f "$lstopo_file" ]] || { printf "0%s\n" "$unit"; return; }
-
-    # extract block device names (e.g. nvme0n1) within NUMANode L#<numa_index>
-    devs=$(awk -v i="$numa_index" '
-      $0 ~ ("NUMANode L#" i) {f=1; next}
-      f && $0 ~ /^NUMANode L#/ {exit}
-      f { print }
-    ' "$lstopo_file" | sed -nE 's/.*Block\(Disk\)[[:space:]]+"([^"]+)".*/\1/p' | tr '\n' ' ')
-
-    for dev in $devs; do
-        [[ -f "/sys/block/$dev/size" ]] || continue
-        sectors=$(</sys/block/"$dev"/size)
-        total_bytes=$(( total_bytes + sectors * 512 ))
-    done
-
-    case "$unit" in
-        B)  printf "%sB\n" "$total_bytes" ;;
-        KB) printf "%.0fKB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024}')" ;;
-        MB) printf "%.0fMB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024}')" ;;
-        GB) printf "%.0fGB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024/1024}')" ;;
-        TB) printf "%.2fTB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024/1024/1024/1024}')" ;;
-        *)  printf "%s\n" "$total_bytes" ;;
-    esac
-}
-
 first_decimal() {
     echo "$1" | sed -E 's/^([0-9]+\.[0-9]).*/\1/'
 }
@@ -191,10 +159,10 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i memory)
     numa_memory=$(cmdb_print "$numa_memory_lstopo" "$numa_memory_cmdb")
     # storage
-    numa_storage_lstopo=$(get_numa_storage $i "$STORAGE_UNIT")
-    numa_storage_lstopo=$(first_decimal "$numa_storage_lstopo")$STORAGE_UNIT
+    #numa_storage_lstopo=$(get_numa_storage $i "$STORAGE_UNIT")
+    #numa_storage_lstopo=$(first_decimal "$numa_storage_lstopo")$STORAGE_UNIT
     numa_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i storage)
-    numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
+    #numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
     # endata NICs
     endata_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i endata)
     endata_num_cmdb=$(wc -w <<< "$endata_idx_cmdb")
@@ -278,16 +246,16 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     # ...
     ad_num_lspci=0
     
-    echo "${bold}NUMA $i${normal}"
-    echo "On-line CPU(s) list: $numa_cpus"
-    echo "Memory             : $numa_memory"
-    echo "Storage            : $numa_storage"
-    echo "GbE interfaces     : $endata_num_ifconfig"
-    echo "GPUs               : $gpu_num_lspci"
-    echo "ADs                : $ad_num_lspci"
+    #echo "${bold}NUMA $i${normal}"
+    #echo "On-line CPU(s) list: $numa_cpus"
+    #echo "Memory             : $numa_memory"
+    #echo "Storage            : $numa_storage"
+    #echo "GbE interfaces     : $endata_num_ifconfig"
+    #echo "GPUs               : $gpu_num_lspci"
+    #echo "ADs                : $ad_num_lspci"
 
     # print numa header
-    print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
+    print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage_cmdb" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
 
 
     #echo $numa_cpus
