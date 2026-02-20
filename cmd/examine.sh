@@ -61,16 +61,12 @@ print_numa_header() {
 
 print_numa() {
     local file="$1"
-
     [[ -f "$file" ]] || return
 
     awk '{
         dev=$1; port=$2; model=$3; serial=$4; bdf=$5; ip=$6; mac=$7; ifc=$8;
-
-        # optional: display indexes starting at 1
-        dev++; port++;
-
-        printf("| %-12s : %-10s : %-11s : %-14s : %-13s : %-18s : %-17s : %-13s |\n",
+        # print exactly the values from the file (no +1)
+        printf("| %-12s : %-10s : %-10s : %-13s : %-12s : %-17s : %-16s : %-12s |\n",
                dev, port, model, serial, bdf, ip, mac, ifc);
     }' "$file"
 
