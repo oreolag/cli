@@ -113,27 +113,15 @@ rm -rf $TMP_PATH/lstopo_output
 lstopo-no-graphics 2>/dev/null > $TMP_PATH/lstopo_output
 
 # CPU model
-#model_name_lscpu=$(lscpu | awk -F: '/Model name/ {print $2}' | xargs)
-#if [[ "$model_name_lscpu" == *Cortex-* ]]; then
-#    model_name_lscpu=$(echo "$model_name_lscpu" | awk '{print $1}')
-#    model_name_lscpu="ARM $model_name_lscpu"
-#fi
 model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model)
-#model_name=$(cmdb_print "$model_name_lscpu" "$model_name_cmdb")
 
 # CPU count
-#cpu_count_lscpu=$(lscpu | grep -i "^CPU(s):" | awk '{print $2}')
 cpu_count_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu count)
-#cpu_count=$(cmdb_print "$cpu_count_lscpu" "$cpu_count_cmdb")
 
 # total memory
-#total_memory_lstopo=$(awk -F'[()]' '/^Machine/ {print $2}' "$TMP_PATH/lstopo_output" | awk '{print $1}')
 total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu memory)
-#total_memory=$(cmdb_print "$total_memory_lstopo" "$total_memory_cmdb")
 
 # total storage
-#total_storage_sys=$(get_total_storage "$STORAGE_UNIT")
-#total_storage_sys=$(first_decimal "$total_storage_sys")$STORAGE_UNIT
 total_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
 
 echo ""
@@ -150,18 +138,11 @@ rm -rf $TMP_PATH/examine_*
 numa_nodes_lscpu=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
 for ((i=0; i<numa_nodes_lscpu; i++)); do
     # CPU list
-    #numa_cpus_lscpu=$(lscpu | grep -i "NUMA node${i} CPU(s)" | awk -F: '{print $2}' | xargs)
     numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i list)
-    #numa_cpus=$(cmdb_print "$numa_cpus_lscpu" "$numa_cpus_cmdb")
     # memory
-    #numa_memory_lstopo=$(grep -i "NUMANode L#$i" "$TMP_PATH/lstopo_output" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
     numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i memory)
-    #numa_memory=$(cmdb_print "$numa_memory_lstopo" "$numa_memory_cmdb")
     # storage
-    #numa_storage_lstopo=$(get_numa_storage $i "$STORAGE_UNIT")
-    #numa_storage_lstopo=$(first_decimal "$numa_storage_lstopo")$STORAGE_UNIT
     numa_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i storage)
-    #numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
     # endata NICs
     endata_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i endata)
     endata_num_cmdb=$(wc -w <<< "$endata_idx_cmdb")
@@ -198,19 +179,6 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
                 connection_name="$name_i_cmdb"
                 echo "$device_index $port_index $model $serial_number $bdf $ip_address $mac_address $connection_name" >> "$TMP_PATH/examine_endata_$i"
             fi
-            # format
-            #numa_storage=$(cmdb_print "$mac_i_ifconfig" "$mac_i_cmdb")
-            #numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
-            #numa_storage=$(cmdb_print "$numa_storage_lstopo" "$numa_storage_cmdb")
-            #echo $i,$j,$k
-            #echo "name_i_cmdb: $name_i_cmdb"
-            ##echo "bdf_i_cmdb: $bdf_i_cmdb"
-            #echo "mac_i_cmdb: $mac_i_cmdb"
-            #echo "ip_address_i_cmdb: $ip_address_i_cmdb"
-            #echo "ip_mask_i_cmdb: $ip_mask_i_cmdb"
-            #echo "mac_i_ifconfig: $mac_i_ifconfig"
-            #echo "ip_address_i_ifconfig: $ip_address_i_ifconfig"
-            #echo "ip_mask_i_ifconfig: $ip_mask_i_ifconfig"
         done
     done
     
@@ -244,21 +212,8 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     # ADs
     # ...
     ad_num_lspci=0
-    
-    #echo "${bold}NUMA $i${normal}"
-    #echo "On-line CPU(s) list: $numa_cpus"
-    #echo "Memory             : $numa_memory"
-    #echo "Storage            : $numa_storage"
-    #echo "GbE interfaces     : $endata_num_ifconfig"
-    #echo "GPUs               : $gpu_num_lspci"
-    #echo "ADs                : $ad_num_lspci"
 
     # print numa header
     print_numa_header "$i" "$numa_cpus_cmdb" "$numa_memory_cmdb" "$numa_storage_cmdb" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
 
-
-    #echo $numa_cpus
-    #echo $numa_memory
-    #echo $numa_storage
-    #echo $numa_nics
 done
