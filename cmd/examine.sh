@@ -155,9 +155,9 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i list)
     numa_cpus=$(cmdb_print "$numa_cpus_lscpu" "$numa_cpus_cmdb")
     # memory
-    numa_memory_lstopo=$(grep -i "NUMANode L#$i" "$TMP_PATH/lstopo_output" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
+    #numa_memory_lstopo=$(grep -i "NUMANode L#$i" "$TMP_PATH/lstopo_output" | awk -F'[()]' '{print $2}' | awk '{print $NF}')
     numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i memory)
-    numa_memory=$(cmdb_print "$numa_memory_lstopo" "$numa_memory_cmdb")
+    #numa_memory=$(cmdb_print "$numa_memory_lstopo" "$numa_memory_cmdb")
     # storage
     #numa_storage_lstopo=$(get_numa_storage $i "$STORAGE_UNIT")
     #numa_storage_lstopo=$(first_decimal "$numa_storage_lstopo")$STORAGE_UNIT
@@ -255,7 +255,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     #echo "ADs                : $ad_num_lspci"
 
     # print numa header
-    print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage_cmdb" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
+    print_numa_header "$i" "$numa_cpus" "$numa_memory_cmdb" "$numa_storage_cmdb" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
 
 
     #echo $numa_cpus
