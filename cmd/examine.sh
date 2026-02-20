@@ -59,6 +59,24 @@ print_numa_header() {
   echo "+--------------------------------------------------------------------------------------------------------------------------------+"
 }
 
+print_numa() {
+    local file="$1"
+
+    [[ -f "$file" ]] || return
+
+    awk '{
+        dev=$1; port=$2; model=$3; serial=$4; bdf=$5; ip=$6; mac=$7; ifc=$8;
+
+        # optional: display indexes starting at 1
+        dev++; port++;
+
+        printf("| %-12s : %-10s : %-11s : %-14s : %-13s : %-18s : %-17s : %-13s |\n",
+               dev, port, model, serial, bdf, ip, mac, ifc);
+    }' "$file"
+
+    echo "+--------------------------------------------------------------------------------------------------------------------------------+"
+}
+
 cmdb_print() {
     local topo="$1"
     local cmdb="$2"
@@ -230,5 +248,5 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
 
     # print numa header
     print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
-
+    print_numa "$TMP_PATH/examine_endata_$i"
 done
