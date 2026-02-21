@@ -21,6 +21,7 @@ normal=$(tput sgr0)
 # constants
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
 COLOR_NIC=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_NIC)
+COLOR_NVIDIA=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_NVIDIA)
 STORAGE_UNIT="TB"
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
 
@@ -250,7 +251,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     gpu_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i gpu)
     gpu_num_cmdb=$(wc -w <<< "$gpu_idx_cmdb")
     # device loop
-    touch $TMP_PATH/examine_gpus_$i
+    touch $TMP_PATH/examine_gpu_$i
     gpu_num_lspci=0
     for ((j=0; j<gpu_num_cmdb; j++)); do
         vendor_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j vendor)
@@ -269,7 +270,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
             ip_address="-"
             mac_address="-"
             connection_name="-"
-            echo "$device_index $port_index $model $serial_number $bdf $ip_address $mac_address $connection_name" >> "$TMP_PATH/examine_gpus_$i"
+            echo "$device_index $port_index $model $serial_number $bdf $ip_address $mac_address $connection_name" >> "$TMP_PATH/examine_gpu_$i"
         fi
     done
     
@@ -280,4 +281,5 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     # print numa header
     print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
     print_numa "$TMP_PATH/examine_endata_$i" "$COLOR_NIC"
+    print_numa "$TMP_PATH/examine_gpu_$i" "$COLOR_NVIDIA"
 done
