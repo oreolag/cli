@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+#
 # Bash completion for odev
 #
 # Supports:
@@ -48,6 +48,27 @@ _odev_list_subcommands() {
 }
 
 # ------------------------------------------------------------
+# Load flags definitions (command_flags.sh or cmd_flags.sh)
+# ------------------------------------------------------------
+_odev_source_flags() {
+  local base="$1"
+
+  if [[ -f "$base/src/command_flags.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "$base/src/command_flags.sh"
+    return 0
+  fi
+
+  if [[ -f "$base/src/cmd_flags.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "$base/src/cmd_flags.sh"
+    return 0
+  fi
+
+  return 0
+}
+
+# ------------------------------------------------------------
 # Completion function
 # ------------------------------------------------------------
 _odev_completions() {
@@ -58,8 +79,10 @@ _odev_completions() {
   base="$(_odev_script_dir)"
   root="$base/cmd"
 
+  _odev_source_flags "$base"
+
   # -----------------------------
-  # Global flags
+  # Global flags (only at top-level: odev --<TAB>)
   # -----------------------------
   if [[ $cword -eq 1 && "$cur" == -* ]]; then
     COMPREPLY=( $(compgen -W "--help -h --version -v" -- "$cur") )
@@ -67,23 +90,67 @@ _odev_completions() {
   fi
 
   # -----------------------------
-  # Top-level commands
+  # Top-level commands (odev <TAB>)
   # -----------------------------
   if [[ $cword -eq 1 ]]; then
     local extra_cmds="examine"
     local cmds
-
     cmds="$(_odev_list_commands "$root") $extra_cmds"
     COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
     return 0
   fi
 
   # -----------------------------
-  # Subcommands
+  # Subcommands (odev <cmd> <TAB>)
   # -----------------------------
   if [[ $cword -eq 2 ]]; then
     local cmd="${words[1]}"
     COMPREPLY=( $(compgen -W "$(_odev_list_subcommands "$root" "$cmd")" -- "$cur") )
+    return 0
+  fi
+
+  # -----------------------------
+  # Subcommand flags (odev <cmd> <subcmd> --<TAB>)
+  # -----------------------------
+  if [[ $cword -ge 3 && "$cur" == -* ]]; then
+    local cmd="${words[1]}"
+    local subcmd="${words[2]}"
+
+    # build uppercase variable name: e.g. VALIDATE_NCCL_FLAGS
+    local cmd_u sub_u varname
+    cmd_u="$(printf '%s' "$cmd" | tr '[:lower:]' '[:upper:]')"
+    sub_u="$(printf '%s' "$subcmd" | tr '[:lower:]' '[:upper:]')"
+    varname="${cmd_u}_${sub_u}_FLAGS"
+
+    # Pull array by name robustly
+    local -a flags=()
+    if eval "[[ \${#${varname}[@]} -gt 0 ]]"; then
+      eval "flags=(\"\${${varname}[@]}\")"
+    fi
+
+    local -a opts=()
+    local entry name short rest
+    for entry in "${flags[@]}"; do
+      # entry format: "name,short,Description,range,default"
+      IFS=',' read -r name short rest <<< "$entry"
+      [[ -n "$name" ]] && opts+=("--$name")
+      [[ -n "$short" ]] && opts+=("-$short")
+    done
+
+    # Only include help here (do NOT inject --version for subcommands)
+    opts+=(--help -h)
+
+    # de-dup
+    local -A seen=()
+    local -a uniq_opts=()
+    local o
+    for o in "${opts[@]}"; do
+      [[ -n "$o" && -z "${seen[$o]:-}" ]] || continue
+      uniq_opts+=("$o")
+      seen["$o"]=1
+    done
+
+    COMPREPLY=( $(compgen -W "${uniq_opts[*]}" -- "$cur") )
     return 0
   fi
 
