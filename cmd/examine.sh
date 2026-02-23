@@ -51,18 +51,31 @@ print_numa_header() {
   local gpus="$6"
   local ads="$7"
 
+  # legend
+  legend=""
+  if [ "$ads" -gt 0 ]; then
+    legend="${COLOR_XILINX}Adaptive devices${normal}"
+  fi
+  if [ "$gpus" -gt 0 ]; then
+    legend="$legend ${COLOR_NVIDIA}GPUs${normal}"
+  fi
+  if [ "$nics" -gt 0 ]; then
+    legend="$legend ${COLOR_NIC}NICs${normal}"
+  fi
+
   separator_length="130"
   top_ruler="${bold}NUMA $id${normal} | CPUs: $cpus | Memory: $mem | Storage: $nvme"
   len=$(printf '%s' "$top_ruler" | sed -E 's/\x1B\[[0-9;]*m//g' | wc -m)
   filling=$(printf '%*s' $((separator_length - len - 1)) '')
 
-  echo "+--------------------------------------------------------------------------------------------------------------------------------+"
-  echo "| $top_ruler$filling |"
-  echo "+--------------------------------------------------------------------------------------------------------------------------------+"
-  echo "| Device Index : Port Index : Model      : Serial Number : BDF          : IP Address         : MAC Address       : Interface     |"
-  echo "|--------------------------------------------------------------------------------------------------------------------------------|"
-  #echo "| 1            : 1          : ConnectX-7 : b5a5df7df3c0  : 000f:01:00.0 : 255.255.255.255/24 : 00:0A:35:0B:25:28 : enaccel0f0np0 |"
-  #echo "+--------------------------------------------------------------------------------------------------------------------------------+"
+  echo -e "                                                                                                        $legend"
+  echo    "+--------------------------------------------------------------------------------------------------------------------------------+"
+  echo -e "| $top_ruler$filling |"
+  echo    "+--------------------------------------------------------------------------------------------------------------------------------+"
+  echo    "| Device Index : Port Index : Model      : Serial Number : BDF          : IP Address         : MAC Address       : Interface     |"
+  echo    "|--------------------------------------------------------------------------------------------------------------------------------|"
+  #echo   "| 1            : 1          : ConnectX-7 : b5a5df7df3c0  : 000f:01:00.0 : 255.255.255.255/24 : 00:0A:35:0B:25:28 : enaccel0f0np0 |"
+  #echo   "+--------------------------------------------------------------------------------------------------------------------------------+"
 }
 
 print_numa() {
@@ -342,7 +355,16 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
 
     # print numa header
     print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$accel_num_lspci"
-    print_numa "$TMP_PATH/examine_endata_$i" "$COLOR_NIC"
-    print_numa "$TMP_PATH/examine_gpu_$i" "$COLOR_NVIDIA"
-    print_numa "$TMP_PATH/examine_accel_$i" "$COLOR_XILINX"
+    # accelerators
+    if [ "$accel_num_lspci" -gt 0 ]; then
+        print_numa "$TMP_PATH/examine_accel_$i" "$COLOR_XILINX"
+    fi
+    # gpus
+    if [ "$gpu_num_lspci" -gt 0 ]; then
+        print_numa "$TMP_PATH/examine_gpu_$i" "$COLOR_NVIDIA"
+    fi
+    # NICs
+    if [ "$gpu_num_lspci" -gt 0 ]; then
+        print_numa "$TMP_PATH/examine_endata_$i" "$COLOR_NIC"
+    fi
 done
