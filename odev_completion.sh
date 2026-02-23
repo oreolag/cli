@@ -128,23 +128,70 @@ _odev_completions() {
       eval "flags=(\"\${${varname}[@]}\")"
     fi
 
+    # Build option lists and maps
     local -a opts=()
+    declare -A long_to_short=()
+    declare -A short_to_long=()
+
     local entry name short rest
     for entry in "${flags[@]}"; do
       # entry format: "name,short,Description,range,default"
       IFS=',' read -r name short rest <<< "$entry"
-      [[ -n "$name" ]] && opts+=("--$name")
-      [[ -n "$short" ]] && opts+=("-$short")
+      if [[ -n "$name" ]]; then
+        opts+=("--$name")
+      fi
+      if [[ -n "$short" ]]; then
+        opts+=("-$short")
+      fi
+      # mappings for exclusion later
+      if [[ -n "$name" && -n "$short" ]]; then
+        long_to_short["$name"]="$short"
+        short_to_long["$short"]="$name"
+      fi
     done
 
-    # Only include help here (do NOT inject --version for subcommands)
+    # include --help/-h always (unless used)
     opts+=(--help -h)
 
-    # de-dup
-    local -A seen=()
-    local -a uniq_opts=()
+    # Collect flags already present in the command line (words[1]..words[cword-1])
+    declare -A used=()
+    local i w key stripped
+    for (( i=1; i < cword; i++ )); do
+      w="${words[i]}"
+      # long form --foo or --foo=bar
+      if [[ "$w" == --* ]]; then
+        # strip leading -- and any =value
+        stripped="${w#--}"
+        key="${stripped%%=*}"
+        used["--$key"]=1
+        # if we know a short alias, mark it used too
+        if [[ -n "${long_to_short[$key]:-}" ]]; then
+          used["-${long_to_short[$key]}"]=1
+        fi
+      elif [[ "$w" == -? ]]; then
+        # short form -x
+        key="${w#-}"
+        used["-$key"]=1
+        # if we know long alias, mark long used too
+        if [[ -n "${short_to_long[$key]:-}" ]]; then
+          used["--${short_to_long[$key]}"]=1
+        fi
+      fi
+      # Note: we intentionally do not handle combined shorts (e.g. -ab) here.
+    done
+
+    # Filter out used options
+    local -a filtered=()
     local o
     for o in "${opts[@]}"; do
+      [[ -n "${used[$o]:-}" ]] && continue
+      filtered+=("$o")
+    done
+
+    # remove duplicates (stable)
+    local -A seen=()
+    local -a uniq_opts=()
+    for o in "${filtered[@]}"; do
       [[ -n "$o" && -z "${seen[$o]:-}" ]] || continue
       uniq_opts+=("$o")
       seen["$o"]=1
