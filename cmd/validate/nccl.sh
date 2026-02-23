@@ -17,14 +17,6 @@ command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$K
 
 # read command flags
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
-#result="$("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")"
-#COMMAND_DESCRIPTION="$(echo "$result" | sed -n 's/^DESCRIPTION=//p' | head -n1)"
-#FLAGS=()
-#while IFS= read -r line; do
-#  FLAGS+=("$line")
-#done < <(echo "$result" | sed -n 's/^FLAG=//p')
-
-
 
 # (maybe) print help
 print_range="1"
