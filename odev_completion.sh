@@ -152,7 +152,7 @@ _odev_completions() {
 
     # Collect flags already present in the command line (words[1]..words[cword-1])
     declare -A used=()
-    local i w key stripped other_used=false
+    local i w key stripped other_used=false help_used=false
     for (( i=1; i < cword; i++ )); do
       w="${words[i]}"
       # long form --foo or --foo=bar
@@ -168,6 +168,8 @@ _odev_completions() {
         # mark that a non-help flag has been used
         if [[ "$key" != "help" ]]; then
           other_used=true
+        else
+          help_used=true
         fi
       elif [[ "$w" == -? ]]; then
         # short form -x
@@ -178,16 +180,26 @@ _odev_completions() {
           used["--${short_to_long[$key]}"]=1
           if [[ "${short_to_long[$key]}" != "help" ]]; then
             other_used=true
+          else
+            help_used=true
           fi
         else
           # plain short (not mapped), treat it as "other used" unless it's -h
           if [[ "$key" != "h" ]]; then
             other_used=true
+          else
+            help_used=true
           fi
         fi
       fi
       # Note: combined shorts (e.g. -ab) are not specially parsed here.
     done
+
+    # If help was used, do not offer any other flags (and don't re-offer help)
+    if [[ "$help_used" = true ]]; then
+      COMPREPLY=()
+      return 0
+    fi
 
     # Only include --help/-h if no other flags are present so far
     if [[ "$other_used" = false ]]; then
