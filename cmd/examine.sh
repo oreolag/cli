@@ -24,6 +24,9 @@ COLOR_NIC=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_NIC)
 COLOR_NVIDIA=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_NVIDIA)
 COLOR_XILINX=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_XILINX)
 STORAGE_UNIT="TB"
+STRING_ACCEL="Adaptive devices"
+STRING_GPUS="GPUs"
+STRING_NICS="NICs"
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
 
 # check on CMDB scripts
@@ -51,24 +54,40 @@ print_numa_header() {
   local gpus="$6"
   local ads="$7"
 
+  separator_length="130"
+  
   # legend
+  #legend="$STRING_ACCEL $STRING_GPUS $STRING_NICS"
   legend=""
   if [ "$ads" -gt 0 ]; then
-    legend="${COLOR_XILINX}Adaptive devices${normal}"
+    legend="$STRING_ACCEL"
   fi
   if [ "$gpus" -gt 0 ]; then
-    legend="$legend ${COLOR_NVIDIA}GPUs${normal}"
+    legend="$legend $STRING_GPUS"
   fi
   if [ "$nics" -gt 0 ]; then
-    legend="$legend ${COLOR_NIC}NICs${normal}"
+    legend="$legend $STRING_NICS"
+  fi
+  len=$(printf '%s' "$legend" | sed -E 's/\x1B\[[0-9;]*m//g' | wc -m)
+  filling_legend=$(printf '%*s' $((separator_length - len - 1)) '')
+  # add color
+  legend=""
+  if [ "$ads" -gt 0 ]; then
+    legend="${COLOR_XILINX}$STRING_ACCEL${normal}"
+  fi
+  if [ "$gpus" -gt 0 ]; then
+    legend="$legend ${COLOR_NVIDIA}$STRING_GPUS${normal}"
+  fi
+  if [ "$nics" -gt 0 ]; then
+    legend="$legend ${COLOR_NIC}$STRING_NICS${normal}"
   fi
 
-  separator_length="130"
+  # top ruler
   top_ruler="${bold}NUMA $id${normal} | CPUs: $cpus | Memory: $mem | Storage: $nvme"
   len=$(printf '%s' "$top_ruler" | sed -E 's/\x1B\[[0-9;]*m//g' | wc -m)
   filling=$(printf '%*s' $((separator_length - len - 1)) '')
 
-  echo -e "                                                                                                        $legend"
+  echo -e " $filling_legend$legend"
   echo    "+--------------------------------------------------------------------------------------------------------------------------------+"
   echo -e "| $top_ruler$filling |"
   echo    "+--------------------------------------------------------------------------------------------------------------------------------+"
