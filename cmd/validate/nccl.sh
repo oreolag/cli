@@ -2,10 +2,6 @@
 
 # example: odev validate nccl --ngpus 1 --nthreads 1 --minbytes 8M --maxbytes 1G --iters 20 --datatype float --stepfactor 2
 
-# early exit
-url="${HOSTNAME}"
-hostname="${url%%.*}"
-
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKFLOW="$(basename "${BASH_SOURCE[0]}" .sh)"
@@ -15,22 +11,7 @@ CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
-# format
-bold=$(tput bold)
-italic=$(tput sitm 2>/dev/null || true)
-normal=$(tput sgr0)
-
-# constants
-CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
-COLOR_OREOL=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_OREOL)
-LOCAL_TEST="1"
-PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths projects)")"
-VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$WORKFLOW.$hostname"
-
-# derived
-MPI_HOME="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
-
-# get command description and parameters
+# read command flags
 KEY="$(printf '%s_%s' "$COMMAND" "$WORKFLOW" | tr '[:lower:]' '[:upper:]')"
 result="$("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")"
 COMMAND_DESCRIPTION="$(echo "$result" | sed -n 's/^DESCRIPTION=//p' | head -n1)"
@@ -64,10 +45,29 @@ iters=${V[iters]}
 datatype=${V[datatype]}
 stepfactor=${V[stepfactor]}
 
-# ------------------------------------------------------------
+# set command flags
 flags="--ngpus $ngpus --nthreads $nthreads --minbytes $minbytes --maxbytes $maxbytes --iters $iters --datatype $datatype --stepfactor $stepfactor"
-# ------------------------------------------------------------
 
+# format
+bold=$(tput bold)
+italic=$(tput sitm 2>/dev/null || true)
+normal=$(tput sgr0)
+
+# get hostname
+url="${HOSTNAME}"
+hostname="${url%%.*}"
+
+# constants
+CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
+COLOR_OREOL=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_OREOL)
+LOCAL_TEST="1"
+PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths projects)")"
+VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$WORKFLOW.$hostname"
+
+# derived
+MPI_HOME="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
+
+# steps
 # create folders
 step_1="rm -rf $VALIDATION_PROJECT_PATH"
 step_2="mkdir -p $VALIDATION_PROJECT_PATH"
@@ -75,7 +75,7 @@ step_2="mkdir -p $VALIDATION_PROJECT_PATH"
 # copy files from template
 step_3="cp -r $ODEV_PATH/templates/nvidia/nccl-tests/. $VALIDATION_PROJECT_PATH"
 
-# build tets
+# build
 step_4="cd $VALIDATION_PROJECT_PATH"
 if [ "$LOCAL_TEST" = "1" ]; then
     step_5="make"
@@ -108,3 +108,5 @@ eval $step_4
 eval $step_5
 eval $step_6
 eval $step_7
+
+# author: https://github.com/jmoya82
