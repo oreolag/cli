@@ -301,10 +301,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
         vendor_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j vendor)
         bdf_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j bdf)
         bdf_i_lspci=$(lspci -D | grep -i "^$bdf_i_cmdb.*$vendor_i_cmdb")
-        bdf_i_lspci="0000:c4:00.0 Processing accelerators: Xilinx Corporation Alveo U55C"
-        echo "vendor_i_cmdb: $vendor_i_cmdb"
-        echo "bdf_i_cmdb: $bdf_i_cmdb"
-        echo "bdf_i_lspci: $bdf_i_lspci"
+        bdf_i_lspci="0000:c4:00.0 Processing accelerators: Xilinx Corporation Alveo U55C" # remove for final version!!!!!!!
         if [ ! "$bdf_i_lspci" = "" ]; then
             # increase counter
             ((accel_num_lspci++))
@@ -329,8 +326,8 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
                 else
                     connection_name="$connection_name_ifconfig"
                 fi
+                echo "$device_index $port_index $model $serial_number $bdf $ip_address_cmdb $mac_address_cmdb $connection_name" >> "$TMP_PATH/examine_accel_$i"
             done
-            echo "$device_index $port_index $model $serial_number $bdf $ip_address_cmdb $mac_address_cmdb $connection_name" >> "$TMP_PATH/examine_accel_$i"
         fi
     done
 
