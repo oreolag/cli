@@ -2,17 +2,17 @@
 set -euo pipefail
 
 # Usage:
-#   cmd_flags_read.sh <ODEV_ROOT> <KEY>
+#   cmd_flags_read.sh <ODEV_PATH> <KEY>
 # Output:
 #   first line:  DESCRIPTION=<...>
 #   next lines:  FLAG=<spec>
 
-ODEV_ROOT="$1"
+ODEV_PATH="$1"
 KEY="$2"
 
 # load centralized flags (internal source; caller reminds clean)
 # shellcheck source=/dev/null
-source "$ODEV_ROOT/src/cmd_flags.sh"
+source "$ODEV_PATH/src/cmd_flags.sh"
 
 desc_var="${KEY}_DESCRIPTION"
 flags_var="${KEY}_FLAGS"
