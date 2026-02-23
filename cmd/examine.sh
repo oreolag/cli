@@ -35,6 +35,12 @@ if [[ -n "$parsed_flags" ]]; then
   done <<< "$parsed_flags"
 fi
 
+# read flags
+# ...
+
+# set command flags
+# ...
+
 # format
 bold=$(tput bold)
 italic=$(tput sitm 2>/dev/null || true)
