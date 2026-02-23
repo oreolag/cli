@@ -1,0 +1,3 @@
+[submodule "submodules/hdev"]
+	path = submodules/hdev
+	url = https://github.com/fpgasystems/hdev.git
