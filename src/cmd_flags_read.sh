@@ -4,24 +4,22 @@ set -euo pipefail
 # Usage:
 #   cmd_flags_read.sh <ODEV_PATH> <KEY>
 # Output:
-#   first line:  DESCRIPTION=<...>
-#   next lines:  FLAG=<spec>
+#   FLAG=<spec>  (one per line)
 
 ODEV_PATH="$1"
 KEY="$2"
 
-# load centralized flags (internal source; caller reminds clean)
 # shellcheck source=/dev/null
 source "$ODEV_PATH/src/cmd_flags.sh"
 
-desc_var="${KEY}_DESCRIPTION"
 flags_var="${KEY}_FLAGS"
 
-desc="${!desc_var:-}"
-[[ -n "$desc" ]] || { echo "cmd_flags_read: missing $desc_var" >&2; exit 1; }
+# If variable does not exist → no flags → success
+declare -p "$flags_var" >/dev/null 2>&1 || exit 0
 
-echo "DESCRIPTION=$desc"
+# copy array safely
+eval "__cmd_flags_arr=( \"\${${flags_var}[@]}\" )"
 
-# indirect array expansion
-eval "for f in \"\${${flags_var}[@]}\"; do echo \"FLAG=\$f\"; done" \
-  || { echo "cmd_flags_read: missing/invalid $flags_var" >&2; exit 1; }
+for f in "${__cmd_flags_arr[@]:-}"; do
+    [[ -n "$f" ]] && echo "$f"
+done
