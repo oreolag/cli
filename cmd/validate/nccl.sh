@@ -31,10 +31,12 @@ print_both="0"
 
 # parse and check flag values
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${FLAGS[@]}" -- "$@")" || exit 1
-declare -A V
-while IFS='=' read -r k v; do
-  V["$k"]="$v"
-done <<< "$parsed_flags"
+if [[ -n "$parsed_flags" ]]; then
+  declare -A V
+  while IFS='=' read -r k v; do
+    V["$k"]="$v"
+  done <<< "$parsed_flags"
+fi
 
 # read flags
 ngpus=${V[ngpus]}
