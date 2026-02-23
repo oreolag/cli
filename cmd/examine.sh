@@ -8,14 +8,15 @@ WORKFLOW="-"
 
 # derive from SCRIPT_DIR
 CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
-COMMAND="examine" #"$(basename "$SCRIPT_DIR")"
+COMMAND="examine"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
 # read command description
-command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "EXAMINE")"
+KEY="$(printf '%s' "$COMMAND" | tr '[:lower:]' '[:upper:]')"
+command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 
 # read command flags
-mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "EXAMINE")
+mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
 
 # (maybe) print help
 print_range="1"
