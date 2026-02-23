@@ -57,7 +57,6 @@ print_numa_header() {
   separator_length="130"
   
   # legend
-  #legend="$STRING_ACCEL $STRING_GPUS $STRING_NICS"
   legend=""
   if [ "$ads" -gt 0 ]; then
     legend="$STRING_ACCEL"
