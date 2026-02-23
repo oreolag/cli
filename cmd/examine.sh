@@ -26,6 +26,15 @@ print_both="0"
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
 
+# parse and check flag values
+parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
+if [[ -n "$parsed_flags" ]]; then
+  declare -A V
+  while IFS='=' read -r k v; do
+    V["$k"]="$v"
+  done <<< "$parsed_flags"
+fi
+
 # format
 bold=$(tput bold)
 italic=$(tput sitm 2>/dev/null || true)
