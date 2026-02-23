@@ -150,12 +150,9 @@ _odev_completions() {
       fi
     done
 
-    # include --help/-h always (unless used)
-    opts+=(--help -h)
-
     # Collect flags already present in the command line (words[1]..words[cword-1])
     declare -A used=()
-    local i w key stripped
+    local i w key stripped other_used=false
     for (( i=1; i < cword; i++ )); do
       w="${words[i]}"
       # long form --foo or --foo=bar
@@ -168,6 +165,10 @@ _odev_completions() {
         if [[ -n "${long_to_short[$key]:-}" ]]; then
           used["-${long_to_short[$key]}"]=1
         fi
+        # mark that a non-help flag has been used
+        if [[ "$key" != "help" ]]; then
+          other_used=true
+        fi
       elif [[ "$w" == -? ]]; then
         # short form -x
         key="${w#-}"
@@ -175,10 +176,23 @@ _odev_completions() {
         # if we know long alias, mark long used too
         if [[ -n "${short_to_long[$key]:-}" ]]; then
           used["--${short_to_long[$key]}"]=1
+          if [[ "${short_to_long[$key]}" != "help" ]]; then
+            other_used=true
+          fi
+        else
+          # plain short (not mapped), treat it as "other used" unless it's -h
+          if [[ "$key" != "h" ]]; then
+            other_used=true
+          fi
         fi
       fi
-      # Note: we intentionally do not handle combined shorts (e.g. -ab) here.
+      # Note: combined shorts (e.g. -ab) are not specially parsed here.
     done
+
+    # Only include --help/-h if no other flags are present so far
+    if [[ "$other_used" = false ]]; then
+      opts+=(--help -h)
+    fi
 
     # Filter out used options
     local -a filtered=()
