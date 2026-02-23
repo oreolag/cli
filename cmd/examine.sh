@@ -2,16 +2,29 @@
 
 # example: odev examine
 
-# early exit
-url="${HOSTNAME}"
-hostname="${url%%.*}"
-
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKFLOW="$(basename "${BASH_SOURCE[0]}" .sh)"
+WORKFLOW="-"
 
 # derive from SCRIPT_DIR
+CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
+COMMAND="examine" #"$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
+
+# read command description
+command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "EXAMINE")"
+
+# read command flags
+mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "EXAMINE")
+
+# (maybe) print help
+print_range="1"
+print_default="0"
+print_both="0"
+"$ODEV_PATH/src/cmd_help_print.sh" --maybe \
+  "$CLI_NAME" "$COMMAND" "$WORKFLOW" "$command_description" \
+  "$print_range" "$print_default" "$print_both" \
+  "${flags[@]}" -- "$@" && exit 0 || true
 
 # format
 bold=$(tput bold)
@@ -37,6 +50,10 @@ for script in $cmdb_scripts; do
         exit 1
     fi
 done
+
+# get hostname
+url="${HOSTNAME}"
+hostname="${url%%.*}"
 
 # check on CMDB
 if [[ ! -f "$CMDB_PATH/$hostname.yml" ]]; then
