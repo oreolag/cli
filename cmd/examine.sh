@@ -355,6 +355,10 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
 
     # print numa header
     print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$accel_num_lspci"
+    # NICs
+    if [ "$endata_num_ifconfig" -gt 0 ]; then
+        print_numa "$TMP_PATH/examine_endata_$i" "$COLOR_NIC"
+    fi
     # accelerators
     if [ "$accel_num_lspci" -gt 0 ]; then
         print_numa "$TMP_PATH/examine_accel_$i" "$COLOR_XILINX"
@@ -362,9 +366,5 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     # gpus
     if [ "$gpu_num_lspci" -gt 0 ]; then
         print_numa "$TMP_PATH/examine_gpu_$i" "$COLOR_NVIDIA"
-    fi
-    # NICs
-    if [ "$gpu_num_lspci" -gt 0 ]; then
-        print_numa "$TMP_PATH/examine_endata_$i" "$COLOR_NIC"
     fi
 done
