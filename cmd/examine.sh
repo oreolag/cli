@@ -315,10 +315,18 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
             # port loop
             for ((k=0; k<ports_i_cmdb; k++)); do
                 port_index=$k
+                # check on port index
+                if [ "$port_index" -gt 0 ]; then
+                    device_index="-"
+                    model="-"
+                    serial_number="-"
+                    bdf="-"
+                fi
                 ip_address_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ip_address $k)
                 ip_mask_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ip_mask $k)
                 ip_address_cmdb="$ip_address_cmdb/$ip_mask_cmdb"
                 mac_address_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j mac $k)
+                # check on connection name
                 connection_name_ifconfig=$(get_connection_name "$ip_address_cmdb" "$mac_address_cmdb")
                 connection_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j name $k)
                 if [[ "$connection_name_cmdb" != "$connection_name_ifconfig" ]]; then
@@ -326,6 +334,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
                 else
                     connection_name="$connection_name_ifconfig"
                 fi
+                # add to file
                 echo "$device_index $port_index $model $serial_number $bdf $ip_address_cmdb $mac_address_cmdb $connection_name" >> "$TMP_PATH/examine_accel_$i"
             done
         fi
