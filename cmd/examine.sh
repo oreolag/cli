@@ -22,6 +22,7 @@ normal=$(tput sgr0)
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
 COLOR_NIC=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_NIC)
 COLOR_NVIDIA=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_NVIDIA)
+COLOR_XILINX=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_XILINX)
 STORAGE_UNIT="TB"
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
 
@@ -134,6 +135,22 @@ is_consecutive_bdf() {
     else
         echo "0"
     fi
+}
+
+get_connection_name() {
+    local ip="$1"
+    local mac="$2"
+
+    ip -o link | while read -r num name rest; do
+        name="${name%:}"                        # remove trailing :
+        curmac=$(ip link show "$name" | awk '/link\/ether/ {print $2}')
+        curip=$(ip -4 -o addr show "$name" | awk '{print $4}' | cut -d/ -f1)
+
+        if [[ "$curip" == "$ip" && "$curmac" == "$mac" ]]; then
+            echo "$name"
+            return 0
+        fi
+    done
 }
 
 # print operating system information
@@ -275,11 +292,51 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     done
     
     # ADs
-    # ...
-    ad_num_lspci=0
+    accel_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i accel)
+    accel_num_cmdb=$(wc -w <<< "$accel_idx_cmdb")
+    # device loop
+    touch $TMP_PATH/examine_accel_$i
+    accel_num_lspci=0
+    for ((j=0; j<accel_num_cmdb; j++)); do
+        vendor_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j vendor)
+        bdf_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j bdf)
+        bdf_i_lspci=$(lspci -D | grep -i "^$bdf_i_cmdb.*$vendor_i_cmdb")
+        bdf_i_lspci="0000:c4:00.0 Processing accelerators: Xilinx Corporation Alveo U55C"
+        echo "vendor_i_cmdb: $vendor_i_cmdb"
+        echo "bdf_i_cmdb: $bdf_i_cmdb"
+        echo "bdf_i_lspci: $bdf_i_lspci"
+        if [ ! "$bdf_i_lspci" = "" ]; then
+            # increase counter
+            ((accel_num_lspci++))
+
+            # add to file
+            device_index="$j"
+            model=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j model)
+            serial_number=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j serial)
+            bdf=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j bdf)
+            ports_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ports)
+            # port loop
+            for ((k=0; k<ports_i_cmdb; k++)); do
+                port_index=$k
+                ip_address_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ip_address $k)
+                ip_mask_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ip_mask $k)
+                ip_address_cmdb="$ip_address_cmdb/$ip_mask_cmdb"
+                mac_address_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j mac $k)
+                connection_name_ifconfig=$(get_connection_name "$ip_address_cmdb" "$mac_address_cmdb")
+                connection_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j name $k)
+                if [[ "$connection_name_cmdb" != "$connection_name_ifconfig" ]]; then
+                    connection_name="-"
+                else
+                    connection_name="$connection_name_ifconfig"
+                fi
+            done
+            echo "$device_index $port_index $model $serial_number $bdf $ip_address_cmdb $mac_address_cmdb $connection_name" >> "$TMP_PATH/examine_accel_$i"
+        fi
+    done
 
     # print numa header
-    print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$ad_num_lspci"
+    print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$accel_num_lspci"
     print_numa "$TMP_PATH/examine_endata_$i" "$COLOR_NIC"
     print_numa "$TMP_PATH/examine_gpu_$i" "$COLOR_NVIDIA"
+    print_numa "$TMP_PATH/examine_accel_$i" "$COLOR_XILINX"
 done
