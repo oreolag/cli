@@ -32,7 +32,7 @@ MPI_HOME="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$CMDB_PATH/vars.yml"
 
 # get command description and parameters
 KEY="$(printf '%s_%s' "$COMMAND" "$WORKFLOW" | tr '[:lower:]' '[:upper:]')"
-result="$("$ODEV_ROOT/src/cmd_flags_read.sh" "$ODEV_ROOT" "$KEY")"
+result="$("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")"
 COMMAND_DESCRIPTION="$(echo "$result" | sed -n 's/^DESCRIPTION=//p' | head -n1)"
 FLAGS=()
 while IFS= read -r line; do
@@ -43,13 +43,13 @@ done < <(echo "$result" | sed -n 's/^FLAG=//p')
 print_range="1"
 print_default="0"
 print_both="0"
-"$ODEV_ROOT/src/cmd_help_print.sh" --maybe \
+"$ODEV_PATH/src/cmd_help_print.sh" --maybe \
   "$CLI_NAME" "$COMMAND" "$WORKFLOW" "$COMMAND_DESCRIPTION" \
   "$print_range" "$print_default" "$print_both" \
   "${FLAGS[@]}" -- "$@" && exit 0 || true
 
 # parse and check flag values
-parsed_flags="$("$ODEV_ROOT/src/cmd_parse.sh" --params "${FLAGS[@]}" -- "$@")" || exit 1
+parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${FLAGS[@]}" -- "$@")" || exit 1
 declare -A V
 while IFS='=' read -r k v; do
   V["$k"]="$v"
