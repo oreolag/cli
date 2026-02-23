@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# examine
+# examine 
 EXAMINE_DESCRIPTION="System and device information"
 EXAMINE_FLAGS=(
 )
