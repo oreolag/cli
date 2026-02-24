@@ -88,7 +88,8 @@ echo "${bold}USAGE:${normal}"
 if [ "$WORKFLOW" = "-" ]; then
   usage="${CLI_NAME} ${COMMAND}"
 else
-  usage="${CLI_NAME} ${COMMAND} ${WORKFLOW}"
+  #usage="${CLI_NAME} ${COMMAND} ${WORKFLOW}"
+  usage="${CLI_NAME} ${WORKFLOW} ${COMMAND}"
 fi
 
 # flags
