@@ -8,6 +8,11 @@ bold=$(tput bold)
 italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
+# command descriptions
+new="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "NEW")"
+validate="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "VALIDATE")"
+examine="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "EXAMINE")"
+
 print_help() {
   echo "The CLI for hetero${italic}genius${normal} computing."
   echo ""
@@ -15,9 +20,9 @@ print_help() {
   echo "  odev <command> <subcommand> [flags]"
   echo ""
   echo "${bold}CORE COMMANDS${normal}"
-  echo "  new:             Create a new project"
-  echo "  validate:        Infrastructure functionality assessment"
-  echo "  examine:         System and device information"
+  echo "  new:             $new"
+  echo "  validate:        $validate"
+  echo "  examine:         $examine"
   echo ""
   echo "${bold}FLAGS${normal}"
   echo "  -h, --help       Show help for command"

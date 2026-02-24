@@ -5,11 +5,19 @@ EXAMINE_DESCRIPTION="System and device information"
 EXAMINE_FLAGS=(
 )
 
+# new
+NEW_DESCRIPTION="Create a new project"
+NEW_FLAGS=(
+)
+
 # run
 # nccl
 # ...
 
 # validate
+VALIDATE_DESCRIPTION="Infrastructure functionality assessment"
+VALIDATE_FLAGS=(
+)
 # nccl
 VALIDATE_NCCL_DESCRIPTION="Validate NCCL"
 VALIDATE_NCCL_FLAGS=(
