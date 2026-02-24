@@ -82,26 +82,41 @@ normal=$(tput sgr0 2>/dev/null || true)
 
 echo "$COMMAND_DESCRIPTION"
 echo ""
-echo "${bold}USAGE:${normal}"
+
 
 # usage
-if [ "$WORKFLOW" = "-" ]; then
-  usage="${CLI_NAME} ${COMMAND}"
-else
-  #usage="${CLI_NAME} ${COMMAND} ${WORKFLOW}"
-  usage="${CLI_NAME} ${WORKFLOW} ${COMMAND}"
-fi
-
-# flags
-if (( ${#PARAMS[@]} == 0 )); then
-  echo "  ${usage}"
+echo "${bold}USAGE:${normal}"
+if [ "$WORKFLOW" = "-" ] && [ ! "$COMMAND" = "-" ]; then
+  # examine
+  #usage="${CLI_NAME} ${COMMAND}"
+  echo "  $CLI_NAME $COMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
   echo "  ${italic}This command has no flags.${normal}"
-else
-  echo "  ${usage} [flags]"
+elif [ ! "$WORKFLOW" = "" ] && [ "$COMMAND" = "-" ]; then
+  # cmd/new.sh
+  #usage="${CLI_NAME} ${WORKFLOW}"
+  echo "  $CLI_NAME $WORKFLOW [commands]"
+  echo ""
+  echo "${bold}COMMANDS:${normal}"
+elif [ ! "$WORKFLOW" = "" ] && [ ! "$COMMAND" = "" ]; then
+  # cmd/new/nccl.sh
+  #usage="${CLI_NAME} ${WORKFLOW} ${COMMAND}"
+  echo "  $CLI_NAME $WORKFLOW $COMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
+fi
+
+# flags
+#if (( ${#PARAMS[@]} == 0 )); then
+#  #echo "  ${usage}"
+#  #echo ""
+#  echo "${bold}FLAGS:${normal}"
+#  echo "  ${italic}This command has no flags.${normal}"
+#else
+#  echo "  ${usage} [flags]"
+#  echo ""
+#  echo "${bold}FLAGS:${normal}"
 
   for p in "${PARAMS[@]}"; do
     IFS=',' read -r name short desc range def <<< "$p"
@@ -132,7 +147,7 @@ else
     printf "  -%-1s, --%-10s %s%s\n" \
       "$short" "$name" "$desc" "$suffix"
   done
-fi
+#fi
 
 echo ""
 echo "${bold}INHERITED FLAGS:${normal}"
