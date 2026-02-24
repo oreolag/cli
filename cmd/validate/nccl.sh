@@ -23,7 +23,7 @@ print_range="1"
 print_default="0"
 print_both="0"
 "$ODEV_PATH/src/cmd_help_print.sh" --maybe \
-  "$CLI_NAME" "$COMMAND" "$WORKFLOW" "$command_description" \
+  "$CLI_NAME" "$WORKFLOW" "$COMMAND" "$command_description" \
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
 

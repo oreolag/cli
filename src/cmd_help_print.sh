@@ -2,14 +2,14 @@
 set -euo pipefail
 
 # Usage:
-#   cmd_help_print.sh --maybe <CLI_NAME> <COMMAND> <WORKFLOW> <DESCRIPTION> \
+#   cmd_help_print.sh --maybe <CLI_NAME> <WORKFLOW> <COMMAND> <DESCRIPTION> \
 #                     <print_range> <print_default> <print_both> \
 #                     <param1> <param2> ... -- <argv...>
 #     Output:
 #       prints help and exits 0 if -h|--help is found in <argv...>
 #       exits 2 if no help flag is found
 #
-#   cmd_help_print.sh <CLI_NAME> <COMMAND> <WORKFLOW> <DESCRIPTION> \
+#   cmd_help_print.sh <CLI_NAME> <WORKFLOW> <COMMAND> <DESCRIPTION> \
 #                     <print_range> <print_default> <print_both> \
 #                     <param1> <param2> ...
 #     Output:
@@ -28,8 +28,10 @@ fi
 # Fixed arguments
 # ---------------------------------------
 CLI_NAME="$1"
-COMMAND="$2"
-WORKFLOW="$3"
+#COMMAND="$2"
+#WORKFLOW="$3"
+WORKFLOW="$2"
+COMMAND="$3"
 COMMAND_DESCRIPTION="$4"
 print_range="$5"
 print_default="$6"
