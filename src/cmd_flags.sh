@@ -9,6 +9,12 @@ EXAMINE_FLAGS=(
 NEW_DESCRIPTION="Create a new project"
 NEW_FLAGS=(
 )
+# vllm
+NEW_VLLM_DESCRIPTION="Creates a vLLM project"
+NEW_VLLM_FLAGS=(
+  "name,n,Project name,-,-"
+  "framework,f,Framework to be used,-,-"
+)
 
 # run
 # nccl
