@@ -92,7 +92,7 @@ if [ "$WORKFLOW" = "-" ] && [ ! "$COMMAND" = "-" ]; then
   echo "  $CLI_NAME $COMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
-  echo "  ${italic}This command has no flags.${normal}"
+  echo "  This command has no flags"
 elif [ ! "$WORKFLOW" = "" ] && [ "$COMMAND" = "-" ]; then
   # cmd/new.sh
   #usage="${CLI_NAME} ${WORKFLOW}"
@@ -107,47 +107,39 @@ elif [ ! "$WORKFLOW" = "" ] && [ ! "$COMMAND" = "" ]; then
   echo "${bold}FLAGS:${normal}"
 fi
 
-# flags
-#if (( ${#PARAMS[@]} == 0 )); then
-#  #echo "  ${usage}"
-#  #echo ""
-#  echo "${bold}FLAGS:${normal}"
-#  echo "  ${italic}This command has no flags.${normal}"
-#else
-#  echo "  ${usage} [flags]"
-#  echo ""
-#  echo "${bold}FLAGS:${normal}"
+# print commands or flags
+for p in "${PARAMS[@]}"; do
+  IFS=',' read -r name short desc range def <<< "$p"
 
-  for p in "${PARAMS[@]}"; do
-    IFS=',' read -r name short desc range def <<< "$p"
-
-    suffix=""
-    if [[ "$print_both" == "1" ]]; then
-      if [[ -n "$range" && -n "$def" ]]; then
-        suffix=" ($range, default: $def)"
-      elif [[ -n "$range" ]]; then
-        suffix=" ($range)"
-      elif [[ -n "$def" ]]; then
+  suffix=""
+  if [[ "$print_both" == "1" ]]; then
+    if [[ -n "$range" && -n "$def" ]]; then
+      suffix=" ($range, default: $def)"
+    elif [[ -n "$range" ]]; then
+      suffix=" ($range)"
+    elif [[ -n "$def" ]]; then
+      suffix=" (default: $def)"
+    fi
+  else
+    if [[ "$print_range" == "1" && -n "$range" ]]; then
+      suffix+=" ($range)"
+    fi
+    if [[ "$print_default" == "1" && -n "$def" ]]; then
+      if [[ -n "$suffix" ]]; then
+        suffix="${suffix%)}"
+        suffix+=", default: $def)"
+      else
         suffix=" (default: $def)"
       fi
-    else
-      if [[ "$print_range" == "1" && -n "$range" ]]; then
-        suffix+=" ($range)"
-      fi
-      if [[ "$print_default" == "1" && -n "$def" ]]; then
-        if [[ -n "$suffix" ]]; then
-          suffix="${suffix%)}"
-          suffix+=", default: $def)"
-        else
-          suffix=" (default: $def)"
-        fi
-      fi
     fi
+  fi
 
-    printf "  -%-1s, --%-10s %s%s\n" \
-      "$short" "$name" "$desc" "$suffix"
-  done
-#fi
+  if [ ! "$WORKFLOW" = "" ] && [ "$COMMAND" = "-" ]; then
+    printf "  %-16s %s\n" "$name" "$desc"
+  elif [ ! "$WORKFLOW" = "" ] && [ ! "$COMMAND" = "" ]; then
+    printf "  -%-1s, --%-10s %s%s\n" "$short" "$name" "$desc" "$suffix"
+  fi
+done
 
 echo ""
 echo "${bold}INHERITED FLAGS:${normal}"
