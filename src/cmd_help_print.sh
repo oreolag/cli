@@ -106,15 +106,15 @@ else
     suffix=""
     if [[ "$print_both" == "1" ]]; then
       if [[ -n "$range" && -n "$def" ]]; then
-        suffix=" (range: $range, default: $def)"
+        suffix=" ($range, default: $def)"
       elif [[ -n "$range" ]]; then
-        suffix=" (range: $range)"
+        suffix=" ($range)"
       elif [[ -n "$def" ]]; then
         suffix=" (default: $def)"
       fi
     else
       if [[ "$print_range" == "1" && -n "$range" ]]; then
-        suffix+=" (range: $range)"
+        suffix+=" ($range)"
       fi
       if [[ "$print_default" == "1" && -n "$def" ]]; then
         if [[ -n "$suffix" ]]; then
