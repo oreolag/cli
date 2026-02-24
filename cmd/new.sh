@@ -18,22 +18,22 @@ workflow_description="$("$ODEV_PATH/src/description_read.sh" "$ODEV_PATH" "$KEY"
 # read workflow commands
 mapfile -t commands < <("$ODEV_PATH/src/workflow_commands_read.sh" "$ODEV_PATH" "$KEY")
 
-# (maybe) print help
+# print help
 print_range="-"
 print_default="-"
-print_both="-"     #help_print.sh 
-"$ODEV_PATH/src/help_print.sh" --maybe \
+print_both="-"      
+"$ODEV_PATH/src/help_print.sh" --print \
   "$CLI_NAME" "$WORKFLOW" "$COMMAND" "$workflow_description" \
   "$print_range" "$print_default" "$print_both" "${commands[@]}" -- "$@" && exit 0 || true
 
 # parse and check flag values
-parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
+#parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
+#if [[ -n "$parsed_flags" ]]; then
+#  declare -A V
+#  while IFS='=' read -r k v; do
+#    V["$k"]="$v"
+#  done <<< "$parsed_flags"
+#fi
 
 # read flags
 # ...
