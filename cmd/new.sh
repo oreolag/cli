@@ -22,7 +22,7 @@ mapfile -t commands < <("$ODEV_PATH/src/workflow_commands_read.sh" "$ODEV_PATH" 
 print_range="-"
 print_default="-"
 print_both="-"     #help_print.sh 
-"$ODEV_PATH/src/cmd_help_print.sh" --maybe \
+"$ODEV_PATH/src/help_print.sh" --maybe \
   "$CLI_NAME" "$WORKFLOW" "$COMMAND" "$workflow_description" \
   "$print_range" "$print_default" "$print_both" "${commands[@]}" -- "$@" && exit 0 || true
 
