@@ -96,7 +96,7 @@ if [ "$WORKFLOW" = "-" ] && [ ! "$COMMAND" = "-" ]; then
 elif [ ! "$WORKFLOW" = "" ] && [ "$COMMAND" = "-" ]; then
   # cmd/new.sh
   #usage="${CLI_NAME} ${WORKFLOW}"
-  echo "  $CLI_NAME $WORKFLOW [commands]"
+  echo "  $CLI_NAME $WORKFLOW [command]"
   echo ""
   echo "${bold}COMMANDS:${normal}"
 elif [ ! "$WORKFLOW" = "" ] && [ ! "$COMMAND" = "" ]; then
