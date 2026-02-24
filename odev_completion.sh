@@ -51,9 +51,9 @@ _odev_source_flags() {
     return 0
   fi
 
-  if [[ -f "$base/src/cmd_flags.sh" ]]; then
+  if [[ -f "$base/src/commands.sh" ]]; then
     # shellcheck source=/dev/null
-    source "$base/src/cmd_flags.sh"
+    source "$base/src/commands.sh"
     return 0
   fi
 
