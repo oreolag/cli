@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
 # examine 
-EXAMINE_DESCRIPTION="System and device information."
+EXAMINE_DESCRIPTION="System and device information"
 EXAMINE_FLAGS=(
 )
 
 # new
-NEW_DESCRIPTION="Creates a new project based on the selected template."
+NEW_DESCRIPTION="Creates a new project based on the selected template"
 NEW_FLAGS=(
 )
 # vllm
-NEW_VLLM_DESCRIPTION="Creates a new project configured for vLLM."
+NEW_VLLM_DESCRIPTION="Creates a new project configured for vLLM"
 NEW_VLLM_FLAGS=(
   "name,n,Project name,-,-"
   "framework,f,Framework to be used,-,-"
@@ -21,11 +21,11 @@ NEW_VLLM_FLAGS=(
 # ...
 
 # validate
-VALIDATE_DESCRIPTION="Infrastructure functionality assessment."
+VALIDATE_DESCRIPTION="Infrastructure functionality assessment"
 VALIDATE_FLAGS=(
 )
 # nccl
-VALIDATE_NCCL_DESCRIPTION="NVIDIA Collective Communications Library (NCCL) validation."
+VALIDATE_NCCL_DESCRIPTION="NVIDIA Collective Communications Library (NCCL) validation"
 VALIDATE_NCCL_FLAGS=(
   "ngpus,g,Number of GPUs,1-8,1"
   "nthreads,t,Threads per process,1-64,1"

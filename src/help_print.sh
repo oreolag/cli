@@ -80,7 +80,7 @@ normal=$(tput sgr0 2>/dev/null || true)
 # Print help
 # ---------------------------------------
 
-echo "$COMMAND_DESCRIPTION"
+echo "$COMMAND_DESCRIPTION."
 echo ""
 
 
@@ -92,7 +92,7 @@ if [ "$WORKFLOW" = "-" ] && [ ! "$COMMAND" = "-" ]; then
   echo "  $CLI_NAME $COMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
-  echo "  This command has no flags"
+  echo "  This command has no flags."
 elif [ ! "$WORKFLOW" = "" ] && [ "$COMMAND" = "-" ]; then
   # cmd/new.sh
   #usage="${CLI_NAME} ${WORKFLOW}"
