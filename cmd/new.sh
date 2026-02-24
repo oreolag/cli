@@ -25,18 +25,3 @@ print_both="-"
 "$ODEV_PATH/src/help_print.sh" --print \
   "$CLI_NAME" "$WORKFLOW" "$COMMAND" "$workflow_description" \
   "$print_range" "$print_default" "$print_both" "${commands[@]}" -- "$@" && exit 0 || true
-
-# parse and check flag values
-#parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
-#if [[ -n "$parsed_flags" ]]; then
-#  declare -A V
-#  while IFS='=' read -r k v; do
-#    V["$k"]="$v"
-#  done <<< "$parsed_flags"
-#fi
-
-# read flags
-# ...
-
-# set command flags
-# ...
