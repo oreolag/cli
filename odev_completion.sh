@@ -2,14 +2,6 @@
 #
 # Bash completion for odev
 #
-# Supports:
-#   - Folder-based commands:   /opt/odev/cmd/<cmd>/<subcmd>.sh
-#   - Virtual commands:        examine, etc.
-#   - Global flags:            --help, --version, ...
-#
-# Requires:
-#   export ODEV_PATH=/opt/odev
-#   (or odev available on PATH)
 
 # ------------------------------------------------------------
 # Resolve odev root directory
@@ -48,7 +40,7 @@ _odev_list_subcommands() {
 }
 
 # ------------------------------------------------------------
-# Load flags definitions (command_flags.sh or cmd_flags.sh)
+# Load flags definitions
 # ------------------------------------------------------------
 _odev_source_flags() {
   local base="$1"
@@ -82,7 +74,7 @@ _odev_completions() {
   _odev_source_flags "$base"
 
   # -----------------------------
-  # Global flags (only at top-level: odev --<TAB>)
+  # Global flags (odev --<TAB>)
   # -----------------------------
   if [[ $cword -eq 1 && "$cur" == -* ]]; then
     COMPREPLY=( $(compgen -W "--help -h --version -v" -- "$cur") )
@@ -97,6 +89,14 @@ _odev_completions() {
     local cmds
     cmds="$(_odev_list_commands "$root") $extra_cmds"
     COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
+    return 0
+  fi
+
+  # -----------------------------
+  # Always offer --help/-h for top-level commands (odev <cmd> --<TAB>)
+  # -----------------------------
+  if [[ $cword -eq 2 && "$cur" == -* ]]; then
+    COMPREPLY=( $(compgen -W "--help -h" -- "$cur") )
     return 0
   fi
 
