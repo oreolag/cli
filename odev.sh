@@ -4,10 +4,10 @@ set -euo pipefail
 ODEV_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # early exit
-#is_odev_user=$($ODEV_PATH/src/is_member $USER odev_users)
-#if [ "$is_odev_user" = "0" ]; then
-#  exit 1
-#fi
+is_odev_user=$($ODEV_PATH/src/is_member.sh $USER odev-users)
+if [ "$is_odev_user" = "0" ]; then
+  exit 1
+fi
 
 # format
 bold=$(tput bold)
