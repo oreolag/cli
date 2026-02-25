@@ -1,0 +1,5 @@
+%odev-users ALL=(ALL) NOPASSWD: \
+  /sbin/insmod, \
+  /sbin/rmmod, \
+  /usr/sbin/insmod, \
+  /usr/sbin/rmmod
