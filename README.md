@@ -14,7 +14,7 @@
 * [Ecosystem](#ecosystem)
 
 # Start Here
-For installing...
+For installing....
 
 ## Ecosystem 
 Academic, industrial, and investment partners supporting odev.
