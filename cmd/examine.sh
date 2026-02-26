@@ -230,7 +230,9 @@ echo "Linux kernel: ${bold}$linux_kernel${normal}"
 echo "Uptime      : ${bold}$uptime_info${normal}"
 
 # lstopo
-rm -rf $TMP_PATH/lstopo_output
+#rm -rf $TMP_PATH/lstopo_output
+sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$TMP_PATH/lstopo_output"
+
 lstopo-no-graphics 2>/dev/null > $TMP_PATH/lstopo_output
 
 # CPU model
@@ -261,7 +263,11 @@ echo "Total storage: $total_storage"
 echo ""
 
 # remove examine files
-rm -rf $TMP_PATH/examine_*
+#rm -rf $TMP_PATH/examine_*
+for f in "$TMP_PATH"/examine_*; do
+    [ -e "$f" ] || continue
+    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$f"
+done
 
 # NUMA lstopo loop 
 numa_nodes_lscpu=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
