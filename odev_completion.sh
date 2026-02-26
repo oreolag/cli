@@ -64,6 +64,13 @@ _odev_source_flags() {
 # Completion function
 # ------------------------------------------------------------
 _odev_completions() {
+
+  # only allow odev-users (similar to is_member.sh)
+  if ! getent group "odev-users" | grep -q "$USER"; then
+    COMPREPLY=()
+    return 0
+  fi
+
   local cur prev words cword
   _init_completion -n : || return
 
