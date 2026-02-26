@@ -9,8 +9,12 @@ target="$(readlink -f -- "$target")" || exit 1
 [[ -e "$target" ]] || exit 1
 [[ -f "$target" ]] || exit 1
 
+# constants
+TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
+
+# Only files in allowed folders can be removed
 ALLOWED_FOLDERS=(
-  "/tmp"
+  "$TMP_PATH"
 )
 
 # normalize allowed folders
