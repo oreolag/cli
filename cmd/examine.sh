@@ -4,15 +4,15 @@
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKFLOW="-"
+COMMAND="-"
 
 # derive from SCRIPT_DIR
 CLI_NAME="$(basename "$(dirname "$SCRIPT_DIR")")"
-COMMAND="examine"
+SUBCOMMAND="examine"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
 # read command description
-KEY="$(printf '%s' "$COMMAND" | tr '[:lower:]' '[:upper:]')"
+KEY="$(printf '%s' "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 command_description="$("$ODEV_PATH/src/description_read.sh" "$ODEV_PATH" "$KEY")"
 
 # read command flags
@@ -23,7 +23,7 @@ print_range="1"
 print_default="0"
 print_both="0"
 "$ODEV_PATH/src/help_print.sh" --maybe \
-  "$CLI_NAME" "$WORKFLOW" "$COMMAND" "$command_description" \
+  "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$command_description" \
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
 

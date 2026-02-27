@@ -2,14 +2,14 @@
 set -euo pipefail
 
 # Usage:
-#   help_print.sh --maybe <CLI_NAME> <WORKFLOW> <COMMAND> <DESCRIPTION> \
+#   help_print.sh --maybe <CLI_NAME> <COMMAND> <SUBCOMMAND> <DESCRIPTION> \
 #                     <print_range> <print_default> <print_both> \
 #                     <param1> <param2> ... -- <argv...>
 #     Output:
 #       prints help and exits 0 if -h|--help is found in <argv...>
 #       exits 2 if no help flag is found
 #
-#   help_print.sh <CLI_NAME> <WORKFLOW> <COMMAND> <DESCRIPTION> \
+#   help_print.sh <CLI_NAME> <COMMAND> <SUBCOMMAND> <DESCRIPTION> \
 #                     <print_range> <print_default> <print_both> \
 #                     <param1> <param2> ...
 #     Output:
@@ -28,10 +28,10 @@ fi
 # Fixed arguments
 # ---------------------------------------
 CLI_NAME="$1"
-#COMMAND="$2"
-#WORKFLOW="$3"
-WORKFLOW="$2"
-COMMAND="$3"
+#SUBCOMMAND="$2"
+#COMMAND="$3"
+COMMAND="$2"
+SUBCOMMAND="$3"
 COMMAND_DESCRIPTION="$4"
 print_range="$5"
 print_default="$6"
@@ -86,23 +86,23 @@ echo ""
 
 # usage
 echo "${bold}USAGE:${normal}"
-if [ "$WORKFLOW" = "-" ] && [ ! "$COMMAND" = "-" ]; then
+if [ "$COMMAND" = "-" ] && [ ! "$SUBCOMMAND" = "-" ]; then
   # examine
-  #usage="${CLI_NAME} ${COMMAND}"
-  echo "  $CLI_NAME $COMMAND [flags]"
+  #usage="${CLI_NAME} ${SUBCOMMAND}"
+  echo "  $CLI_NAME $SUBCOMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
   echo "  This command has no flags."
-elif [ ! "$WORKFLOW" = "" ] && [ "$COMMAND" = "-" ]; then
+elif [ ! "$COMMAND" = "" ] && [ "$SUBCOMMAND" = "-" ]; then
   # cmd/new.sh
-  #usage="${CLI_NAME} ${WORKFLOW}"
-  echo "  $CLI_NAME $WORKFLOW [command]"
+  #usage="${CLI_NAME} ${COMMAND}"
+  echo "  $CLI_NAME $COMMAND [command]"
   echo ""
   echo "${bold}COMMANDS:${normal}"
-elif [ ! "$WORKFLOW" = "" ] && [ ! "$COMMAND" = "" ]; then
+elif [ ! "$COMMAND" = "" ] && [ ! "$SUBCOMMAND" = "" ]; then
   # cmd/new/nccl.sh
-  #usage="${CLI_NAME} ${WORKFLOW} ${COMMAND}"
-  echo "  $CLI_NAME $WORKFLOW $COMMAND [flags]"
+  #usage="${CLI_NAME} ${COMMAND} ${SUBCOMMAND}"
+  echo "  $CLI_NAME $COMMAND $SUBCOMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
 fi
@@ -134,9 +134,9 @@ for p in "${PARAMS[@]}"; do
     fi
   fi
 
-  if [ ! "$WORKFLOW" = "" ] && [ "$COMMAND" = "-" ]; then
+  if [ ! "$COMMAND" = "" ] && [ "$SUBCOMMAND" = "-" ]; then
     printf "  %-16s %s\n" "$name" "$desc"
-  elif [ ! "$WORKFLOW" = "" ] && [ ! "$COMMAND" = "" ]; then
+  elif [ ! "$COMMAND" = "" ] && [ ! "$SUBCOMMAND" = "" ]; then
     printf "  -%-1s, --%-10s %s%s\n" "$short" "$name" "$desc" "$suffix"
   fi
 done

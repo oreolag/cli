@@ -4,15 +4,15 @@
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMAND="$(basename "${BASH_SOURCE[0]}" .sh)"
+SUBCOMMAND="$(basename "${BASH_SOURCE[0]}" .sh)"
 
 # derive from SCRIPT_DIR
 CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
-WORKFLOW="$(basename "$SCRIPT_DIR")"
+COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
 # read command description
-KEY="$(printf '%s_%s' "$WORKFLOW" "$COMMAND" | tr '[:lower:]' '[:upper:]')"
+KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 command_description="$("$ODEV_PATH/src/description_read.sh" "$ODEV_PATH" "$KEY")"
 
 # read command flags
@@ -23,7 +23,7 @@ print_range="1"
 print_default="0"
 print_both="0"
 "$ODEV_PATH/src/help_print.sh" --maybe \
-  "$CLI_NAME" "$WORKFLOW" "$COMMAND" "$command_description" \
+  "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$command_description" \
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
 
@@ -62,7 +62,7 @@ CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constant
 COLOR_OREOL=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_OREOL)
 LOCAL_TEST="1"
 PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths projects)")"
-VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$WORKFLOW.$hostname"
+VALIDATION_PROJECT_PATH="$PROJECTS_PATH/validate.$COMMAND.$hostname"
 
 # derived
 MPI_HOME="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$CMDB_PATH/vars.yml" mpi home)")"
@@ -89,7 +89,7 @@ step_7="./all_gather_perf $flags"
 
 # echo steps
 echo ""
-echo -e "${bold}$CLI_NAME $COMMAND $WORKFLOW $flags${normal}"
+echo -e "${bold}$CLI_NAME $SUBCOMMAND $COMMAND $flags${normal}"
 echo ""
 echo -e "${COLOR_OREOL}$step_1${normal}"
 echo -e "${COLOR_OREOL}$step_2${normal}"
