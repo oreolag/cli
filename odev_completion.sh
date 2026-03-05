@@ -34,7 +34,7 @@ _odev_list_commands() {
 _odev_list_subcommands() {
   local root="$1"
   local cmd="$2"
-  find "$root/$cmd" -mindepth 1 -maxdepth 1 -type f -name '*.sh' -printf '%f\n' 2>/dev/null \
+  find "$root/$cmd" -mindepth 1 -maxdepth 1 \( -type f -o -type l \) -name '*.sh' -printf '%f\n' 2>/dev/null \
     | sed 's/\.sh$//' \
     | sort
 }
