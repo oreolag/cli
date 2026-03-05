@@ -6,7 +6,7 @@ EXAMINE_FLAGS=(
 )
 
 # new
-NEW_DESCRIPTION="Creates a new project based on the selected template"
+NEW_DESCRIPTION="Create a new workflow or project based on the selected template"
 NEW_FLAGS=(
 )
 # vllm
@@ -14,6 +14,10 @@ NEW_VLLM_DESCRIPTION="Creates a new project configured for vLLM"
 NEW_VLLM_FLAGS=(
   "name,n,Project name,-,-"
   "framework,f,Framework to be used,-,-"
+)
+NEW_WORKFLOW_DESCRIPTION="Create a new accelerated workflow"
+NEW_WORKFLOW_FLAGS=(
+  "name,n,Workflow name,-,-"
 )
 
 # run
