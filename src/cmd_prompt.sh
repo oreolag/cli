@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Usage:
-#   cmd_prompt.sh --required "name type" --params "${FLAGS[@]}" -- "$parsed_flags"
+#   cmd_prompt.sh --required "name,type" --params "${FLAGS[@]}" -- "$parsed_flags"
 # Output:
 #   key=value   (one per line)  (updated)
 
@@ -38,6 +38,25 @@ for p in "${PARAMS[@]}"; do
     DEF["$name"]=""
   else
     DEF["$name"]="$def"
+  fi
+done
+
+# NEW: build set of mandatory flags (from --required "a,b,c")
+declare -A MANDATORY
+IFS=',' read -r -a __REQ <<< "$required_csv"
+for m in "${__REQ[@]}"; do
+  m="${m#"${m%%[![:space:]]*}"}"
+  m="${m%"${m##*[![:space:]]}"}"
+  [[ -n "$m" ]] && MANDATORY["$m"]=1
+done
+
+# NEW: ensure all NON-mandatory flags exist in V with their default (including "-" or "1")
+for p in "${PARAMS[@]}"; do
+  IFS=',' read -r name short desc range def <<< "$p"
+  if [[ -z "${MANDATORY[$name]+x}" ]]; then
+    if [[ -z "${V[$name]+x}" ]]; then
+      V["$name"]="$def"
+    fi
   fi
 done
 
@@ -97,21 +116,10 @@ for name in "${REQUIRED[@]}"; do
     range="${RANGE[$name]:-}"
     def="${DEF[$name]:-}"
 
-    #prompt="$name"
-    #if [[ -n "$range" || -n "$def" ]]; then
-    #  prompt+=" ("
-    #  [[ -n "$range" ]] && prompt+="$range"
-    #  [[ -n "$range" && -n "$def" ]] && prompt+=", "
-    #  [[ -n "$def" ]] && prompt+="default $def"
-    #  prompt+=")"
-    #fi
-    #prompt+=": "
-    
     prompt="$name"
     if [[ "$range" != "-" && "$def" != "-" ]]; then
       prompt+=" ($range, default $def)"
     fi
-
     prompt+=": "
 
     printf '%s' "$prompt" > /dev/tty

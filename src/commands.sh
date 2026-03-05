@@ -19,6 +19,7 @@ NEW_WORKFLOW_DESCRIPTION="Create a new accelerated workflow"
 NEW_WORKFLOW_FLAGS=(
   "name,n,Workflow name,-,-"
   "ngpus,g,Number of GPUs,1-8,1"
+  "iters,n,Timed iterations,1-1000,20"
 )
 NEW_WORKFLOW_FLAGS_MANDATORY="name,ngpus"
 

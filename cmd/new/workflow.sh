@@ -56,6 +56,8 @@ if [[ -n "$parsed_flags" ]]; then
 fi
 name=${V[name]}
 ngpus=${V[ngpus]}
+iters=${V[iters]}
 
 echo "--name: $name"
 echo "--ngpus: $ngpus"
+echo "--iters: $iters"
