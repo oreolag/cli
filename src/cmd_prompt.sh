@@ -51,13 +51,10 @@ validate_value() {
 
   # enum: a|b|c
   if [[ "$range" == *"|"* ]]; then
-    local ok=0
     IFS='|' read -r -a choices <<< "$range"
     for c in "${choices[@]}"; do
-      [[ "$value" == "$c" ]] && { ok=1; break; }
+      [[ "$value" == "$c" ]] && return 0
     done
-    [[ "$ok" == "1" ]] && return 0
-    echo "Invalid value for --$name: '$value' (allowed: $range)" >&2
     return 1
   fi
 
@@ -65,14 +62,8 @@ validate_value() {
   if [[ "$range" =~ ^[0-9]+-[0-9]+$ ]]; then
     local lo="${range%-*}"
     local hi="${range#*-}"
-    if ! is_int "$value"; then
-      echo "Invalid value for --$name: '$value' (expected integer in range: $range)" >&2
-      return 1
-    fi
-    if (( value < lo || value > hi )); then
-      echo "Invalid value for --$name: '$value' (expected range: $range)" >&2
-      return 1
-    fi
+    is_int "$value" || return 1
+    (( value >= lo && value <= hi )) || return 1
     return 0
   fi
 
