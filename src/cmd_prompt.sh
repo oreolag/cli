@@ -76,7 +76,7 @@ if [[ ! -r /dev/tty || ! -w /dev/tty ]]; then
   exit 1
 fi
 
-read -r -a REQUIRED <<< "$required_csv"
+IFS=',' read -r -a REQUIRED <<< "$required_csv"
 for name in "${REQUIRED[@]}"; do
   name="${name#"${name%%[![:space:]]*}"}"
   name="${name%"${name##*[![:space:]]}"}"

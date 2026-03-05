@@ -20,7 +20,7 @@ mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
 
 # check on flags
 INTERACTIVE_PROMPT="1"
-REQUIRED_FLAGS="name ngpus"
+REQUIRED_FLAGS="name,ngpus"
 
 # (maybe) print help
 print_range="0"
