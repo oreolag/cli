@@ -20,6 +20,7 @@ NEW_WORKFLOW_FLAGS=(
   "name,n,Workflow name,-,-"
   "ngpus,g,Number of GPUs,1-8,1"
 )
+NEW_WORKFLOW_FLAGS_MANDATORY="name,ngpus"
 
 # run
 # nccl

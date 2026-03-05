@@ -18,9 +18,12 @@ command_description="$("$ODEV_PATH/src/description_read.sh" "$ODEV_PATH" "$KEY")
 # read command flags
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
 
+# read mandatory flags
+mandatory_flags="$("$ODEV_PATH/src/mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
+
 # check on flags
 INTERACTIVE_PROMPT="1"
-REQUIRED_FLAGS="name,ngpus"
+#REQUIRED_FLAGS="name,ngpus"
 
 # (maybe) print help
 print_range="0"
@@ -33,7 +36,7 @@ print_both="0"
 
 # check on flags
 if [[ "$INTERACTIVE_PROMPT" == "0" ]]; then
-    "$ODEV_PATH/src/cmd_check.sh" --required "$REQUIRED_FLAGS" --params "${flags[@]}" -- "$@" || exit 1
+    "$ODEV_PATH/src/cmd_check.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$@" || exit 1
 fi
 
 # parse flags
@@ -41,7 +44,7 @@ parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" |
 
 # run interactive prompt
 if [[ "$INTERACTIVE_PROMPT" == "1" ]]; then
-    parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$REQUIRED_FLAGS" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+    parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 fi
 
 # read flags
