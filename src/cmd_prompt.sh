@@ -106,14 +106,21 @@ for name in "${REQUIRED[@]}"; do
     range="${RANGE[$name]:-}"
     def="${DEF[$name]:-}"
 
+    #prompt="$name"
+    #if [[ -n "$range" || -n "$def" ]]; then
+    #  prompt+=" ("
+    #  [[ -n "$range" ]] && prompt+="$range"
+    #  [[ -n "$range" && -n "$def" ]] && prompt+=", "
+    #  [[ -n "$def" ]] && prompt+="default $def"
+    #  prompt+=")"
+    #fi
+    #prompt+=": "
+    
     prompt="$name"
-    if [[ -n "$range" || -n "$def" ]]; then
-      prompt+=" ("
-      [[ -n "$range" ]] && prompt+="$range"
-      [[ -n "$range" && -n "$def" ]] && prompt+=", "
-      [[ -n "$def" ]] && prompt+="default $def"
-      prompt+=")"
+    if [[ "$range" != "-" && "$def" != "-" ]]; then
+      prompt+=" ($range, default $def)"
     fi
+
     prompt+=": "
 
     printf '%s' "$prompt" > /dev/tty
