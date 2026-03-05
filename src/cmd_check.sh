@@ -2,13 +2,11 @@
 set -euo pipefail
 
 # Usage:
-#   cmd_check.sh --required "name,ngpus" --params "${FLAGS[@]}" -- "$@"
-#
-# - Missing required flag => "Missing required flag: --name"
-# - Present but empty/missing value => "Invalid value for --name"
+#   cmd_check.sh --required "name,others" --params "${FLAGS[@]}" -- "$@"
 
 [[ "${1:-}" == "--required" ]] || exit 2
-required_csv="${2:-}"; shift 2
+required_csv="${2:-}"
+shift 2
 
 [[ "${1:-}" == "--params" ]] || exit 2
 shift
@@ -22,64 +20,80 @@ shift # consume --
 
 ARGV=( "$@" )
 
-declare -A SHORT RANGE
+declare -A SHORT
+declare -A RANGE
+
+# store metadata from PARAMS
 for p in "${PARAMS[@]}"; do
   IFS=',' read -r name short desc range def <<< "$p"
   SHORT["$name"]="$short"
   RANGE["$name"]="$range"
 done
 
-is_int() { [[ "$1" =~ ^[0-9]+$ ]]; }
+# ------------------------------------------------------------
+# Reject unknown options (same logic spirit as cmd_parse.sh)
+# ------------------------------------------------------------
 
-validate_value() {
-  local name="$1" value="$2" range="${RANGE[$name]:-}"
+declare -A KNOWN_LONG
+declare -A KNOWN_SHORT
 
-  # required => must be non-empty
-  [[ -n "$value" ]] || return 1
+for p in "${PARAMS[@]}"; do
+  IFS=',' read -r name short desc range def <<< "$p"
+  KNOWN_LONG["$name"]=1
+  [[ -n "$short" ]] && KNOWN_SHORT["$short"]=1
+done
 
-  # empty range => accept anything non-empty
-  [[ -z "$range" ]] && return 0
+i=0
+while [[ $i -lt ${#ARGV[@]} ]]; do
+  arg="${ARGV[$i]}"
 
-  # enum: a|b|c
-  if [[ "$range" == *"|"* ]]; then
-    IFS='|' read -r -a choices <<< "$range"
-    for c in "${choices[@]}"; do
-      [[ "$value" == "$c" ]] && return 0
-    done
-    return 1
+  if [[ "$arg" == --* ]]; then
+    name="${arg#--}"
+    if [[ -z "${KNOWN_LONG[$name]+x}" ]]; then
+      echo "Unknown option: $arg" >&2
+      exit 1
+    fi
+    ((i+=2))
+    continue
   fi
 
-  # int range: N-M
-  if [[ "$range" =~ ^[0-9]+-[0-9]+$ ]]; then
-    local lo="${range%-*}" hi="${range#*-}"
-    is_int "$value" || return 1
-    (( value >= lo && value <= hi )) || return 1
-    return 0
+  if [[ "$arg" == -* && "$arg" != "-" ]]; then
+    short="${arg#-}"
+    if [[ -z "${KNOWN_SHORT[$short]+x}" ]]; then
+      echo "Unknown option: $arg" >&2
+      exit 1
+    fi
+    ((i+=2))
+    continue
   fi
 
-  return 0
-}
+  ((i++))
+done
+
+# ------------------------------------------------------------
+# Validate required flags
+# ------------------------------------------------------------
 
 find_value() {
   local name="$1"
   local short="${SHORT[$name]:-}"
-  local i=0
 
+  local i=0
   while [[ $i -lt ${#ARGV[@]} ]]; do
     local a="${ARGV[$i]}"
-    if [[ "$a" == "--$name" || ( -n "$short" && "$a" == "-$short" ) ]]; then
-      # flag present
-      local v="${ARGV[$((i+1))]:-}"
 
-      # missing value (end of argv) OR next token is another option
-      if [[ -z "$v" || "$v" == --* || ( -n "$short" && "$v" == -* ) ]]; then
+    if [[ "$a" == "--$name" || ( -n "$short" && "$a" == "-$short" ) ]]; then
+      local val="${ARGV[$((i+1))]:-}"
+
+      if [[ -z "$val" || "$val" == --* || "$val" == -* ]]; then
         echo "__EMPTY__"
-        return 0
+        return
       fi
 
-      echo "$v"
-      return 0
+      echo "$val"
+      return
     fi
+
     ((i++))
   done
 
@@ -99,7 +113,7 @@ for name in "${REQUIRED[@]}"; do
     exit 1
   fi
 
-  if [[ "$val" == "__EMPTY__" ]] || ! validate_value "$name" "$val"; then
+  if [[ "$val" == "__EMPTY__" ]]; then
     echo "Invalid value for --$name" >&2
     exit 1
   fi
