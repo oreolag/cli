@@ -18,6 +18,7 @@ NEW_VLLM_FLAGS=(
 NEW_WORKFLOW_DESCRIPTION="Create a new accelerated workflow"
 NEW_WORKFLOW_FLAGS=(
   "name,n,Workflow name,-,-"
+  "ngpus,g,Number of GPUs,1-8,1"
 )
 
 # run

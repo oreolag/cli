@@ -20,7 +20,7 @@ mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
 
 # check on flags
 INTERACTIVE_PROMPT="1"
-REQUIRED_FLAGS="name"
+REQUIRED_FLAGS="name ngpus"
 
 # (maybe) print help
 print_range="0"
@@ -52,5 +52,7 @@ if [[ -n "$parsed_flags" ]]; then
   done <<< "$parsed_flags"
 fi
 name=${V[name]}
+ngpus=${V[ngpus]}
 
-echo "The name is --name: $name"
+echo "--name: $name"
+echo "--ngpus: $ngpus"

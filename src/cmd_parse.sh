@@ -20,10 +20,9 @@ declare -A V
 declare -A RANGE
 declare -A DESC
 
-# init defaults + store range/desc for validation
+# store range/desc for validation (no defaults)
 for p in "${PARAMS[@]}"; do
   IFS=',' read -r name short desc range def <<< "$p"
-  V["$name"]="$def"
   RANGE["$name"]="$range"
   DESC["$name"]="$desc"
 done
@@ -87,7 +86,7 @@ while [[ $# -gt 0 ]]; do
   [[ "$matched" == true ]] || { echo "Unknown option: $1" >&2; exit 1; }
 done
 
-# emit results
+# emit results (only provided flags)
 for k in "${!V[@]}"; do
   echo "$k=${V[$k]}"
 done
