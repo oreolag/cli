@@ -20,6 +20,7 @@ mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
 
 # check on flags
 INTERACTIVE_PROMPT="0"
+REQUIRED_FLAGS="name"
 
 # (maybe) print help
 print_range="0"
@@ -31,7 +32,7 @@ print_both="0"
   "${flags[@]}" -- "$@" && exit 0 || true
 
 # check on flags
-"$ODEV_PATH/src/cmd_check.sh" --required "name" --params "${flags[@]}" -- "$@" || exit 1
+"$ODEV_PATH/src/cmd_check.sh" --required "$REQUIRED_FLAGS" --params "${flags[@]}" -- "$@" || exit 1
 
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
@@ -44,7 +45,7 @@ fi
 
 # run interactive prompt
 if [[ "$INTERACTIVE_PROMPT" == "1" ]]; then
-    parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "name" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+    parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$REQUIRED_FLAGS" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 fi
 
 # read flags

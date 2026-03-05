@@ -100,7 +100,7 @@ find_value() {
   echo "__MISSING__"
 }
 
-IFS=',' read -r -a REQUIRED <<< "$required_csv"
+read -r -a REQUIRED <<< "$required_csv"
 
 for name in "${REQUIRED[@]}"; do
   name="${name#"${name%%[![:space:]]*}"}"
