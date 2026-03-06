@@ -18,10 +18,8 @@ NEW_VLLM_FLAGS=(
 NEW_WORKFLOW_DESCRIPTION="Create a new accelerated workflow"
 NEW_WORKFLOW_FLAGS=(
   "name,n,Workflow name,-,-"
-  "ngpus,g,Number of GPUs,1-8,1"
-  "iters,n,Timed iterations,1-1000,20"
 )
-NEW_WORKFLOW_FLAGS_MANDATORY="name,ngpus"
+NEW_WORKFLOW_FLAGS_MANDATORY="name"
 
 # run
 # nccl
@@ -42,4 +40,4 @@ VALIDATE_NCCL_FLAGS=(
   "datatype,d,Specify which datatype to use,int8|half|bfloat16|float,float"
   "stepfactor,f,Multiplication factor between sizes,2|4|8,2"
 )
-VALIDATE_NCCL_FLAGS_MANDATORY="ngpus"
+VALIDATE_NCCL_FLAGS_MANDATORY="ngpus,minbytes,maxbytes"
