@@ -1,1 +1,0 @@
-../submodules/hdev/cli/common/gh_auth_status.sh
