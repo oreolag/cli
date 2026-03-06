@@ -11,6 +11,15 @@ CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
+# early exit
+required_tools=("gh")
+for tool in "${required_tools[@]}"; do
+  installed="$("$ODEV_PATH/src/which.sh" "$tool")"
+  if [[ "$installed" == "0" ]]; then
+    echo "Please install $tool"
+  fi
+done
+
 # read command description
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 command_description="$("$ODEV_PATH/src/description_read.sh" "$ODEV_PATH" "$KEY")"
@@ -44,9 +53,25 @@ if [[ -n "$parsed_flags" ]]; then
   done <<< "$parsed_flags"
 fi
 name=${V[name]}
-ngpus=${V[ngpus]}
-iters=${V[iters]}
 
-echo "--name: $name"
-echo "--ngpus: $ngpus"
-echo "--iters: $iters"
+# set command flags
+flags="--name $name"
+
+# format
+bold=$(tput bold)
+italic=$(tput sitm 2>/dev/null || true)
+normal=$(tput sgr0)
+
+# get hostname
+url="${HOSTNAME}"
+hostname="${url%%.*}"
+
+# constants
+
+# derived
+
+# login to GitHub
+github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+if [ "$github_auth_status" = "0" ]; then
+  eval "gh auth login"
+fi
