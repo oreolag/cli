@@ -71,6 +71,12 @@ WORKFLOWS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/con
 
 # derived
 
+# check if exists
+if [[ -d "$WORKFLOWS_PATH/$name" ]]; then
+  echo "Workflow already exists: $name"
+  exit 1
+fi
+
 # login to GitHub
 github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
 if [ "$github_auth_status" = "0" ]; then
@@ -91,5 +97,7 @@ for script in "${scripts[@]}"; do
   echo "echo \"Hi from ${name}/${script}.sh script!\"" >> "$file"
   chmod +x "$file"
 done
+
+# create constants
 
 # add to GitHub
