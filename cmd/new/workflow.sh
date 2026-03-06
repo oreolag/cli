@@ -78,5 +78,18 @@ if [ "$github_auth_status" = "0" ]; then
 fi
 
 # create workflows folder
-#mkdir -p $WORKFLOWS_PATH
-echo $WORKFLOWS_PATH
+mkdir -p "$WORKFLOWS_PATH/$name"
+cd "$WORKFLOWS_PATH/$name"
+
+# create scripts
+scripts=("new" "build" "program" "run" "validate")
+for script in "${scripts[@]}"; do
+  file="$WORKFLOWS_PATH/$name/${script}.sh"
+  touch "$file"
+  echo "#!/bin/bash" >> "$file"
+  echo "" >> "$file"
+  echo "echo \"Hi from ${name}/${script}.sh script!\"" >> "$file"
+  chmod +x "$file"
+done
+
+# add to GitHub
