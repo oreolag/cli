@@ -98,7 +98,7 @@ else
 fi
 
 if [[ ! -x "$script" ]]; then
-  echo "Error: command not found: ${cmd} ${subcmd:-}"
+  echo "Command not found: ${cmd} ${subcmd:-}"
   exit 1
 fi
 
