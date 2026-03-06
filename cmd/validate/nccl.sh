@@ -1,1 +1,0 @@
-../../submodules/workflows/nccl/validate.sh
