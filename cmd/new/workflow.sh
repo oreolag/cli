@@ -99,5 +99,13 @@ for script in "${scripts[@]}"; do
 done
 
 # create constants
+touch "$WORKFLOWS_PATH/$name/constants.yml"
+echo "---" >> "$WORKFLOWS_PATH/$name/constants.yml"
+echo "" >> "$WORKFLOWS_PATH/$name/constants.yml"
+echo "# my_constants" >> "$WORKFLOWS_PATH/$name/constants.yml"
+echo "my_constants:" >> "$WORKFLOWS_PATH/$name/constants.yml"
+echo "  year: 1982" >> "$WORKFLOWS_PATH/$name/constants.yml"
+echo "  month: August" >> "$WORKFLOWS_PATH/$name/constants.yml"
+echo "  day: 15" >> "$WORKFLOWS_PATH/$name/constants.yml"
 
 # add to GitHub
