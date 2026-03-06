@@ -6,3 +6,4 @@ paths:
   models: "${HOME}/odev/models"
   projects: "${HOME}/odev/projects"
   tmp: /tmp
+  workflows: "${HOME}/odev/workflows"

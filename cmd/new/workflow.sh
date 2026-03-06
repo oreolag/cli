@@ -67,6 +67,7 @@ url="${HOSTNAME}"
 hostname="${url%%.*}"
 
 # constants
+WORKFLOWS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
 
 # derived
 
@@ -75,3 +76,7 @@ github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
 if [ "$github_auth_status" = "0" ]; then
   eval "gh auth login"
 fi
+
+# create workflows folder
+#mkdir -p $WORKFLOWS_PATH
+echo $WORKFLOWS_PATH
