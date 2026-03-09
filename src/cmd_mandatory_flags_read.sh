@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Usage:
-#   mandatory_flags_read.sh <ODEV_PATH> <KEY>
+#   cmd_mandatory_flags_read.sh <ODEV_PATH> <KEY>
 # Output:
 #   MANDATORY flags string (e.g. name,ngpus)
 
