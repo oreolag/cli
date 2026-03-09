@@ -10,7 +10,7 @@ ODEV_PATH="$1"
 KEY="$2"
 
 # shellcheck source=/dev/null
-source "$ODEV_PATH/src/commands.sh"
+source "$ODEV_PATH/src/cmd_spec.sh"
 
 desc_var="${KEY}_DESCRIPTION"
 desc="${!desc_var:-}"

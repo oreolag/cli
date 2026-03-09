@@ -15,7 +15,7 @@ ODEV_PATH="$1"
 KEY="$2"
 
 # shellcheck source=/dev/null
-source "$ODEV_PATH/src/commands.sh"
+source "$ODEV_PATH/src/cmd_spec.sh"
 
 # gather variable names that start with "${KEY}_"
 mapfile -t vars < <(compgen -v "${KEY}_" | sort)
