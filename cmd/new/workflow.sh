@@ -34,7 +34,7 @@ mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$K
 print_range="0"
 print_default="0"
 print_both="0"
-"$ODEV_PATH/src/help_print.sh" --maybe \
+"$ODEV_PATH/src/cmd_help_print.sh" --maybe \
   "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$command_description" \
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
