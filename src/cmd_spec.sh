@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
+# get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# derive from SCRIPT_DIR
+WORKFLOWS_DIR="$SCRIPT_DIR/../submodules/workflows"
 
 # examine 
 EXAMINE_DESCRIPTION="System and device information"
@@ -40,7 +44,12 @@ VALIDATE_FLAGS=(
 #VALIDATE_NCCL_FLAGS_MANDATORY="ngpus,minbytes,maxbytes"
 
 # workflows
-workflows=("nccl")
+workflows=()
+for d in "$WORKFLOWS_DIR"/*/; do
+  workflows+=("$(basename "$d")")
+done
+
+# source cmd_spec.sh for workflows
 for wf in "${workflows[@]}"; do
   wf_i="$SCRIPT_DIR/../submodules/workflows/$wf/cmd_spec.sh"
   [[ -f "$wf_i" ]] && source "$wf_i"
