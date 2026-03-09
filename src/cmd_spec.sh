@@ -4,7 +4,11 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # derive from SCRIPT_DIR
-WORKFLOWS_DIR="$SCRIPT_DIR/../submodules/workflows"
+ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
+WORKFLOWS_PATH="$SCRIPT_DIR/../submodules/workflows"
+
+# constants
+WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
 
 # examine 
 EXAMINE_DESCRIPTION="System and device information"
@@ -45,7 +49,7 @@ VALIDATE_FLAGS=(
 
 # workflows
 workflows=()
-for d in "$WORKFLOWS_DIR"/*/; do
+for d in "$WORKFLOWS_PATH"/*/; do
   workflows+=("$(basename "$d")")
 done
 
@@ -56,3 +60,17 @@ for wf in "${workflows[@]}"; do
 done
 
 # user workflows
+workflows_user=()
+if [[ -d "$WORKFLOWS_USER_PATH" ]]; then
+  for d in "$WORKFLOWS_USER_PATH"/*; do
+    [[ -d "$d" ]] || continue
+    workflows_user+=("$(basename "$d")")
+  done
+fi
+
+# source cmd_spec.sh for user workflows not in workflows
+for wf in "${workflows_user[@]}"; do
+  [[ " ${workflows[*]} " =~ " $wf " ]] && continue
+  wf_i="$WORKFLOWS_USER_PATH/$wf/cmd_spec.sh"
+  [[ -f "$wf_i" ]] && source "$wf_i"
+done

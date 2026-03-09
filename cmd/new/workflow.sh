@@ -10,6 +10,8 @@ SUBCOMMAND="$(basename "${BASH_SOURCE[0]}" .sh)"
 CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
+WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
+WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
 
 # early exit
 required_tools=("gh")
@@ -67,12 +69,12 @@ url="${HOSTNAME}"
 hostname="${url%%.*}"
 
 # constants
-WORKFLOWS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
+WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
 
 # derived
 
 # check if exists
-if [[ -d "$WORKFLOWS_PATH/$name" ]]; then
+if [[ -d "$WORKFLOWS_PATH/$name" ]] || [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
   echo "Workflow already exists: $name"
   exit 1
 fi
@@ -84,28 +86,31 @@ if [ "$github_auth_status" = "0" ]; then
 fi
 
 # create workflows folder
-mkdir -p "$WORKFLOWS_PATH/$name"
-cd "$WORKFLOWS_PATH/$name"
+mkdir -p "$WORKFLOWS_USER_PATH/$name"
+cd "$WORKFLOWS_USER_PATH/$name"
+
+# copy from template
+cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
 
 # create scripts
-scripts=("new" "build" "program" "run" "validate")
-for script in "${scripts[@]}"; do
-  file="$WORKFLOWS_PATH/$name/${script}.sh"
-  touch "$file"
-  echo "#!/bin/bash" >> "$file"
-  echo "" >> "$file"
-  echo "echo \"Hi from ${name}/${script}.sh script!\"" >> "$file"
-  chmod +x "$file"
-done
+#scripts=("new" "build" "program" "run" "validate")
+#for script in "${scripts[@]}"; do
+#  file="$WORKFLOWS_USER_PATH/$name/${script}.sh"
+#  touch "$file"
+#  echo "#!/bin/bash" >> "$file"
+#  echo "" >> "$file"
+#  echo "echo \"Hi from ${name}/${script}.sh script!\"" >> "$file"
+#  chmod +x "$file"
+#done
 
 # create constants
-touch "$WORKFLOWS_PATH/$name/constants.yml"
-echo "---" >> "$WORKFLOWS_PATH/$name/constants.yml"
-echo "" >> "$WORKFLOWS_PATH/$name/constants.yml"
-echo "# my_constants" >> "$WORKFLOWS_PATH/$name/constants.yml"
-echo "my_constants:" >> "$WORKFLOWS_PATH/$name/constants.yml"
-echo "  year: 1982" >> "$WORKFLOWS_PATH/$name/constants.yml"
-echo "  month: August" >> "$WORKFLOWS_PATH/$name/constants.yml"
-echo "  day: 15" >> "$WORKFLOWS_PATH/$name/constants.yml"
+#touch "$WORKFLOWS_USER_PATH/$name/constants.yml"
+#echo "---" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
+#echo "" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
+#echo "# my_constants" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
+#echo "my_constants:" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
+#echo "  year: 1982" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
+#echo "  month: August" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
+#echo "  day: 15" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
 
 # add to GitHub
