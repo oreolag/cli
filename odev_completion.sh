@@ -45,11 +45,11 @@ _odev_list_subcommands() {
 _odev_source_flags() {
   local base="$1"
 
-  if [[ -f "$base/src/command_flags.sh" ]]; then
-    # shellcheck source=/dev/null
-    source "$base/src/command_flags.sh"
-    return 0
-  fi
+  #if [[ -f "$base/src/command_flags.sh" ]]; then
+  #  # shellcheck source=/dev/null
+  #  source "$base/src/command_flags.sh"
+  #  return 0
+  #fi
 
   if [[ -f "$base/src/cmd_spec.sh" ]]; then
     # shellcheck source=/dev/null
