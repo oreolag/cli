@@ -13,7 +13,7 @@ ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
 # read workflow description
 KEY="$(printf '%s' "$COMMAND" | tr '[:lower:]' '[:upper:]')"
-workflow_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
+command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 
 # read workflow commands
 mapfile -t commands < <("$ODEV_PATH/src/cmd_subcommands_read.sh" "$ODEV_PATH" "$KEY")
@@ -23,5 +23,5 @@ print_range="-"
 print_default="-"
 print_both="-"      
 "$ODEV_PATH/src/cmd_help_print.sh" --print \
-  "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$workflow_description" \
+  "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$command_description" \
   "$print_range" "$print_default" "$print_both" "${commands[@]}" -- "$@" && exit 0 || true
