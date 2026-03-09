@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Usage:
-#   description_read.sh <ODEV_PATH> <KEY>
+#   cmd_description_read.sh <ODEV_PATH> <KEY>
 # Output:
 #   DESCRIPTION text only
 

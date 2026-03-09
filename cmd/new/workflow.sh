@@ -22,7 +22,7 @@ done
 
 # read command description
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
-command_description="$("$ODEV_PATH/src/description_read.sh" "$ODEV_PATH" "$KEY")"
+command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 
 # read command flags
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")

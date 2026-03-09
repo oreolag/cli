@@ -15,9 +15,9 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # command descriptions
-new="$("$ODEV_PATH/src/description_read.sh" "$ODEV_PATH" "NEW")"
-validate="$("$ODEV_PATH/src/description_read.sh" "$ODEV_PATH" "VALIDATE")"
-examine="$("$ODEV_PATH/src/description_read.sh" "$ODEV_PATH" "EXAMINE")"
+new="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "NEW")"
+validate="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "VALIDATE")"
+examine="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "EXAMINE")"
 
 print_help() {
   echo "The CLI for hetero${italic}genius${normal} computing."
