@@ -40,4 +40,10 @@ VALIDATE_FLAGS=(
 #VALIDATE_NCCL_FLAGS_MANDATORY="ngpus,minbytes,maxbytes"
 
 # workflows
-source "$SCRIPT_DIR/../submodules/workflows/nccl/cmd_spec.sh"
+workflows=("nccl")
+for wf in "${workflows[@]}"; do
+  wf_i="$SCRIPT_DIR/../submodules/workflows/$wf/cmd_spec.sh"
+  [[ -f "$wf_i" ]] && source "$wf_i"
+done
+
+# user workflows
