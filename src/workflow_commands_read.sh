@@ -2,12 +2,12 @@
 set -euo pipefail
 
 # Usage:
-#   workflow_commands_read.sh <ODEV_PATH> <KEY>
+#   cmd_subcommands_read.sh <ODEV_PATH> <KEY>
 # Output:
 #   subcommand: Description (one per line)
 #
 # Example:
-#   workflow_commands_read.sh /opt/odev NEW
+#   cmd_subcommands_read.sh /opt/odev NEW
 #   vllm:        Creates a vLLM project
 #   hugging:     Creates a Hugging Face project
 

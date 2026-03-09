@@ -16,7 +16,7 @@ KEY="$(printf '%s' "$COMMAND" | tr '[:lower:]' '[:upper:]')"
 workflow_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 
 # read workflow commands
-mapfile -t commands < <("$ODEV_PATH/src/workflow_commands_read.sh" "$ODEV_PATH" "$KEY")
+mapfile -t commands < <("$ODEV_PATH/src/cmd_subcommands_read.sh" "$ODEV_PATH" "$KEY")
 
 # print help
 print_range="-"
