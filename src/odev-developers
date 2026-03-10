@@ -1,0 +1,2 @@
+%odev-users ALL=(ALL) NOPASSWD: \
+  /opt/odev/src/ln_s.sh
