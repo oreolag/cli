@@ -50,9 +50,9 @@ print_both="0"
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
 # run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+#parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
-# read flags
+# read flags (1)
 if [[ -n "$parsed_flags" ]]; then
   declare -A V
   while IFS='=' read -r k v; do
@@ -60,9 +60,13 @@ if [[ -n "$parsed_flags" ]]; then
   done <<< "$parsed_flags"
 fi
 name=${V[name]}
+delete=${V[delete]}
 
-# set command flags
-flags="--name $name"
+# check on flags
+if [[ -n "$name" && -n "$delete" ]]; then
+  echo "Error: --name and --delete cannot be used together."
+  exit 1
+fi
 
 # format
 bold=$(tput bold)
@@ -77,6 +81,30 @@ hostname="${url%%.*}"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
 
 # derived
+
+# delete workflow
+if [ ! "$delete" = "" ] && [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
+  sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/new/$delete.sh"
+  sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/build/$delete.sh"
+  sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/program/$delete.sh"
+  sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/run/$delete.sh"
+  sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$delete.sh"
+  rm -rf "$WORKFLOWS_USER_PATH/$name"
+  exit 1
+fi
+
+# run interactive prompt
+parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+
+# read flags (2)
+if [[ -n "$parsed_flags" ]]; then
+  declare -A V
+  while IFS='=' read -r k v; do
+    V["$k"]="$v"
+  done <<< "$parsed_flags"
+fi
+name=${V[name]}
+delete=${V[delete]}
 
 # check if exists
 if [[ -d "$WORKFLOWS_PATH/$name" ]] || [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then

@@ -5,16 +5,13 @@ set -euo pipefail
 ODEV_PATH="$1"
 target="$2"
 
-target="$(readlink -f -- "$target")" || exit 1
-[[ -e "$target" ]] || exit 1
-[[ -f "$target" ]] || exit 1
-
 # constants
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
 
 # Only files in allowed folders can be removed
 ALLOWED_FOLDERS=(
   "$TMP_PATH"
+  "$ODEV_PATH"
 )
 
 # normalize allowed folders
@@ -22,13 +19,18 @@ for i in "${!ALLOWED_FOLDERS[@]}"; do
   ALLOWED_FOLDERS[$i]="$(readlink -f -- "${ALLOWED_FOLDERS[$i]}")"
 done
 
-# get first root component ("/tmp" from "/tmp/foo/bar" or "/tmp")
-root="/$(cut -d/ -f2 <<< "$target")"
-root="$(readlink -f -- "$root" 2>/dev/null || true)"
+# normalize only the parent directory, NOT the target itself
+target_dir="$(dirname -- "$target")"
+target_base="$(basename -- "$target")"
+target_dir="$(readlink -f -- "$target_dir")" || exit 1
+target="$target_dir/$target_base"
+
+# allow regular files OR symlinks
+[[ -f "$target" || -L "$target" ]] || exit 1
 
 allowed=false
 for a in "${ALLOWED_FOLDERS[@]}"; do
-  [[ "$root" == "$a" ]] && allowed=true && break
+  [[ "$target" == "$a" || "$target" == "$a/"* ]] && allowed=true && break
 done
 
 $allowed || exit 1
