@@ -36,16 +36,6 @@ else
     mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
 fi
 
-# read command description
-#KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
-#command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
-
-# read command flags
-#mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
-
-# read mandatory flags
-#mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
-
 # (maybe) print help
 print_range="0"
 print_default="0"
@@ -56,22 +46,22 @@ print_both="0"
   "${flags[@]}" -- "$@" && exit 0 || true
 
 # parse flags
-#parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
+parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
 # run interactive prompt
-#parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
 # read flags
-#if [[ -n "$parsed_flags" ]]; then
-#  declare -A V
-#  while IFS='=' read -r k v; do
-#    V["$k"]="$v"
-#  done <<< "$parsed_flags"
-#fi
-#name=${V[name]}
+if [[ -n "$parsed_flags" ]]; then
+  declare -A V
+  while IFS='=' read -r k v; do
+    V["$k"]="$v"
+  done <<< "$parsed_flags"
+fi
 
-# set command flags
-#flags="--name $name"
+# assign flags
+flag1=${V[flag1]}
+flag2=${V[flag2]}
 
 # format
 bold=$(tput bold)
@@ -82,8 +72,9 @@ normal=$(tput sgr0)
 url="${HOSTNAME}"
 hostname="${url%%.*}"
 
-# constants
-
-# derived
+# add your code here!
 
 echo "Hello from WFNAME _COMMAND_!"
+echo ""
+echo "flag1: $flag1"
+echo "flag2: $flag2"
