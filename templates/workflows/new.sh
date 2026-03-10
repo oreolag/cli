@@ -13,6 +13,10 @@ ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
 # early exit
 
+# check on symlink
+echo "COMMAND: $COMMAND"
+echo "SUBCOMMAND: $SUBCOMMAND"
+
 # read command description
 #KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 #command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
