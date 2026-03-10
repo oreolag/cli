@@ -13,17 +13,19 @@ ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
 
-# early exit
+# check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developer" = "0" ]; then
+  echo "Permission denied: $USER"
   exit 1
 fi
 
+# check on tools
 required_tools=("gh")
 for tool in "${required_tools[@]}"; do
   installed="$("$ODEV_PATH/src/which.sh" "$tool")"
   if [[ "$installed" == "0" ]]; then
-    echo "Please install $tool"
+    echo "Missing command: $tool"
   fi
 done
 
