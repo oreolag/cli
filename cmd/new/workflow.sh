@@ -83,13 +83,15 @@ WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PAT
 # derived
 
 # delete workflow
-if [ ! "$delete" = "" ] && [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
-  sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/new/$delete.sh"
-  sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/build/$delete.sh"
-  sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/program/$delete.sh"
-  sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/run/$delete.sh"
-  sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$delete.sh"
-  rm -rf "$WORKFLOWS_USER_PATH/$name"
+if [ ! "$delete" = "" ]; then
+  if [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
+    sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/new/$delete.sh"
+    sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/build/$delete.sh"
+    sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/program/$delete.sh"
+    sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/run/$delete.sh"
+    sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$delete.sh"
+    rm -rf "$WORKFLOWS_USER_PATH/$name"
+  fi
   exit 1
 fi
 
