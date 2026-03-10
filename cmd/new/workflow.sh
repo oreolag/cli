@@ -83,14 +83,14 @@ WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PAT
 # derived
 
 # delete workflow
-if [ ! "$delete" = "" ]; then
-  if [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
-    sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/new/$delete.sh"
-    sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/build/$delete.sh"
-    sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/program/$delete.sh"
-    sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/run/$delete.sh"
-    sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$delete.sh"
-    rm -rf "$WORKFLOWS_USER_PATH/$name"
+if [[ -n "$delete" ]]; then
+  if [[ -d "$WORKFLOWS_USER_PATH/$delete" ]]; then
+    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/new/$delete.sh"
+    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/build/$delete.sh"
+    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/program/$delete.sh"
+    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/run/$delete.sh"
+    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$delete.sh"
+    rm -rf -- "$WORKFLOWS_USER_PATH/$delete"
   fi
   exit 1
 fi
@@ -109,7 +109,10 @@ name=${V[name]}
 delete=${V[delete]}
 
 # check if exists
-if [[ -d "$WORKFLOWS_PATH/$name" ]] || [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
+if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
+   [[ -d "$WORKFLOWS_USER_PATH/$name" ]] || \
+   [[ -e "$ODEV_PATH/cmd/new/$name.sh" ]] || \
+   [[ -L "$ODEV_PATH/cmd/new/$name.sh" ]]; then
   echo "Workflow already exists: $name"
   exit 1
 fi
