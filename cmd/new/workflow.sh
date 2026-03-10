@@ -10,8 +10,11 @@ SUBCOMMAND="$(basename "${BASH_SOURCE[0]}" .sh)"
 CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
+
+# constants
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
+WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
 
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
@@ -29,14 +32,12 @@ for tool in "${required_tools[@]}"; do
   fi
 done
 
-# read command description
+# set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
+
+# read command description, command flags, mandatory flags
 command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
-
-# read command flags
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
-
-# read mandatory flags
 mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
 
 # (maybe) print help
@@ -78,9 +79,6 @@ normal=$(tput sgr0)
 # get hostname
 url="${HOSTNAME}"
 hostname="${url%%.*}"
-
-# constants
-WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
 
 # derived
 
