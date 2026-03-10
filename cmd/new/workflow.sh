@@ -14,6 +14,11 @@ WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
 
 # early exit
+is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
+if [ "$is_odev_developer" = "0" ]; then
+  exit 1
+fi
+
 required_tools=("gh")
 for tool in "${required_tools[@]}"; do
   installed="$("$ODEV_PATH/src/which.sh" "$tool")"
@@ -91,6 +96,12 @@ cd "$WORKFLOWS_USER_PATH/$name"
 
 # copy from template
 cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
+
+echo "I am a odev-developer? The answer is $is_odev_developer"
+exit
+
+# create symlink
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$origin_file" "$destination_file"
 
 # create scripts
 #scripts=("new" "build" "program" "run" "validate")
