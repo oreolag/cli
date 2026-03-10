@@ -97,16 +97,34 @@ cd "$WORKFLOWS_USER_PATH/$name"
 # copy from template
 cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
 
+# create other files
+cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/build.sh"
+cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/program.sh"
+cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/run.sh"
+cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/validate.sh"
+
 #echo "I am a odev-developer? The answer is $is_odev_developer"
 #exit
 
-# replace WFNAME
+# replace WFNAME (and _COMMAND_)
 sed -i "s/WFNAME/${name^^}/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"
+sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
+sed -i "s/_COMMAND_/new/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
+sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
+sed -i "s/_COMMAND_/build/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
+sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
+sed -i "s/_COMMAND_/program/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
+sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/run.sh"
+sed -i "s/_COMMAND_/run/g" "$WORKFLOWS_USER_PATH/$name/run.sh"
+sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/validate.sh"
+sed -i "s/_COMMAND_/validate/g" "$WORKFLOWS_USER_PATH/$name/validate.sh"
 
-# create symlink
-origin_file="$WORKFLOWS_USER_PATH/$name/new.sh"
-destination_file="$ODEV_PATH/cmd/new/$name.sh"
-sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$origin_file" "$destination_file"
+# create symlinks
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/new.sh" "$ODEV_PATH/cmd/new/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/build.sh" "$ODEV_PATH/cmd/build/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/program.sh" "$ODEV_PATH/cmd/program/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/run.sh" "$ODEV_PATH/cmd/run/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh" "$ODEV_PATH/cmd/validate/$name.sh"
 
 # create scripts
 #scripts=("new" "build" "program" "run" "validate")
