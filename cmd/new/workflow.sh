@@ -97,10 +97,15 @@ cd "$WORKFLOWS_USER_PATH/$name"
 # copy from template
 cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
 
-echo "I am a odev-developer? The answer is $is_odev_developer"
-exit
+#echo "I am a odev-developer? The answer is $is_odev_developer"
+#exit
+
+# replace WFNAME
+sed -i "s/WFNAME/${name^^}/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"
 
 # create symlink
+origin_file="$WORKFLOWS_USER_PATH/$name/new.sh"
+destination_file="$ODEV_PATH/cmd/new/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$origin_file" "$destination_file"
 
 # create scripts

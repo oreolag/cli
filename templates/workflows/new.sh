@@ -62,3 +62,5 @@ hostname="${url%%.*}"
 # constants
 
 # derived
+
+echo "Hello from new!"
