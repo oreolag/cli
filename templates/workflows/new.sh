@@ -63,4 +63,4 @@ hostname="${url%%.*}"
 
 # derived
 
-echo "Hello from new!"
+echo "Hello from WFNAME _COMMAND_!"
