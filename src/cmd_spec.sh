@@ -15,6 +15,12 @@ DELETE_DESCRIPTION="Deletes an artifact of your choice"
 DELETE_FLAGS=(
 )
 # workflow
+DELETE_PROJECT_DESCRIPTION="Deletes an existing user project"
+DELETE_PROJECT_FLAGS=(
+  "name,n,Project name,-,-"
+)
+DELETE_PROJECT_FLAGS_MANDATORY="name"
+# workflow
 DELETE_WORKFLOW_DESCRIPTION="Deletes an existing user workflow"
 DELETE_WORKFLOW_FLAGS=(
   "name,n,Workflow name,-,-"
