@@ -75,6 +75,9 @@ fi
 # assign flags
 name=${V[name]}
 
+# replace spaces with "_"
+name="${name// /_}"
+
 # check on flags
 if [[ -n "$name" && -n "$delete" ]]; then
   echo "Error: --name and --delete cannot be used together."
