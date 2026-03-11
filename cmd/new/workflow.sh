@@ -62,9 +62,9 @@ print_both="0"
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
 # run interactive prompt
-#parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
-# read flags (1)
+# read flags
 if [[ -n "$parsed_flags" ]]; then
   declare -A V
   while IFS='=' read -r k v; do
@@ -74,7 +74,6 @@ fi
 
 # assign flags
 name=${V[name]}
-delete=${V[delete]}
 
 # check on flags
 if [[ -n "$name" && -n "$delete" ]]; then
@@ -87,32 +86,6 @@ fi
 
 # derived
 # ...
-
-# delete workflow
-if [[ -n "$delete" ]]; then
-  if [[ -d "$WORKFLOWS_USER_PATH/$delete" ]]; then
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/new/$delete.sh"
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/build/$delete.sh"
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/program/$delete.sh"
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/run/$delete.sh"
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$delete.sh"
-    rm -rf -- "$WORKFLOWS_USER_PATH/$delete"
-  fi
-  exit 1
-fi
-
-# run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
-
-# read flags (2)
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
-name=${V[name]}
-delete=${V[delete]}
 
 # check if exists
 if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
