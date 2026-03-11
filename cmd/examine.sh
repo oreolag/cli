@@ -11,36 +11,9 @@ CLI_NAME="$(basename "$(dirname "$SCRIPT_DIR")")"
 SUBCOMMAND="examine"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
-# read command description
-KEY="$(printf '%s' "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
-command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
-
-# read command flags
-mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
-
-# (maybe) print help
-print_range="1"
-print_default="0"
-print_both="0"
-"$ODEV_PATH/src/cmd_help_print.sh" --maybe \
-  "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$command_description" \
-  "$print_range" "$print_default" "$print_both" \
-  "${flags[@]}" -- "$@" && exit 0 || true
-
-# parse and check flag values
-parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
-
-# read flags
-# ...
-
-# set command flags
-# ...
+# get hostname
+url="${HOSTNAME}"
+hostname="${url%%.*}"
 
 # format
 bold=$(tput bold)
@@ -58,6 +31,37 @@ STRING_GPUS="GPUs"
 STRING_NICS="NICs"
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
 
+# set KEY
+KEY="$(printf '%s' "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
+
+# read command description, command flags
+command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
+mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
+
+# (maybe) print help
+print_range="1"
+print_default="0"
+print_both="0"
+"$ODEV_PATH/src/cmd_help_print.sh" --maybe \
+  "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$command_description" \
+  "$print_range" "$print_default" "$print_both" \
+  "${flags[@]}" -- "$@" && exit 0 || true
+
+# parse and check flag values
+#parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
+#if [[ -n "$parsed_flags" ]]; then
+#  declare -A V
+#  while IFS='=' read -r k v; do
+#    V["$k"]="$v"
+#  done <<< "$parsed_flags"
+#fi
+
+# read flags
+# ...
+
+# set command flags
+# ...
+
 # check on CMDB scripts
 cmdb_scripts="cmdb_get.py cmdb_get_cpu.sh cmdb_get_memory.sh cmdb_get_model.sh cmdb_get_storage.sh"
 for script in $cmdb_scripts; do
@@ -66,10 +70,6 @@ for script in $cmdb_scripts; do
         exit 1
     fi
 done
-
-# get hostname
-url="${HOSTNAME}"
-hostname="${url%%.*}"
 
 # check on CMDB
 if [[ ! -f "$CMDB_PATH/$hostname.yml" ]]; then
