@@ -33,13 +33,10 @@ if [ "$is_odev_developer" = "0" ]; then
 fi
 
 # check on tools
-required_tools=("gh")
-for tool in "${required_tools[@]}"; do
-  installed="$("$ODEV_PATH/src/which.sh" "$tool")"
-  if [[ "$installed" == "0" ]]; then
-    echo "Missing command: $tool"
-  fi
-done
+installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
+if [[ "$installed" == "0" ]]; then
+  echo "Missing command: $tool"
+fi
 
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
