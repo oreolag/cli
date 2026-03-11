@@ -19,6 +19,18 @@ new="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "NEW")"
 validate="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "VALIDATE")"
 examine="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "EXAMINE")"
 
+# check on GitHub CLI
+#installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
+#if [[ "$installed" == "1" ]]; then
+#  logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
+#  if [[ "$logged_in" == "1" ]]; then
+#    github_user="$(gh api user --jq .login)"
+#    gh_status="You are logged in to GitHub CLI as ${bold}$github_user${normal}"
+#  else
+#    gh_status="Please use login to GitHub CLI with ${bold}gh auth login${normal}"
+#  fi
+#fi
+
 print_help() {
   echo "The CLI for hetero${italic}genius${normal} computing."
   echo ""
@@ -42,6 +54,10 @@ print_help() {
   echo "${bold}LEARN MORE${normal}"
   echo "  Use ${bold}odev <command> <subcommand> --help${normal} for more information about a command."
   echo "  Read the manual at https://books.oreol.ch/6/cli"
+  #if [ ! "$gh_status" = "" ]; then
+  #  echo ""
+  #  echo $gh_status
+  #fi
 }
 
 print_version() {
