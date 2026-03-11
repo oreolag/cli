@@ -1,0 +1,1 @@
+../../submodules/workflows/nccl/run.sh
