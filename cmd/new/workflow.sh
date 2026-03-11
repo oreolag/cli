@@ -35,7 +35,7 @@ fi
 # check on tools
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 if [[ "$installed" == "0" ]]; then
-  echo "Missing command: $tool"
+  echo "Missing tool: $tool"
 fi
 
 # set KEY

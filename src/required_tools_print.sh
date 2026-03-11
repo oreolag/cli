@@ -12,7 +12,7 @@ if [[ -z "$tool" ]]; then
     if [[ "$installed" == "0" ]]; then
       echo "👎 $t"
     else
-      echo "👍🏻 $t"
+      echo "✅ $t"
     fi
   done
 else
