@@ -10,9 +10,18 @@ SUBCOMMAND="$(basename "${BASH_SOURCE[0]}" .sh)"
 CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
-WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
+
+# get hostname
+url="${HOSTNAME}"
+hostname="${url%%.*}"
+
+# format
+bold=$(tput bold)
+italic=$(tput sitm 2>/dev/null || true)
+normal=$(tput sgr0)
 
 # constants
+WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
 
 # check on users
@@ -63,14 +72,11 @@ fi
 flag1=${V[flag1]}
 flag2=${V[flag2]}
 
-# format
-bold=$(tput bold)
-italic=$(tput sitm 2>/dev/null || true)
-normal=$(tput sgr0)
+# set command flags
+# ...
 
-# get hostname
-url="${HOSTNAME}"
-hostname="${url%%.*}"
+# derived
+# ...
 
 # add your code here!
 

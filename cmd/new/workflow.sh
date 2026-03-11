@@ -11,6 +11,15 @@ CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
 COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
+# get hostname
+url="${HOSTNAME}"
+hostname="${url%%.*}"
+
+# format
+bold=$(tput bold)
+italic=$(tput sitm 2>/dev/null || true)
+normal=$(tput sgr0)
+
 # constants
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
@@ -62,6 +71,8 @@ if [[ -n "$parsed_flags" ]]; then
     V["$k"]="$v"
   done <<< "$parsed_flags"
 fi
+
+# assign flags
 name=${V[name]}
 delete=${V[delete]}
 
@@ -71,16 +82,11 @@ if [[ -n "$name" && -n "$delete" ]]; then
   exit 1
 fi
 
-# format
-bold=$(tput bold)
-italic=$(tput sitm 2>/dev/null || true)
-normal=$(tput sgr0)
-
-# get hostname
-url="${HOSTNAME}"
-hostname="${url%%.*}"
+# set command flags
+# ...
 
 # derived
+# ...
 
 # delete workflow
 if [[ -n "$delete" ]]; then
