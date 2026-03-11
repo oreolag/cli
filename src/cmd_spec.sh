@@ -34,7 +34,6 @@ NEW_FLAGS=(
 NEW_WORKFLOW_DESCRIPTION="Create a new accelerated workflow"
 NEW_WORKFLOW_FLAGS=(
   "name,n,Workflow name,-,-"
-  "delete,d,Deletes an existing workflow,-,-"
 )
 NEW_WORKFLOW_FLAGS_MANDATORY="name"
 
