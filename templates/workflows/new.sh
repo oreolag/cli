@@ -72,6 +72,9 @@ fi
 flag1=${V[flag1]}
 flag2=${V[flag2]}
 
+# replace spaces with "_"
+flag1="${flag1// /_}"
+
 # set command flags
 # ...
 
