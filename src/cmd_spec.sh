@@ -10,6 +10,17 @@ WORKFLOWS_PATH="$SCRIPT_DIR/../submodules/workflows"
 # constants
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
 
+# delete
+DELETE_DESCRIPTION="Deletes an artifact of your choice"
+DELETE_FLAGS=(
+)
+# workflow
+DELETE_WORKFLOW_DESCRIPTION="Deletes an existing user workflow"
+DELETE_WORKFLOW_FLAGS=(
+  "name,n,Workflow name,-,-"
+)
+DELETE_WORKFLOW_FLAGS_MANDATORY="name"
+
 # examine 
 EXAMINE_DESCRIPTION="System and device information"
 EXAMINE_FLAGS=(
