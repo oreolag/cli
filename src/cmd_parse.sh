@@ -83,7 +83,7 @@ while [[ $# -gt 0 ]]; do
     fi
   done
 
-  [[ "$matched" == true ]] || { echo "Unknown option: $1" >&2; exit 1; }
+  [[ "$matched" == true ]] || { echo "Unknown flag: $1" >&2; exit 1; }
 done
 
 # emit results (only provided flags)

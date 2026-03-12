@@ -86,13 +86,16 @@ echo ""
 
 # usage
 echo "${bold}USAGE:${normal}"
-if [ "$COMMAND" = "-" ] && [ ! "$SUBCOMMAND" = "-" ]; then
-  # examine
-  #usage="${CLI_NAME} ${SUBCOMMAND}"
+if [ "$SUBCOMMAND" = "examine" ]; then
   echo "  $CLI_NAME $SUBCOMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
-  echo "  This command has no flags."
+#elif [ "$COMMAND" = "-" ] && [ ! "$SUBCOMMAND" = "-" ]; then
+#  # examine
+#  echo "  $CLI_NAME $SUBCOMMAND [flags]"
+#  echo ""
+#  echo "${bold}FLAGS:${normal}"
+#  echo "  This command has no flags."
 elif [ ! "$COMMAND" = "" ] && [ "$SUBCOMMAND" = "-" ]; then
   # cmd/new.sh
   #usage="${CLI_NAME} ${COMMAND}"

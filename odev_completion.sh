@@ -103,8 +103,35 @@ _odev_completions() {
 
   # -----------------------------
   # Always offer --help/-h for top-level commands (odev <cmd> --<TAB>)
+  # Also support flags for single-command scripts like:
+  #   odev examine --<TAB>
   # -----------------------------
   if [[ $cword -eq 2 && "$cur" == -* ]]; then
+    local cmd="${words[1]}"
+    local script="$root/${cmd}.sh"
+
+    if [[ -f "$script" ]]; then
+      local cmd_u varname
+      cmd_u="$(printf '%s' "$cmd" | tr '[:lower:]' '[:upper:]')"
+      varname="${cmd_u}_FLAGS"
+
+      local -a flags=()
+      if eval "[[ \${#${varname}[@]} -gt 0 ]]"; then
+        eval "flags=(\"\${${varname}[@]}\")"
+      fi
+
+      local -a opts=(--help -h)
+      local entry name short rest
+      for entry in "${flags[@]}"; do
+        IFS=',' read -r name short rest <<< "$entry"
+        [[ -n "$name" ]] && opts+=("--$name")
+        [[ -n "$short" ]] && opts+=("-$short")
+      done
+
+      COMPREPLY=( $(compgen -W "${opts[*]}" -- "$cur") )
+      return 0
+    fi
+
     COMPREPLY=( $(compgen -W "--help -h" -- "$cur") )
     return 0
   fi

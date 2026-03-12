@@ -40,6 +40,8 @@ DELETE_WORKFLOW_FLAGS_MANDATORY="name"
 # examine 
 EXAMINE_DESCRIPTION="System and device information"
 EXAMINE_FLAGS=(
+  "tools,t,Show installed tools,-,-"
+  "servers,s,Show server list,-,-"
 )
 
 # new

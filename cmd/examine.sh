@@ -39,7 +39,7 @@ command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$K
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
 
 # (maybe) print help
-print_range="1"
+print_range="0"
 print_default="0"
 print_both="0"
 "$ODEV_PATH/src/cmd_help_print.sh" --maybe \
@@ -47,20 +47,29 @@ print_both="0"
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
 
-# parse and check flag values
-#parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
-#if [[ -n "$parsed_flags" ]]; then
-#  declare -A V
-#  while IFS='=' read -r k v; do
-#    V["$k"]="$v"
-#  done <<< "$parsed_flags"
-#fi
+# parse and assign flags
+flag=$1
 
-# read flags
-# ...
+# check on flags
+if [[ -n "$flag" && "$flag" != "--tools" && "$flag" != "--servers" ]]; then
+    echo "Unknown flag: $flag"
+    exit 1
+fi
 
 # set command flags
 # ...
+
+# print tools
+if [ "$flag" = "--tools" ]; then
+  $ODEV_PATH/src/required_tools_print.sh $ODEV_PATH
+  exit 0
+fi
+
+# print servers
+if [ "$flag" = "--servers" ]; then
+  echo "show servers"
+  exit 0
+fi
 
 # check on CMDB scripts
 cmdb_scripts="cmdb_get.py cmdb_get_cpu.sh cmdb_get_memory.sh cmdb_get_model.sh cmdb_get_storage.sh"
