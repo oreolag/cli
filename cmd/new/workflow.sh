@@ -76,10 +76,7 @@ name=${V[name]}
 name="${name// /_}"
 
 # check on flags
-if [[ -n "$name" && -n "$delete" ]]; then
-  echo "Error: --name and --delete cannot be used together."
-  exit 1
-fi
+# ...
 
 # set command flags
 # ...
