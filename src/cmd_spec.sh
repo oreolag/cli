@@ -10,6 +10,16 @@ WORKFLOWS_PATH="$SCRIPT_DIR/../submodules/workflows"
 # constants
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
 
+# format
+bold=$(tput bold)
+italic=$(tput sitm 2>/dev/null || true)
+normal=$(tput sgr0)
+
+# build
+BUILD_DESCRIPTION="Hetero${italic}genius${normal} project build"
+BUILD_FLAGS=(
+)
+
 # delete
 DELETE_DESCRIPTION="Deletes an artifact of your choice"
 DELETE_FLAGS=(
@@ -43,9 +53,15 @@ NEW_WORKFLOW_FLAGS=(
 )
 NEW_WORKFLOW_FLAGS_MANDATORY="name"
 
+# program
+PROGRAM_DESCRIPTION="Device programming"
+PROGRAM_FLAGS=(
+)
+
 # run
-# nccl
-# ...
+RUN_DESCRIPTION="Accelerated application execution"
+RUN_FLAGS=(
+)
 
 # validate
 VALIDATE_DESCRIPTION="Infrastructure functionality assessment"
