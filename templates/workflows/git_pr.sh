@@ -7,20 +7,29 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
   exit 1
 }
 
-# move to repo root
 cd "$(git rev-parse --show-toplevel)"
 
-# current branch
+# configure git identity if missing
+if ! git config user.name >/dev/null; then
+  git config user.name "$(gh api user --jq .login)"
+fi
+
+if ! git config user.email >/dev/null; then
+  git config user.email "$(gh api user --jq .login)@users.noreply.github.com"
+fi
+
 branch="$(git rev-parse --abbrev-ref HEAD)"
 
-# ensure upstream exists
-git remote get-url upstream >/dev/null 2>&1 || {
-  echo "Error: upstream remote not configured"
+if [[ "$branch" == "main" ]]; then
+  echo "Error: cannot create PR from main"
   exit 1
-}
+fi
 
-# push branch to origin if needed
 git push origin "$branch"
+git fetch upstream main
 
-# create pull request
-gh pr create --repo oreolag/workflows --head "$(gh api user --jq .login):$branch" --fill
+gh pr create \
+  --repo oreolag/workflows \
+  --base main \
+  --head "$(gh api user --jq .login):$branch" \
+  --fill
