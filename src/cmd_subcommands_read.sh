@@ -25,7 +25,7 @@ for v in "${vars[@]:-}"; do
     suffix="${BASH_REMATCH[1]}"
     # normalize name: lowercase and replace underscores with hyphens
     name="${suffix,,}"
-    name="${name//_/-}"
+    #name="${name//_/-}"
     # indirect expansion to fetch the description value
     desc="${!v}"
     [[ -n "$desc" ]] || continue
