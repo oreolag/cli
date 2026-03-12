@@ -52,8 +52,9 @@ NEW_FLAGS=(
 NEW_WORKFLOW_DESCRIPTION="Create a new accelerated workflow"
 NEW_WORKFLOW_FLAGS=(
   "name,n,Workflow name,-,-"
+  "program,p,Set to 1 to add a program workflow,0|1,1"
 )
-NEW_WORKFLOW_FLAGS_MANDATORY="name"
+NEW_WORKFLOW_FLAGS_MANDATORY="name,program"
 
 # program
 PROGRAM_DESCRIPTION="Device programming"

@@ -71,12 +71,16 @@ fi
 
 # assign flags
 name=${V[name]}
+program=${V[program]}
 
 # replace spaces with "_"
 name="${name// /_}"
 
 # check on flags
-# ...
+if [[ "$program" != "0" && "$program" != "1" ]]; then
+  echo "Invalid flag value: --program"
+  exit 1
+fi
 
 # set command flags
 # ...
@@ -108,12 +112,11 @@ cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
 
 # create other files
 cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/build.sh"
-cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/program.sh"
+if [ "$program" = "1" ]; then
+  cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/program.sh"
+fi
 cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/run.sh"
 cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/validate.sh"
-
-#echo "I am a odev-developer? The answer is $is_odev_developer"
-#exit
 
 # replace WFNAME (and _COMMAND_)
 sed -i "s/WFNAME/${name^^}/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"
@@ -121,8 +124,10 @@ sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
 sed -i "s/_COMMAND_/new/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
 sed -i "s/_COMMAND_/build/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
-sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
-sed -i "s/_COMMAND_/program/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
+if [ "$program" = "1" ]; then
+  sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
+  sed -i "s/_COMMAND_/program/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
+fi
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/run.sh"
 sed -i "s/_COMMAND_/run/g" "$WORKFLOWS_USER_PATH/$name/run.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/validate.sh"
@@ -131,29 +136,10 @@ sed -i "s/_COMMAND_/validate/g" "$WORKFLOWS_USER_PATH/$name/validate.sh"
 # create symlinks
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/new.sh" "$ODEV_PATH/cmd/new/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/build.sh" "$ODEV_PATH/cmd/build/$name.sh"
-sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/program.sh" "$ODEV_PATH/cmd/program/$name.sh"
+if [ "$program" = "1" ]; then
+  sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/program.sh" "$ODEV_PATH/cmd/program/$name.sh"
+fi
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/run.sh" "$ODEV_PATH/cmd/run/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh" "$ODEV_PATH/cmd/validate/$name.sh"
 
-# create scripts
-#scripts=("new" "build" "program" "run" "validate")
-#for script in "${scripts[@]}"; do
-#  file="$WORKFLOWS_USER_PATH/$name/${script}.sh"
-#  touch "$file"
-#  echo "#!/bin/bash" >> "$file"
-#  echo "" >> "$file"
-#  echo "echo \"Hi from ${name}/${script}.sh script!\"" >> "$file"
-#  chmod +x "$file"
-#done
-
-# create constants
-#touch "$WORKFLOWS_USER_PATH/$name/constants.yml"
-#echo "---" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
-#echo "" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
-#echo "# my_constants" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
-#echo "my_constants:" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
-#echo "  year: 1982" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
-#echo "  month: August" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
-#echo "  day: 15" >> "$WORKFLOWS_USER_PATH/$name/constants.yml"
-
-# add to GitHub
+# author: https://github.com/jmoya82
