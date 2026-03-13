@@ -79,9 +79,13 @@ fi
 
 # assign flags
 name=${V[name]}
+push=${V[push]}
 
 # replace spaces with "_"
 name="${name// /_}"
+
+# check on flags
+# ...
 
 # set command flags
 # ...
@@ -89,11 +93,29 @@ name="${name// /_}"
 # derived
 # ...
 
+# check if exists
+if [[ -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
+  echo "Project already exists: $SUBCOMMAND/$name"
+  exit 1
+fi
+
+# login to GitHub
+github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+if [ "$github_auth_status" = "0" ]; then
+  eval "gh auth login"
+fi
+
+# get GitHub user
+github_user="$(gh api user --jq .login)"
+
 # create folder
 mkdir -p "$PROJECTS_PATH/$SUBCOMMAND/$name"
 
 # add WORKFLOW
 [[ -f "$PROJECTS_PATH/$SUBCOMMAND/$name/WORKFLOW_NAME" ]] || echo "$SUBCOMMAND" > "$PROJECTS_PATH/$SUBCOMMAND/$name/WORKFLOW_NAME"
+
+# push to GitHub
+
  
 # add your code here!
-echo "Hi from $COMMAND $SUBCOMMAND!"
+echo "Project $SUBCOMMAND/$name has been created!"

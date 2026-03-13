@@ -3,6 +3,7 @@
 NEW_WFNAME_DESCRIPTION="New description"
 NEW_WFNAME_FLAGS=(
   "name,n,Project name,-,-"
+  "push,p,Push to GitHub,0|1,1"
 )
 NEW_WFNAME_FLAGS_MANDATORY="name"
 
