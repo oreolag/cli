@@ -79,13 +79,28 @@ if [[ ! -d "$WORKFLOWS_USER_PATH/$name" ]]; then
   exit 1
 fi
 
-# delete workflow
+# get GitHub branch
+github_branch=$(cat $WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH)
+
+# delete 
 if [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
+  # delete workflow and push
+  cd "$WORKFLOWS_USER_PATH"
+  if git ls-tree -r --name-only "$github_branch" -- "$name" | grep -q .; then
+    rm -rf -- "$WORKFLOWS_USER_PATH/$name"
+
+    git add -A
+    git commit -m "Delete workflow $name"
+    git push origin "$github_branch"
+  else
+    rm -rf -- "$WORKFLOWS_USER_PATH/$name"
+  fi
+
+  # delete symlinks
   sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/new/$name.sh"
   sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/build/$name.sh"
   sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/program/$name.sh"
   sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/run/$name.sh"
   sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$name.sh"
-  rm -rf -- "$WORKFLOWS_USER_PATH/$name"
 fi
 exit 1
