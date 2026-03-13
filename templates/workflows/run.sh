@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev new WFNAME
+# example: odev run WFNAME
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -30,14 +30,6 @@ WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PAT
 
 # check on tools
 # ...
-
-# set projects folder
-if [[ ! -d "$PROJECTS_PATH" ]]; then
-  mkdir -p "$PROJECTS_PATH"
-  cp "$ODEV_PATH/src/git_push.sh" "$PROJECTS_PATH"
-  cp "$ODEV_PATH/src/git_diff.sh" "$PROJECTS_PATH"
-  chmod +x "$PROJECTS_PATH/git_push.sh" "$PROJECTS_PATH/git_diff.sh"
-fi
 
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
@@ -89,11 +81,11 @@ name="${name// /_}"
 # derived
 # ...
 
-# create folder
-mkdir -p "$PROJECTS_PATH/$SUBCOMMAND/$name"
+# check if exists
+if [[ ! -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
+  echo "Project does not exist: $name"
+  exit 1
+fi
 
-# add WORKFLOW
-[[ -f "$PROJECTS_PATH/$SUBCOMMAND/$name/WORKFLOW_NAME" ]] || echo "$SUBCOMMAND" > "$PROJECTS_PATH/$SUBCOMMAND/$name/WORKFLOW_NAME"
- 
 # add your code here!
 echo "Hi from $COMMAND $SUBCOMMAND!"

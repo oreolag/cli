@@ -147,31 +147,32 @@ cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
 #chmod +x $WORKFLOWS_USER_PATH/git_pr.sh
 
 # create other files
-cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/build.sh"
-if [ "$program" = "1" ]; then
-  cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/program.sh"
+#cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/build.sh"
+if [ "$program" = "0" ]; then
+  #cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/program.sh"
+  rm "$WORKFLOWS_USER_PATH/$name/program.sh"
 fi
-cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/run.sh"
+#cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/run.sh"
 
 # replace _INSERT_
 # new
-sed -i 's|_INSERT_|# create folder\
-mkdir -p "\$PROJECTS_PATH/WFNAME/\$name"\
-\
-# add WORKFLOW\
-[[ -f "\$PROJECTS_PATH/WFNAME/\$name/WORKFLOW_NAME" ]] \|\| echo "WFNAME" > "\$PROJECTS_PATH/WFNAME/\$name/WORKFLOW_NAME"|g' "$WORKFLOWS_USER_PATH/$name/new.sh"
-# build, program, run
-for file in \
-  "$WORKFLOWS_USER_PATH/$name/build.sh" \
-  "$WORKFLOWS_USER_PATH/$name/program.sh" \
-  "$WORKFLOWS_USER_PATH/$name/run.sh"
-do
-  sed -i 's|_INSERT_|# check if exists\
-if [[ ! -d "\$PROJECTS_PATH/WFNAME/\$name" ]]; then\
-  echo "Project does not exist: \$name"\
-  exit 1\
-fi|g' "$file"
-done
+#sed -i 's|_INSERT_|# create folder\
+#mkdir -p "\$PROJECTS_PATH/WFNAME/\$name"\
+#\
+## add WORKFLOW\
+#[[ -f "\$PROJECTS_PATH/WFNAME/\$name/WORKFLOW_NAME" ]] \|\| echo "WFNAME" > "\$PROJECTS_PATH/WFNAME/\$name/WORKFLOW_NAME"|g' "$WORKFLOWS_USER_PATH/$name/new.sh"
+## build, program, run
+#for file in \
+#  "$WORKFLOWS_USER_PATH/$name/build.sh" \
+#  "$WORKFLOWS_USER_PATH/$name/program.sh" \
+#  "$WORKFLOWS_USER_PATH/$name/run.sh"
+#do
+#  sed -i 's|_INSERT_|# check if exists\
+#if [[ ! -d "\$PROJECTS_PATH/WFNAME/\$name" ]]; then\
+#  echo "Project does not exist: \$name"\
+#  exit 1\
+#fi|g' "$file"
+#done
 
 # replace WFNAME (and _COMMAND_)
 sed -i "s/WFNAME/${name^^}/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"

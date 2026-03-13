@@ -31,14 +31,6 @@ WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PAT
 # check on tools
 # ...
 
-# set projects folder
-if [[ ! -d "$PROJECTS_PATH" ]]; then
-  mkdir -p "$PROJECTS_PATH"
-  cp "$ODEV_PATH/src/git_push.sh" "$PROJECTS_PATH"
-  cp "$ODEV_PATH/src/git_diff.sh" "$PROJECTS_PATH"
-  chmod +x "$PROJECTS_PATH/git_push.sh" "$PROJECTS_PATH/git_diff.sh"
-fi
-
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 
@@ -92,4 +84,4 @@ flag2="${flag2// /_}"
 # ...
 
 # add your code here!
-echo "Validating WFNAME with flag1=$flag1 and flag2=$flag2"
+echo "Hi from $COMMAND $SUBCOMMAND (with flag1=$flag1 and flag2=$flag2)!"
