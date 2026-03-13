@@ -116,6 +116,14 @@ fi
 # create a fork
 if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
   cd "$odev_path"
+
+  # check if repository already exists in the account
+  if gh repo view "${github_user}/workflows" >/dev/null 2>&1; then
+    echo "Repository already exists: $github_user/workflows"
+    exit 1
+  fi
+  
+  #fork
   gh repo fork oreolag/workflows --clone=false
   git clone "https://github.com/${github_user}/workflows.git" workflows
   cd workflows
