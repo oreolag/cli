@@ -90,7 +90,9 @@ name="${name// /_}"
 # ...
 
 # create folder
-mkdir -p $PROJECTS_PATH/$name
+mkdir -p $PROJECTS_PATH/WFNAME/$name
+
+# add WORKFLOW
+[[ -f "$PROJECTS_PATH/WFNAME/$name/WORKFLOW_NAME" ]] || echo "WFNAME" > "$PROJECTS_PATH/WFNAME/$name/WORKFLOW_NAME"
 
 # add your code here!
-echo "Hello from _COMMAND_ WFNAME $name has been created!"
