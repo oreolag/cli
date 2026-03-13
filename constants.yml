@@ -1,5 +1,9 @@
 ---
 
+#github
+github:
+  push_branch: my_workflows
+
 #paths
 paths:
   cmdb: /opt

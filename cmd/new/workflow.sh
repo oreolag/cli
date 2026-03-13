@@ -21,6 +21,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
+GITHUB_PUSH_BRANCH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" github push_branch)")"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
@@ -103,12 +104,39 @@ if [ "$github_auth_status" = "0" ]; then
   eval "gh auth login"
 fi
 
-# create workflows folder
+# get GitHub user
+github_user="$(gh api user --jq .login)"
+
+# check on ~/odev
+odev_path="$(dirname "$WORKFLOWS_USER_PATH")"
+if [[ ! -d "$odev_path" ]]; then
+  mkdir -p "$odev_path"
+fi
+
+# create a fork
+if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
+  cd "$odev_path"
+  gh repo fork oreolag/workflows --clone=false
+  git clone "https://github.com/${github_user}/workflows.git" workflows
+  cd workflows
+  git remote get-url upstream >/dev/null 2>&1 || git remote add upstream https://github.com/oreolag/workflows.git
+fi
+
+# save branch
+echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
+
+# create workflow folder
 mkdir -p "$WORKFLOWS_USER_PATH/$name"
 cd "$WORKFLOWS_USER_PATH/$name"
 
 # copy from template
 cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
+
+# move scripts
+#mv $WORKFLOWS_USER_PATH/$name/git_push.sh $WORKFLOWS_USER_PATH
+#mv $WORKFLOWS_USER_PATH/$name/git_pr.sh $WORKFLOWS_USER_PATH
+#chmod +x $WORKFLOWS_USER_PATH/git_push.sh
+#chmod +x $WORKFLOWS_USER_PATH/git_pr.sh
 
 # create other files
 cp "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOWS_USER_PATH/$name/build.sh"
