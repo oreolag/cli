@@ -99,14 +99,7 @@ if [[ -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
   exit 1
 fi
 
-# login to GitHub
-github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
-if [ "$github_auth_status" = "0" ]; then
-  eval "gh auth login"
-fi
 
-# get GitHub user
-github_user="$(gh api user --jq .login)"
 
 # create folder
 mkdir -p "$PROJECTS_PATH/$SUBCOMMAND/$name"
@@ -115,7 +108,47 @@ mkdir -p "$PROJECTS_PATH/$SUBCOMMAND/$name"
 [[ -f "$PROJECTS_PATH/$SUBCOMMAND/$name/WORKFLOW_NAME" ]] || echo "$SUBCOMMAND" > "$PROJECTS_PATH/$SUBCOMMAND/$name/WORKFLOW_NAME"
 
 # push to GitHub
+if [ "$push" = "1" ]; then
+  # login
+  github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+  if [ "$github_auth_status" = "0" ]; then
+    eval "gh auth login"
+  fi
 
- 
+  # get GitHub user
+  github_user="$(gh api user --jq .login)"
+
+  # check if repository already exists in the account
+  if gh repo view "${github_user}/$name" >/dev/null 2>&1; then
+    echo "Repository already exists: $github_user/$name"
+    exit 1
+  fi
+
+  # move to project
+  cd "$PROJECTS_PATH/$SUBCOMMAND/$name"
+
+  # initialize git repo if needed
+  if [[ ! -d ".git" ]]; then
+    git init
+  fi
+
+  # configure git identity if missing
+  if ! git config user.name >/dev/null; then
+    git config user.name "$github_user"
+  fi
+
+  if ! git config user.email >/dev/null; then
+    git config user.email "${github_user}@users.noreply.github.com"
+  fi
+
+  # initial commit if needed
+  if ! git rev-parse --verify HEAD >/dev/null 2>&1; then
+    git add .
+    git commit -m "Initial commit"
+  fi
+
+  gh repo create "$github_user/$name" --private --source=. --remote=origin --push
+fi
+
 # add your code here!
 echo "Project $SUBCOMMAND/$name has been created!"
