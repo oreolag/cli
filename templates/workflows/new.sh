@@ -21,6 +21,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
+PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths projects)")"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
 
@@ -29,6 +30,14 @@ WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PAT
 
 # check on tools
 # ...
+
+# set projects folder
+if [[ ! -d "$PROJECTS_PATH" ]]; then
+  mkdir -p "$PROJECTS_PATH"
+  cp "$ODEV_PATH/src/git_push.sh" "$PROJECTS_PATH"
+  cp "$ODEV_PATH/src/git_diff.sh" "$PROJECTS_PATH"
+  chmod +x "$PROJECTS_PATH/git_push.sh" "$PROJECTS_PATH/git_diff.sh"
+fi
 
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
@@ -81,9 +90,12 @@ flag1="${flag1// /_}"
 # derived
 # ...
 
+# create folder
+mkdir -p $PROJECTS_PATH/$name
+
 # add your code here!
 
-echo "Hello from WFNAME _COMMAND_!"
+echo "Hello from _COMMAND_ WFNAME!"
 echo ""
 echo "flag1: $flag1"
 echo "flag2: $flag2"
