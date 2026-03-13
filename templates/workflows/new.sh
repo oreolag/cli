@@ -89,10 +89,6 @@ name="${name// /_}"
 # derived
 # ...
 
-# create folder
-mkdir -p $PROJECTS_PATH/WFNAME/$name
-
-# add WORKFLOW
-[[ -f "$PROJECTS_PATH/WFNAME/$name/WORKFLOW_NAME" ]] || echo "WFNAME" > "$PROJECTS_PATH/WFNAME/$name/WORKFLOW_NAME"
-
+_INSERT_
+ 
 # add your code here!
