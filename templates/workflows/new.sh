@@ -78,11 +78,10 @@ if [[ -n "$parsed_flags" ]]; then
 fi
 
 # assign flags
-flag1=${V[flag1]}
-flag2=${V[flag2]}
+name=${V[name]}
 
 # replace spaces with "_"
-flag1="${flag1// /_}"
+name="${name// /_}"
 
 # set command flags
 # ...
@@ -94,8 +93,4 @@ flag1="${flag1// /_}"
 mkdir -p $PROJECTS_PATH/$name
 
 # add your code here!
-
-echo "Hello from _COMMAND_ WFNAME!"
-echo ""
-echo "flag1: $flag1"
-echo "flag2: $flag2"
+echo "Hello from _COMMAND_ WFNAME $name has been created!"
