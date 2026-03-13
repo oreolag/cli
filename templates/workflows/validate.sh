@@ -77,6 +77,9 @@ flag2=${V[flag2]}
 flag1="${flag1// /_}"
 flag2="${flag2// /_}"
 
+# check on flags
+# ...
+
 # set command flags
 # ...
 

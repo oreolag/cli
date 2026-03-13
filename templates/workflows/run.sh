@@ -75,6 +75,9 @@ name=${V[name]}
 # replace spaces with "_"
 name="${name// /_}"
 
+# check on flags
+# ...
+
 # set command flags
 # ...
 
