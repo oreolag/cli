@@ -99,8 +99,6 @@ if [[ -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
   exit 1
 fi
 
-
-
 # create folder
 mkdir -p "$PROJECTS_PATH/$SUBCOMMAND/$name"
 
