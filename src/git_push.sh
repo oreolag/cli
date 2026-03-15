@@ -3,6 +3,7 @@ set -euo pipefail
 
 msg="Update"
 workflow=""
+project=""
 file=""
 
 # format
@@ -11,14 +12,15 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 print_help() {
-  echo "Commit and push git changes for a workflow."
+  echo "Commit and push git changes for a project."
   echo
   echo "${bold}USAGE:${normal}"
   echo "  git_push.sh [flags]"
   echo
   echo "${bold}FLAGS:${normal}"
   echo "    --workflow   Workflow name"
-  echo "    --file       Workflow file name (add, modify, or delete)"
+  echo "    --project    Project name"
+  echo "    --file       Project file name (add, modify, or delete)"
   echo "    --comment    Commit subject"
   echo
   echo "${bold}INHERITED FLAGS:${normal}"
@@ -30,6 +32,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --workflow)
       workflow="${2:-}"
+      shift 2
+      ;;
+    --project)
+      project="${2:-}"
       shift 2
       ;;
     --file)
@@ -59,13 +65,15 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
 
 cd "$(git rev-parse --show-toplevel)"
 
-# get GITHUB_PUSH_BRANCH
-github_branch="$(cat "./GITHUB_PUSH_BRANCH")"
-
 # interactive prompts
 if [[ -z "$workflow" ]]; then
   printf "workflow: " > /dev/tty
   read -r workflow < /dev/tty
+fi
+
+if [[ -z "$project" ]]; then
+  printf "project: " > /dev/tty
+  read -r project < /dev/tty
 fi
 
 if [[ -z "$file" ]]; then
@@ -79,11 +87,17 @@ if [[ "$msg" == "Update" ]]; then
 fi
 
 # set file
-file="$workflow/$file"
+file="$workflow/$project/$file"
 
 # validate workflow
 if [[ ! -d "$workflow" ]]; then
-  echo "File not found: $file"
+  echo "Project not found: $workflow/$project"
+  exit 1
+fi
+
+# validate project
+if [[ ! -d "$workflow/$project" ]]; then
+  echo "Project not found: $workflow/$project"
   exit 1
 fi
 
@@ -102,13 +116,6 @@ if ! git config user.email >/dev/null; then
   git config user.email "$(gh api user --jq .login)@users.noreply.github.com"
 fi
 
-# create branch if needed
-branch="$(git rev-parse --abbrev-ref HEAD)"
-if [[ "$branch" == "main" ]]; then
-  git checkout -b "$github_branch"
-  branch="$github_branch"
-fi
-
 # stage file change (including deletion)
 git add -A -- "$file"
 
@@ -118,4 +125,4 @@ if git diff --cached --quiet; then
 fi
 
 git commit -m "$msg"
-git push -u origin "$branch"
+git push
