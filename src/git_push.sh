@@ -57,14 +57,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# ensure we are inside a git repository
-git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
-  echo "Error: not inside a git repository"
-  exit 1
-}
-
-cd "$(git rev-parse --show-toplevel)"
-
 # interactive prompts
 if [[ -z "$workflow" ]]; then
   printf "workflow: " > /dev/tty
@@ -86,12 +78,9 @@ if [[ "$msg" == "Update" ]]; then
   read -r msg < /dev/tty
 fi
 
-# set file
-file="$workflow/$project/$file"
-
 # validate workflow
 if [[ ! -d "$workflow" ]]; then
-  echo "Project not found: $workflow/$project"
+  echo "Workflow not found: $workflow"
   exit 1
 fi
 
@@ -100,6 +89,16 @@ if [[ ! -d "$workflow/$project" ]]; then
   echo "Project not found: $workflow/$project"
   exit 1
 fi
+
+# enter repository
+repo="$workflow/$project"
+
+if [[ ! -d "$repo/.git" ]]; then
+  echo "Error: not inside a git repository: $repo"
+  exit 1
+fi
+
+cd "$repo"
 
 # validate file (existing or tracked-for-deletion)
 if [[ ! -f "$file" ]] && ! git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
