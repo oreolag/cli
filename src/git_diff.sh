@@ -2,7 +2,7 @@
 set -euo pipefail
 
 workflow=""
-command=""
+file=""
 
 # format
 bold=$(tput bold)
@@ -10,14 +10,14 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 print_help() {
-  echo "Show git differences for a workflow command."
+  echo "Show git differences for a workflow file."
   echo
   echo "${bold}USAGE:${normal}"
   echo "  git_diff.sh [flags]"
   echo
   echo "${bold}FLAGS:${normal}"
   echo "    --workflow   Workflow name"
-  echo "    --command    Command name (new, build, ${italic}program,${normal} run, validate)"
+  echo "    --file       File name"
   echo
   echo "${bold}INHERITED FLAGS:${normal}"
   echo "  -h, --help       Show this help"
@@ -32,8 +32,8 @@ while [[ $# -gt 0 ]]; do
       workflow="${2:-}"
       shift 2
       ;;
-    --command)
-      command="${2:-}"
+    --file)
+      file="${2:-}"
       shift 2
       ;;
     --help|-h)
@@ -65,25 +65,19 @@ if [[ -z "$workflow" ]]; then
   read -r workflow < /dev/tty
 fi
 
-if [[ -z "$command" ]]; then
-  printf "command: " > /dev/tty
-  read -r command < /dev/tty
+if [[ -z "$file" ]]; then
+  printf "file: " > /dev/tty
+  read -r file < /dev/tty
 fi
 
 # -----------------------------
 # Determine file
 # -----------------------------
-if [[ -n "$command" ]]; then
-  if [[ "$command" == *.sh ]]; then
-    file="$workflow/$command"
-    command_name="${command%.sh}"
-  else
-    file="$workflow/$command.sh"
-    command_name="$command"
-  fi
+if [[ -n "$file" ]]; then
+  file="$workflow/$file"
 
   if [[ ! -d "$workflow" ]] || [[ ! -f "$file" ]]; then
-    echo "Command not found: $workflow $command_name"
+    echo "File not found: $file"
     exit 1
   fi
 
@@ -93,7 +87,6 @@ if [[ -n "$command" ]]; then
     echo "Error: use git_push.sh first"
     exit 1
   fi
-
 else
   # diff entire workflow
   while read -r file; do

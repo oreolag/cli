@@ -2,16 +2,8 @@
 set -euo pipefail
 
 msg="Update"
-if [[ $# -gt 0 && "$1" != --* ]]; then
-  msg="$1"
-  shift
-fi
-
-# get GITHUB_PUSH_BRANCH
-github_branch=$(cat ./GITHUB_PUSH_BRANCH)
-
 workflow=""
-command=""
+file=""
 
 # format
 bold=$(tput bold)
@@ -19,16 +11,16 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 print_help() {
-  echo "Commit and push git changes for a workflow command."
+  echo "Commit and push git changes for a workflow."
   echo
   echo "${bold}USAGE:${normal}"
   echo "  git_push.sh [flags]"
   echo
   echo "${bold}FLAGS:${normal}"
   echo "    --workflow   Workflow name"
-  echo "    --command    Command name (new, build, ${italic}program,${normal} run, validate)"
+  echo "    --file       Workflow file name (add, modify, or delete)"
   echo "    --comment    Commit subject"
-  echo 
+  echo
   echo "${bold}INHERITED FLAGS:${normal}"
   echo "  -h, --help       Show this help"
 }
@@ -36,6 +28,18 @@ print_help() {
 # parse flags
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --workflow)
+      workflow="${2:-}"
+      shift 2
+      ;;
+    --file)
+      file="${2:-}"
+      shift 2
+      ;;
+    --comment)
+      msg="${2:-}"
+      shift 2
+      ;;
     --help|-h)
       print_help
       exit 0
@@ -55,28 +59,37 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
 
 cd "$(git rev-parse --show-toplevel)"
 
+# get GITHUB_PUSH_BRANCH
+github_branch="$(cat "./GITHUB_PUSH_BRANCH")"
+
 # interactive prompts
-printf "workflow: " > /dev/tty
-read -r workflow < /dev/tty
-
-printf "command: " > /dev/tty
-read -r command < /dev/tty
-
-printf "comment: " > /dev/tty
-read -r msg < /dev/tty
-
-# resolve file
-if [[ "$command" == *.sh ]]; then
-  file="$workflow/$command"
-  command_name="${command%.sh}"
-else
-  file="$workflow/$command.sh"
-  command_name="$command"
+if [[ -z "$workflow" ]]; then
+  printf "workflow: " > /dev/tty
+  read -r workflow < /dev/tty
 fi
 
-# validate workflow + command together (odev style)
-if [[ ! -d "$workflow" ]] || [[ ! -f "$file" ]]; then
-  echo "Command not found: $workflow $command_name"
+if [[ -z "$file" ]]; then
+  printf "file: " > /dev/tty
+  read -r file < /dev/tty
+fi
+
+if [[ "$msg" == "Update" ]]; then
+  printf "comment: " > /dev/tty
+  read -r msg < /dev/tty
+fi
+
+# set file
+file="$workflow/$file"
+
+# validate workflow
+if [[ ! -d "$workflow" ]]; then
+  echo "File not found: $file"
+  exit 1
+fi
+
+# validate file (existing or tracked-for-deletion)
+if [[ ! -f "$file" ]] && ! git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+  echo "File not found: $file"
   exit 1
 fi
 
@@ -92,11 +105,12 @@ fi
 # create branch if needed
 branch="$(git rev-parse --abbrev-ref HEAD)"
 if [[ "$branch" == "main" ]]; then
-  git checkout -b my_workflows
-  branch="my_workflows"
+  git checkout -b "$github_branch"
+  branch="$github_branch"
 fi
 
-git add "$file"
+# stage file change (including deletion)
+git add -A -- "$file"
 
 if git diff --cached --quiet; then
   echo "Nothing to commit."
