@@ -169,4 +169,7 @@ fi
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/run.sh" "$ODEV_PATH/cmd/run/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh" "$ODEV_PATH/cmd/validate/$name.sh"
 
+# commit cmd_spec.sh
+"$WORKFLOWS_USER_PATH/git_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
+
 # author: https://github.com/jmoya82
