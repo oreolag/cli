@@ -91,19 +91,22 @@ fi
 # get GitHub user
 github_user="$(gh api user --jq .login)"
 
+# set GitHub project name
+github_name="$workflow-$project"
+
 # check remote repository
-if ! gh repo view "${github_user}/${project}" >/dev/null 2>&1; then
-  echo "Repository does not exist: ${github_user}/${project}"
+if ! gh repo view "${github_user}/${github_name}" >/dev/null 2>&1; then
+  echo "Project does not exist: ${github_user}/${github_name}"
   exit 1
 fi
 
 # delete remote repository
-if ! gh repo delete "${github_user}/${project}" --yes >/dev/null 2>&1; then
+if ! gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
   gh auth refresh -h github.com -s delete_repo
 
   # try again
-  if ! gh repo delete "${github_user}/${project}" --yes >/dev/null 2>&1; then
-    echo "Permission denied: ${github_user}/${project}"
+  if ! gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
+    echo "Permission denied: ${github_user}/${github_name}"
     exit 1
   fi
 fi

@@ -116,9 +116,14 @@ if [ "$push" = "1" ]; then
   # get GitHub user
   github_user="$(gh api user --jq .login)"
 
+  # set GitHub project name
+  github_name="$SUBCOMMAND-$name"
+
   # check if repository already exists in the account
-  if gh repo view "${github_user}/$name" >/dev/null 2>&1; then
-    echo "Repository already exists: $github_user/$name"
+  if gh repo view "${github_user}/$github_name" >/dev/null 2>&1; then
+    echo "Project already exists: $github_user/$github_name"
+    # remove locally
+    rm -rf "$PROJECTS_PATH/$SUBCOMMAND/$name"
     exit 1
   fi
 
@@ -145,7 +150,7 @@ if [ "$push" = "1" ]; then
     git commit -m "Initial commit"
   fi
 
-  gh repo create "$github_user/$name" --private --source=. --remote=origin --push
+  gh repo create "$github_user/$github_name" --private --source=. --remote=origin --push
 fi
 
 # add your code here!
