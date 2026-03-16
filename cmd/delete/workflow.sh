@@ -31,7 +31,10 @@ if [ "$is_odev_developer" = "0" ]; then
 fi
 
 # check on tools
-# ...
+installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
+if [[ "$installed" == "0" ]]; then
+  echo "Missing tool: $tool"
+fi
 
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
@@ -67,6 +70,9 @@ fi
 # assign flags
 name=${V[name]}
 
+# check on flags
+# ...
+
 # set command flags
 # ...
 
@@ -77,6 +83,12 @@ name=${V[name]}
 if [[ ! -d "$WORKFLOWS_USER_PATH/$name" ]]; then
   echo "Workflow does not exist: $name"
   exit 1
+fi
+
+# login to GitHub
+github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+if [ "$github_auth_status" = "0" ]; then
+  eval "gh auth login"
 fi
 
 # get GitHub branch
