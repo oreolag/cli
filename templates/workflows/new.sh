@@ -149,4 +149,6 @@ if [ "$push" = "1" ]; then
 fi
 
 # add your code here!
-echo "Project $SUBCOMMAND/$name has been created!"
+# ...
+
+echo "Project created: $SUBCOMMAND/$name"
