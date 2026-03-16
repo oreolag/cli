@@ -35,7 +35,7 @@ WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PAT
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 
 # read command description, command flags, and mandatory flags
-target="$(readlink -f "$ODEV_PATH/cmd/new/$SUBCOMMAND.sh")"
+target="$(readlink -f "$ODEV_PATH/cmd/$COMMAND/$SUBCOMMAND.sh")"
 if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
     command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY" --db "$WORKFLOWS_USER_PATH/$SUBCOMMAND/cmd_spec.sh")"
     mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY" --db "$WORKFLOWS_USER_PATH/$SUBCOMMAND/cmd_spec.sh")
