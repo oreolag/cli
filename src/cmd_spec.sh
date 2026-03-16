@@ -27,9 +27,10 @@ DELETE_FLAGS=(
 # workflow
 DELETE_PROJECT_DESCRIPTION="Deletes an existing user project"
 DELETE_PROJECT_FLAGS=(
-  "name,n,Project name,-,-"
+  "project,p,Project name,-,-"
+  "workflow,w,Workflow name,-,-"
 )
-DELETE_PROJECT_FLAGS_MANDATORY="name"
+DELETE_PROJECT_FLAGS_MANDATORY="project,workflow"
 # workflow
 DELETE_WORKFLOW_DESCRIPTION="Deletes an existing user workflow"
 DELETE_WORKFLOW_FLAGS=(

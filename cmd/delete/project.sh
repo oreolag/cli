@@ -27,7 +27,10 @@ PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/cons
 # ...
 
 # check on tools
-# ...
+installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
+if [[ "$installed" == "0" ]]; then
+  echo "Missing tool: $tool"
+fi
 
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
@@ -61,7 +64,11 @@ if [[ -n "$parsed_flags" ]]; then
 fi
 
 # assign flags
-name=${V[name]}
+project=${V[project]}
+workflow=${V[workflow]}
+
+# check on flags
+# ...
 
 # set command flags
 # ...
@@ -69,14 +76,37 @@ name=${V[name]}
 # derived
 # ...
 
-# check if exists
-if [[ ! -d "$PROJECTS_PATH/$name" ]]; then
-  echo "Project does not exist: $name"
+# check local project
+if [[ ! -d "$PROJECTS_PATH/$workflow/$project" ]]; then
+  echo "Project does not exist: $workflow/$project"
   exit 1
 fi
 
-# delete workflow
-if [[ -d "$PROJECTS_PATH/$name" ]]; then
-  rm -rf -- "$PROJECTS_PATH/$name"
+# login to GitHub
+github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+if [ "$github_auth_status" = "0" ]; then
+  eval "gh auth login"
 fi
-exit 1
+
+# get GitHub user
+github_user="$(gh api user --jq .login)"
+
+# check remote repository
+if ! gh repo view "${github_user}/${project}" >/dev/null 2>&1; then
+  echo "Repository does not exist: ${github_user}/${project}"
+  exit 1
+fi
+
+# delete remote repository
+if ! gh repo delete "${github_user}/${project}" --yes >/dev/null 2>&1; then
+  gh auth refresh -h github.com -s delete_repo
+
+  # try again
+  if ! gh repo delete "${github_user}/${project}" --yes >/dev/null 2>&1; then
+    echo "Permission denied: ${github_user}/${project}"
+    exit 1
+  fi
+fi
+
+# delete local project
+rm -rf -- "$PROJECTS_PATH/$workflow/$project"
