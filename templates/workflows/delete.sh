@@ -21,6 +21,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
+COLOR_PASSED=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_PASSED)
 PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths projects)")"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
@@ -92,6 +93,7 @@ fi
 
 # get push option
 push=$(cat "$PROJECTS_PATH/$SUBCOMMAND/$name/GITHUB_PUSH")
+remote_deleted="0"
 if [ "$push" = "1" ]; then
   # login to GitHub
   github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
@@ -112,16 +114,26 @@ if [ "$push" = "1" ]; then
   fi
 
   # delete remote repository
-  if ! gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
+  if gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
+    remote_deleted="1"
+  else
     gh auth refresh -h github.com -s delete_repo
 
-    # try again
-    if ! gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
+    if gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
+      remote_deleted="1"
+    else
       echo "Permission denied: ${github_user}/${github_name}"
       exit 1
     fi
   fi
 fi
 
-# delete local $name
-rm -rf -- "$PROJECTS_PATH/$SUBCOMMAND/$name"
+# delete local project
+if rm -rf -- "$PROJECTS_PATH/$SUBCOMMAND/$name"; then
+  echo "Project deleted: $SUBCOMMAND/$name"
+fi
+
+# report GitHub
+if [ "$remote_deleted" = "1" ]; then
+  echo -e "${COLOR_PASSED}✓${normal} Repository deleted: $github_user/$github_name"
+fi
