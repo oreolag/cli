@@ -113,15 +113,6 @@ if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
   exit 1
 fi
 
-# login to GitHub
-github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
-if [ "$github_auth_status" = "0" ]; then
-  eval "gh auth login"
-fi
-
-# get GitHub user
-github_user="$(gh api user --jq .login)"
-
 # check on ~/odev
 odev_path="$(dirname "$WORKFLOWS_USER_PATH")"
 if [[ ! -d "$odev_path" ]]; then
@@ -130,6 +121,15 @@ fi
 
 # create a fork
 if [[ "$push" == "1" && ! -d "$WORKFLOWS_USER_PATH" ]]; then
+  # login to GitHub
+  github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+  if [ "$github_auth_status" = "0" ]; then
+    eval "gh auth login"
+  fi
+
+  # get GitHub user
+  github_user="$(gh api user --jq .login)"
+
   # change directory
   cd "$odev_path"
 
