@@ -1,0 +1,1 @@
+../../submodules/workflows/nccl/delete.sh
