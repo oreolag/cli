@@ -85,6 +85,11 @@ if [[ ! -d "$WORKFLOWS_USER_PATH/$name" ]]; then
   exit 1
 fi
 
+# read push (if applies)
+if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH" ]]; then
+  push=$(cat $WORKFLOWS_USER_PATH/GITHUB_PUSH)
+fi
+
 # login to GitHub
 github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
 if [ "$github_auth_status" = "0" ]; then
@@ -92,7 +97,9 @@ if [ "$github_auth_status" = "0" ]; then
 fi
 
 # get GitHub branch
-github_branch=$(cat $WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH)
+if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
+  github_branch=$(cat $WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH)
+fi
 
 # delete 
 target="$(readlink -f "$ODEV_PATH/cmd/new/$name.sh")"
@@ -100,15 +107,25 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
   if [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
     # delete workflow and push
     cd "$WORKFLOWS_USER_PATH"
-    if git ls-tree -r --name-only "$github_branch" -- "$name" | grep -q .; then
-      rm -rf -- "$WORKFLOWS_USER_PATH/$name"
+    #if git ls-tree -r --name-only "$github_branch" -- "$name" | grep -q .; then
+    #  rm -rf -- "$WORKFLOWS_USER_PATH/$name"
+    #
+    #  git add -A
+    #  git commit -m "Delete workflow $name"
+    #  git push origin "$github_branch"
+    #else
+    #  rm -rf -- "$WORKFLOWS_USER_PATH/$name"
+    #fi
 
+    # delete remotely
+    if [[ "$push" == "1" ]] && git ls-tree -r --name-only "$github_branch" -- "$name" | grep -q .; then
       git add -A
       git commit -m "Delete workflow $name"
       git push origin "$github_branch"
-    else
-      rm -rf -- "$WORKFLOWS_USER_PATH/$name"
     fi
+
+    # delete locally
+    rm -rf -- "$WORKFLOWS_USER_PATH/$name"
 
     # delete symlinks
     sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/new/$name.sh"
@@ -117,6 +134,11 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
     sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/run/$name.sh"
     sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$name.sh"
     sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/delete/$name.sh"
+
+    # print
+    if [ "$push" = "0" ]; then
+      echo "Workflow deleted: $name"
+    fi
   fi
   exit 1
 else

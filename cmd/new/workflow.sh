@@ -47,6 +47,11 @@ command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$K
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
 mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
 
+# check on mandatory_flags (remove push)
+if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH" ]]; then
+  mandatory_flags="name"
+fi
+
 # (maybe) print help
 print_range="0"
 print_default="0"
@@ -72,7 +77,13 @@ fi
 
 # assign flags
 name=${V[name]}
+push=${V[push]}
 #program=${V[program]}
+
+# read push (if applies)
+if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH" ]]; then
+  push=$(cat $WORKFLOWS_USER_PATH/GITHUB_PUSH)
+fi
 
 # replace spaces with "_"
 name="${name// /_}"
@@ -82,6 +93,10 @@ name="${name// /_}"
 #  echo "Invalid flag value: --program"
 #  exit 1
 #fi
+if [[ "$push" != "0" && "$push" != "1" ]]; then
+  echo "Invalid flag value: --push"
+  exit 1
+fi
 
 # set command flags
 # ...
@@ -114,12 +129,14 @@ if [[ ! -d "$odev_path" ]]; then
 fi
 
 # create a fork
-if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
+if [[ "$push" == "1" && ! -d "$WORKFLOWS_USER_PATH" ]]; then
+  # change directory
   cd "$odev_path"
 
   # check if repository already exists in the account
   if gh repo view "${github_user}/workflows" >/dev/null 2>&1; then
     echo "Repository already exists: $github_user/workflows"
+    rm -rf "$odev_path"
     exit 1
   fi
   
@@ -128,14 +145,20 @@ if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
   git clone "https://github.com/${github_user}/workflows.git" workflows
   cd workflows
   git remote get-url upstream >/dev/null 2>&1 || git remote add upstream https://github.com/oreolag/workflows.git
+
+  # save branch
+  echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
 fi
 
 # save branch
-echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
+#echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
 
 # create workflow folder
 mkdir -p "$WORKFLOWS_USER_PATH/$name"
 cd "$WORKFLOWS_USER_PATH/$name"
+
+# add GITHUB_PUSH
+[[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH" ]] || echo "$push" > "$WORKFLOWS_USER_PATH/GITHUB_PUSH"
 
 # copy from template
 cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
@@ -173,6 +196,13 @@ sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" "$ODEV_PATH/cmd/delete/$name.sh"
 
 # commit cmd_spec.sh
-"$WORKFLOWS_USER_PATH/git_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
+if [ "$push" = "1" ]; then
+  "$WORKFLOWS_USER_PATH/git_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
+fi
+
+# print
+if [ "$push" = "0" ]; then
+  echo "Workflow created: $name"
+fi
 
 # author: https://github.com/jmoya82
