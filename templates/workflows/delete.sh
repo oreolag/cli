@@ -90,34 +90,38 @@ if [[ ! -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
   exit 1
 fi
 
-# login to GitHub
-github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
-if [ "$github_auth_status" = "0" ]; then
-  eval "gh auth login"
-fi
+# get push option
+push=$(cat "$PROJECTS_PATH/$SUBCOMMAND/$name/GITHUB_PUSH")
+if [ "$push" = "1" ]; then
+  # login to GitHub
+  github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+  if [ "$github_auth_status" = "0" ]; then
+    eval "gh auth login"
+  fi
 
-# get GitHub user
-github_user="$(gh api user --jq .login)"
+  # get GitHub user
+  github_user="$(gh api user --jq .login)"
 
-# set GitHub project name
-github_name="$SUBCOMMAND-$name"
+  # set GitHub project name
+  github_name="$SUBCOMMAND-$name"
 
-# check remote repository
-if ! gh repo view "${github_user}/${github_name}" >/dev/null 2>&1; then
-  echo "Project does not exist: ${github_user}/${github_name}"
-  exit 1
-fi
-
-# delete remote repository
-if ! gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
-  gh auth refresh -h github.com -s delete_repo
-
-  # try again
-  if ! gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
-    echo "Permission denied: ${github_user}/${github_name}"
+  # check remote repository
+  if ! gh repo view "${github_user}/${github_name}" >/dev/null 2>&1; then
+    echo "Project does not exist: ${github_user}/${github_name}"
     exit 1
+  fi
+
+  # delete remote repository
+  if ! gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
+    gh auth refresh -h github.com -s delete_repo
+
+    # try again
+    if ! gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
+      echo "Permission denied: ${github_user}/${github_name}"
+      exit 1
+    fi
   fi
 fi
 
 # delete local $name
-rm -rf -- "$PROJECTS_PATH/$SUBCOMMAND/$project"
+rm -rf -- "$PROJECTS_PATH/$SUBCOMMAND/$name"

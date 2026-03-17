@@ -105,6 +105,9 @@ mkdir -p "$PROJECTS_PATH/$SUBCOMMAND/$name"
 # add WORKFLOW
 [[ -f "$PROJECTS_PATH/$SUBCOMMAND/$name/WORKFLOW_NAME" ]] || echo "$SUBCOMMAND" > "$PROJECTS_PATH/$SUBCOMMAND/$name/WORKFLOW_NAME"
 
+# add GITHUB_PUSH
+[[ -f "$PROJECTS_PATH/$SUBCOMMAND/$name/GITHUB_PUSH" ]] || echo "$push" > "$PROJECTS_PATH/$SUBCOMMAND/$name/GITHUB_PUSH"
+
 # push to GitHub
 if [ "$push" = "1" ]; then
   # login
