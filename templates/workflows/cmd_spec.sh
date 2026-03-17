@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-# format
-bold=$(tput bold)
-italic=$(tput sitm 2>/dev/null || true)
-normal=$(tput sgr0)
-
 # helpers
 lower() {
   printf '%s' "${1,,}"
@@ -23,7 +18,7 @@ BUILD_WFNAME_FLAGS=(
 )
 BUILD_WFNAME_FLAGS_MANDATORY="name"
 
-DELETE_WFNAME_DESCRIPTION="Deletes a ${italic}$(lower WFNAME)${normal} project"
+DELETE_WFNAME_DESCRIPTION="Deletes a $(lower WFNAME) project"
 DELETE_WFNAME_FLAGS=(
   "name,n,Project name,-,-"
 )
