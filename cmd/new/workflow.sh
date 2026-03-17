@@ -72,16 +72,16 @@ fi
 
 # assign flags
 name=${V[name]}
-program=${V[program]}
+#program=${V[program]}
 
 # replace spaces with "_"
 name="${name// /_}"
 
 # check on flags
-if [[ "$program" != "0" && "$program" != "1" ]]; then
-  echo "Invalid flag value: --program"
-  exit 1
-fi
+#if [[ "$program" != "0" && "$program" != "1" ]]; then
+#  echo "Invalid flag value: --program"
+#  exit 1
+#fi
 
 # set command flags
 # ...
@@ -141,9 +141,9 @@ cd "$WORKFLOWS_USER_PATH/$name"
 cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
 
 # check on program
-if [ "$program" = "0" ]; then
-  rm "$WORKFLOWS_USER_PATH/$name/program.sh"
-fi
+#if [ "$program" = "0" ]; then
+#  rm "$WORKFLOWS_USER_PATH/$name/program.sh"
+#fi
 
 # replace WFNAME (and _COMMAND_)
 sed -i "s/WFNAME/${name^^}/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"
@@ -151,10 +151,10 @@ sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
 sed -i "s/_COMMAND_/new/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
 sed -i "s/_COMMAND_/build/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
-if [ "$program" = "1" ]; then
+#if [ "$program" = "1" ]; then
   sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
   sed -i "s/_COMMAND_/program/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
-fi
+#fi
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/run.sh"
 sed -i "s/_COMMAND_/run/g" "$WORKFLOWS_USER_PATH/$name/run.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/validate.sh"
@@ -165,9 +165,9 @@ sed -i "s/_COMMAND_/delete/g" "$WORKFLOWS_USER_PATH/$name/delete.sh"
 # create symlinks
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/new.sh" "$ODEV_PATH/cmd/new/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/build.sh" "$ODEV_PATH/cmd/build/$name.sh"
-if [ "$program" = "1" ]; then
+#if [ "$program" = "1" ]; then
   sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/program.sh" "$ODEV_PATH/cmd/program/$name.sh"
-fi
+#fi
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/run.sh" "$ODEV_PATH/cmd/run/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh" "$ODEV_PATH/cmd/validate/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" "$ODEV_PATH/cmd/delete/$name.sh"
