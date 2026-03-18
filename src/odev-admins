@@ -1,4 +1,5 @@
 %odev-admins ALL=(ALL) NOPASSWD: \
   /usr/bin/cp, \
   /usr/bin/rm, \  
-  /usr/bin/rsync
+  /usr/bin/rsync, \
+  /usr/bin/mv
