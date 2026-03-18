@@ -1,5 +1,5 @@
 %odev-admins ALL=(ALL) NOPASSWD: \
-  /usr/bin/chown, \
+  /usr/bin/chown -R root:root /opt/odev*, \
   /usr/bin/chmod, \
   /usr/bin/cp, \
   /usr/bin/rm, \
