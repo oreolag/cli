@@ -434,3 +434,5 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
         print_numa "$TMP_PATH/examine_gpu_$i" "$COLOR_NVIDIA"
     fi
 done
+
+# author: https://github.com/jmoya82
