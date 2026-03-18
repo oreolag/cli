@@ -63,7 +63,7 @@ RUN_FLAGS=(
 # update
 UPDATE_DESCRIPTION="Update odev to latest release (github.com/oreolag/cli/releases)"
 UPDATE_FLAGS=(
-  "main,m,Use main branch instead of release,0|1,0"
+  "main,m,Use main branch instead of release,-,-"
 )
 
 # validate

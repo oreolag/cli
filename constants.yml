@@ -3,6 +3,7 @@
 #github
 github:
   push_branch: my_workflows
+  odev_repo: "https://github.com/oreolag/cli"
 
 #paths
 paths:
