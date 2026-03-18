@@ -48,7 +48,7 @@ mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
 # (maybe) print help
 print_range="0"
 print_default="0"
-print_both="1"
+print_both="0"
 "$ODEV_PATH/src/cmd_help_print.sh" --maybe \
   "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$command_description" \
   "$print_range" "$print_default" "$print_both" \
@@ -75,22 +75,21 @@ rm -rf -- "$CHECKOUT_PATH"
 # repository checkout
 msg=""
 if [[ "$flag" == "--main" ]] || [[ "$flag" == "-m" ]]; then
-  # clone main branch
-  git clone --depth 1 --branch main "$ODEV_REPO" "$CHECKOUT_PATH"
+  git clone --branch main "$ODEV_REPO" "$CHECKOUT_PATH"
   msg="${COLOR_PASSED}✓${normal} odev updated: main"
 else
-  # get latest release tag
   tag="$(gh release view --repo oreolag/cli --json tagName -q .tagName)"
 
-  # fallback if gh fails
   if [[ -z "$tag" ]]; then
     tag="$(git ls-remote --tags "$ODEV_REPO" | awk -F/ '{print $3}' | sort -V | tail -n1)"
   fi
 
-  # clone specific tag
-  git clone --depth 1 --branch "$tag" "$ODEV_REPO" "$CHECKOUT_PATH"
+  git clone --branch "$tag" "$ODEV_REPO" "$CHECKOUT_PATH"
   msg="${COLOR_PASSED}✓${normal} odev updated: $tag"
 fi
+
+# get submodules
+git -C "$CHECKOUT_PATH" submodule update --init --recursive
 
 #  
 
