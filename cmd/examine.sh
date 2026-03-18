@@ -60,13 +60,13 @@ fi
 # ...
 
 # print tools
-if [ "$flag" = "--tools" ]; then
+if [ "$flag" = "--tools" ] || [ "$flag" = "-t" ]; then
   $ODEV_PATH/src/required_tools_print.sh $ODEV_PATH
   exit 0
 fi
 
 # print servers
-if [ "$flag" = "--servers" ]; then
+if [ "$flag" = "--servers" ] || [ "$flag" = "-s" ]; then
   echo "show servers"
   exit 0
 fi
