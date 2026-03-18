@@ -136,6 +136,24 @@ sudo cp -a "$CHECKOUT_PATH/submodules" "$ODEV_PATH/submodules"
 sudo rm -rf -- "$ODEV_PATH/templates"
 sudo cp -a "$CHECKOUT_PATH/templates" "$ODEV_PATH/templates"
 
+# Install completion (system-wide)
+sudo install -o root -g root -m 0644 \
+  "$ODEV_PATH/odev_completion.sh" \
+  /usr/share/bash-completion/completions/odev
+
+# Add extended capabilities
+sudo install -o root -g root -m 0440 \
+  "$ODEV_PATH/src/odev-users" \
+  /etc/sudoers.d/odev-users
+
+sudo install -o root -g root -m 0440 \
+  "$ODEV_PATH/src/odev-developers" \
+  /etc/sudoers.d/odev-developers
+
+sudo install -o root -g root -m 0440 \
+  "$ODEV_PATH/src/odev-admins" \
+  /etc/sudoers.d/odev-admins
+
 # consolidate ownership
 sudo chown -R root:root "$ODEV_PATH"
 
