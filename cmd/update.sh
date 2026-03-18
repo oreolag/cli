@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # example: odev update
 
@@ -70,7 +71,8 @@ fi
 CHECKOUT_PATH="$TMP_PATH/odev"
 
 # remove first
-rm -rf -- "$CHECKOUT_PATH"
+sudo rm -rf -- "$CHECKOUT_PATH"
+#sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$CHECKOUT_PATH"
 
 # repository checkout
 msg=""
@@ -91,6 +93,8 @@ fi
 # get submodules
 git -C "$CHECKOUT_PATH" submodule update --init --recursive
 
+echo "here 1"
+
 # top level files
 for f in LICENSE README.md RELEASE_DATE VERSION cli-removebg.png constants.yml odev_completion.sh submodules_update.sh; do
   if [[ -f "$CHECKOUT_PATH/$f" ]]; then
@@ -98,10 +102,14 @@ for f in LICENSE README.md RELEASE_DATE VERSION cli-removebg.png constants.yml o
   fi
 done
 
+echo "here 2"
+
 # compile and copy odev
-chmod +x "$CHECKOUT_PATH/odev.sh"
-mv "$CHECKOUT_PATH/odev.sh" "$CHECKOUT_PATH/odev"
+sudo chmod +x "$CHECKOUT_PATH/odev.sh"
+sudo mv "$CHECKOUT_PATH/odev.sh" "$CHECKOUT_PATH/odev"
 sudo cp -f -- "$CHECKOUT_PATH/odev" "$ODEV_PATH/odev"
+
+echo "here 3"
 
 # cmd (keep user symlinks)
 sudo mv "$ODEV_PATH/cmd" "$ODEV_PATH/cmd_tmp"
@@ -124,38 +132,58 @@ for dir in "${folders[@]}"; do
 done
 sudo rm -rf -- "$ODEV_PATH/cmd_tmp"
 
+echo "here 4"
+
 # src
 sudo rm -rf -- "$ODEV_PATH/src"
 sudo cp -a "$CHECKOUT_PATH/src" "$ODEV_PATH/src"
+
+echo "here 5"
 
 # submodules
 sudo rm -rf -- "$ODEV_PATH/submodules"
 sudo cp -a "$CHECKOUT_PATH/submodules" "$ODEV_PATH/submodules"
 
+echo "here 6"
+
 # templates
 sudo rm -rf -- "$ODEV_PATH/templates"
 sudo cp -a "$CHECKOUT_PATH/templates" "$ODEV_PATH/templates"
+
+echo "here 7"
 
 # Install completion (system-wide)
 sudo install -o root -g root -m 0644 \
   "$ODEV_PATH/odev_completion.sh" \
   /usr/share/bash-completion/completions/odev
 
+echo "here 8"
+
 # Add extended capabilities
 sudo install -o root -g root -m 0440 \
   "$ODEV_PATH/src/odev-users" \
   /etc/sudoers.d/odev-users
 
+echo "here 9"
+
 sudo install -o root -g root -m 0440 \
   "$ODEV_PATH/src/odev-developers" \
   /etc/sudoers.d/odev-developers
+
+echo "here 10"
 
 sudo install -o root -g root -m 0440 \
   "$ODEV_PATH/src/odev-admins" \
   /etc/sudoers.d/odev-admins
 
+echo "here 11"
+
 # consolidate ownership
-sudo chown -R root:root "$ODEV_PATH"
+#chown_path=$(which chown)
+#sudo "$chown_path" -R root:root "$ODEV_PATH"
+sudo "$ODEV_PATH/src/chown.sh" root root "$ODEV_PATH"
+
+echo "here 12"
 
 # print 
 echo -e "$msg"
