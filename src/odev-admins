@@ -1,6 +1,8 @@
 %odev-admins ALL=(ALL) NOPASSWD: \
-  /usr/bin/chown, \  
+  /usr/bin/chown, \
+  /usr/bin/chmod, \
   /usr/bin/cp, \
-  /usr/bin/rm, \  
+  /usr/bin/rm, \
   /usr/bin/rsync, \
-  /usr/bin/mv
+  /usr/bin/mv, \
+  /usr/bin/install
