@@ -53,7 +53,7 @@ print_help() {
   echo ""
   echo "${bold}LEARN MORE${normal}"
   echo "  Use ${bold}odev <command> <subcommand> --help${normal} for more information about a command."
-  echo "  Read the manual at https://books.oreol.ch/6/cli"
+  echo "  Read the manual at books.oreol.ch/6/cli"
   #if [ ! "$gh_status" = "" ]; then
   #  echo ""
   #  echo $gh_status
