@@ -91,8 +91,53 @@ fi
 # get submodules
 git -C "$CHECKOUT_PATH" submodule update --init --recursive
 
-#  
+# top level files
+for f in LICENSE README.md RELEASE_DATE VERSION cli-removebg.png constants.yml odev_completion.sh submodules_update.sh; do
+  if [[ -f "$CHECKOUT_PATH/$f" ]]; then
+    sudo cp -f -- "$CHECKOUT_PATH/$f" "$ODEV_PATH/$f"
+  fi
+done
 
+# compile and copy odev
+chmod +x "$CHECKOUT_PATH/odev.sh"
+mv "$CHECKOUT_PATH/odev.sh" "$CHECKOUT_PATH/odev"
+sudo cp -f -- "$CHECKOUT_PATH/odev" "$ODEV_PATH/odev"
+
+# cmd (keep user symlinks)
+sudo mv "$ODEV_PATH/cmd" "$ODEV_PATH/cmd_tmp"
+sudo cp -a "$CHECKOUT_PATH/cmd" "$ODEV_PATH/cmd"
+folders=(new build program run validate delete)
+for dir in "${folders[@]}"; do
+  src="$ODEV_PATH/cmd_tmp/$dir"
+  dst="$ODEV_PATH/cmd/$dir"
+  [[ -d "$src" ]] || continue
+  find "$src" -maxdepth 1 -type l | while read -r link; do
+    target="$(readlink "$link")"
+    # user symlinks do NOT start with ../../
+    if [[ "$target" != ../../* ]]; then
+      name="$(basename "$link")"
+      if [[ ! -e "$dst/$name" ]]; then
+        sudo cp -a "$link" "$dst/$name"
+      fi
+    fi
+  done
+done
+sudo rm -rf -- "$ODEV_PATH/cmd_tmp"
+
+# src
+sudo rm -rf -- "$ODEV_PATH/src"
+sudo cp -a "$CHECKOUT_PATH/src" "$ODEV_PATH/src"
+
+# submodules
+sudo rm -rf -- "$ODEV_PATH/submodules"
+sudo cp -a "$CHECKOUT_PATH/submodules" "$ODEV_PATH/submodules"
+
+# templates
+sudo rm -rf -- "$ODEV_PATH/templates"
+sudo cp -a "$CHECKOUT_PATH/templates" "$ODEV_PATH/templates"
+
+# consolidate ownership
+sudo chown -R root:root "$ODEV_PATH"
 
 # print 
 echo -e "$msg"
