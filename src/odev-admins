@@ -1,2 +1,3 @@
 %odev-admins ALL=(ALL) NOPASSWD: \
-  /opt/odev/src/cp.sh
+  /usr/bin/cp, \
+  /usr/bin/rsync
