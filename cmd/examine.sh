@@ -51,7 +51,7 @@ print_both="0"
 flag=$1
 
 # check on flags
-if [[ -n "$flag" && "$flag" != "--tools" && "$flag" != "--servers" ]]; then
+if [[ -n "$flag" && "$flag" != "--tools" && "$flag" != "-t" && "$flag" != "--servers" && "$flag" != "-s" ]]; then
     echo "Unknown flag: $flag"
     exit 1
 fi
