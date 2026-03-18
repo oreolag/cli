@@ -86,7 +86,7 @@ echo ""
 
 # usage
 echo "${bold}USAGE:${normal}"
-if [ "$SUBCOMMAND" = "examine" ]; then
+if [ "$SUBCOMMAND" = "examine" ] || [ "$SUBCOMMAND" = "update" ]; then
   echo "  $CLI_NAME $SUBCOMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"

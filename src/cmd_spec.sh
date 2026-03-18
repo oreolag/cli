@@ -60,6 +60,12 @@ RUN_DESCRIPTION="Accelerated application execution"
 RUN_FLAGS=(
 )
 
+# update
+UPDATE_DESCRIPTION="Update odev to latest release (github.com/oreolag/cli/releases)"
+UPDATE_FLAGS=(
+  "main,m,Use main branch instead of release,0|1,0"
+)
+
 # validate
 VALIDATE_DESCRIPTION="Infrastructure functionality assessment"
 VALIDATE_FLAGS=(
