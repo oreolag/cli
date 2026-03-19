@@ -56,7 +56,7 @@ print_both="0"
   "${flags[@]}" -- "$@" && exit 0 || true
 
 # parse and assign flags
-flag=$1
+flag="${1:-}"
 
 # check on flags
 if [[ -n "$flag" && "$flag" != "--main" && "$flag" != "-m" ]]; then
