@@ -272,13 +272,12 @@ echo "Total storage: $total_storage"
 echo ""
 
 # remove examine files
-#rm -rf $TMP_PATH/examine_*
 for f in "$TMP_PATH"/examine_*; do
     [ -e "$f" ] || continue
     sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$f"
 done
 
-# NUMA lstopo loop 
+# NUMA lscpu loop 
 numa_nodes_lscpu=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
 for ((i=0; i<numa_nodes_lscpu; i++)); do
     # CPU list
