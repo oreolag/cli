@@ -36,7 +36,8 @@ if [[ "$installed" == "0" ]]; then
 fi
 
 # set KEY
-KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
+#KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
+KEY="${COMMAND^^}"
 
 # read command description, command flags, and mandatory flags
 target="$(readlink -f "$ODEV_PATH/cmd/$COMMAND/$SUBCOMMAND.sh")"
