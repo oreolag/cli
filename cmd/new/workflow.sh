@@ -192,6 +192,9 @@ cd "$WORKFLOWS_USER_PATH/$name"
 if [ ! "$template" = "-" ]; then
   # this is in fact an existing workflow
   cp -r "$WORKFLOWS_USER_PATH/$template"/* .
+
+  # replace in cmd_spec.sh
+  sed -i "s/_${template^^}_/_${name^^}_/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"
 else
   cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
 fi
