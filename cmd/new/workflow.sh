@@ -21,7 +21,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
-COLOR_PASSED=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_PASSED)
+#COLOR_PASSED=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_PASSED)
 GITHUB_PUSH_BRANCH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" github push_branch)")"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
@@ -157,8 +157,8 @@ if [[ "$push" == "1" && ! -d "$WORKFLOWS_USER_PATH" ]]; then
   echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
 
   # generate string
-  msg1="${COLOR_PASSED}✓${normal} Created fork ${bold}$github_user/workflows${normal}"
-  msg2="Cloning into 'workflows'..."
+  #msg1="${COLOR_PASSED}✓${normal} Created fork ${bold}$github_user/workflows${normal}"
+  #msg2="Cloning into 'workflows'..."
 fi
 
 # create workflow folder
@@ -175,11 +175,11 @@ if [ ! "$template" = "-" ] && [[ ! -d "$WORKFLOWS_USER_PATH/$template" ]]; then
 fi
 
 # print
-if [ ! "$msg1" = "" ]; then
-  echo -e "$msg1"
-  sleep 1
-  echo "$msg2"
-fi
+#if [ ! "$msg1" = "" ]; then
+#  echo -e "$msg1"
+#  sleep 1
+#  echo "$msg2"
+#fi
 
 # create workflow name folder
 mkdir -p "$WORKFLOWS_USER_PATH/$name"
@@ -234,8 +234,8 @@ if [ "$push" = "1" ]; then
 fi
 
 # print
-if [ "$push" = "0" ]; then
+#if [ "$push" = "0" ]; then
   echo "Workflow created: $name"
-fi
+#fi
 
 # author: https://github.com/jmoya82
