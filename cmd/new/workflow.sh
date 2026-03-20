@@ -21,6 +21,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
+COLOR_PASSED=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_PASSED)
 GITHUB_PUSH_BRANCH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" github push_branch)")"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
@@ -77,6 +78,7 @@ fi
 
 # assign flags
 name=${V[name]}
+template=${V[template]}
 push=${V[push]}
 #program=${V[program]}
 
@@ -141,27 +143,58 @@ if [[ "$push" == "1" && ! -d "$WORKFLOWS_USER_PATH" ]]; then
   fi
   
   #fork
-  gh repo fork oreolag/workflows --clone=false
-  git clone "https://github.com/${github_user}/workflows.git" workflows
+  #gh repo fork oreolag/workflows --clone=false
+  #git clone "https://github.com/${github_user}/workflows.git" workflows
+  #cd workflows
+  #git remote get-url upstream >/dev/null 2>&1 || git remote add upstream https://github.com/oreolag/workflows.git
+  gh repo fork oreolag/workflows --clone=false >/dev/null 2>&1
+  git clone "https://github.com/${github_user}/workflows.git" workflows >/dev/null 2>&1
   cd workflows
-  git remote get-url upstream >/dev/null 2>&1 || git remote add upstream https://github.com/oreolag/workflows.git
+  git remote get-url upstream >/dev/null 2>&1 || \
+  git remote add upstream https://github.com/oreolag/workflows.git >/dev/null 2>&1
 
   # save branch
   echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
+
+  # generate string
+  msg1="${COLOR_PASSED}✓${normal} Created fork ${bold}$github_user/workflows${normal}"
+  msg2="Cloning into 'workflows'..."
 fi
 
-# save branch
-#echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
-
 # create workflow folder
-mkdir -p "$WORKFLOWS_USER_PATH/$name"
-cd "$WORKFLOWS_USER_PATH/$name"
+mkdir -p "$WORKFLOWS_USER_PATH"
 
 # add GITHUB_PUSH
 [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH" ]] || echo "$push" > "$WORKFLOWS_USER_PATH/GITHUB_PUSH"
 
-# copy from template
-cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
+# check on template
+if [ ! "$template" = "-" ] && [[ ! -d "$WORKFLOWS_USER_PATH/$template" ]]; then
+  # this is in fact an existing workflow
+  echo "Template does not exist: $template"
+  exit 1
+fi
+
+# print
+if [ ! "$msg1" = "" ]; then
+  echo -e "$msg1"
+  sleep 1
+  echo "$msg2"
+fi
+
+# create workflow name folder
+mkdir -p "$WORKFLOWS_USER_PATH/$name"
+cd "$WORKFLOWS_USER_PATH/$name"
+
+# add GITHUB_PUSH
+#[[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH" ]] || echo "$push" > "$WORKFLOWS_USER_PATH/GITHUB_PUSH"
+
+# copy from existing workflow/template
+if [ ! "$template" = "-" ]; then
+  # this is in fact an existing workflow
+  cp -r "$WORKFLOWS_USER_PATH/$template"/* .
+else
+  cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
+fi
 
 # check on program
 #if [ "$program" = "0" ]; then

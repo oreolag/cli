@@ -91,15 +91,15 @@ if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH" ]]; then
 fi
 
 # login to GitHub
-github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
-if [ "$github_auth_status" = "0" ]; then
-  eval "gh auth login"
-fi
+#github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+#if [ "$github_auth_status" = "0" ]; then
+#  eval "gh auth login"
+#fi
 
 # get GitHub branch
-if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
-  github_branch=$(cat $WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH)
-fi
+#if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
+#  github_branch=$(cat $WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH)
+#fi
 
 # delete 
 target="$(readlink -f "$ODEV_PATH/cmd/new/$name.sh")"
@@ -107,22 +107,6 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
   if [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
     # delete workflow and push
     cd "$WORKFLOWS_USER_PATH"
-    #if git ls-tree -r --name-only "$github_branch" -- "$name" | grep -q .; then
-    #  rm -rf -- "$WORKFLOWS_USER_PATH/$name"
-    #
-    #  git add -A
-    #  git commit -m "Delete workflow $name"
-    #  git push origin "$github_branch"
-    #else
-    #  rm -rf -- "$WORKFLOWS_USER_PATH/$name"
-    #fi
-
-    # delete remotely
-    if [[ "$push" == "1" ]] && git ls-tree -r --name-only "$github_branch" -- "$name" | grep -q .; then
-      git add -A
-      git commit -m "Delete workflow $name"
-      git push origin "$github_branch"
-    fi
 
     # delete locally
     rm -rf -- "$WORKFLOWS_USER_PATH/$name"
@@ -135,8 +119,25 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
     sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$name.sh"
     sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/delete/$name.sh"
 
-    # print
-    if [ "$push" = "0" ]; then
+    if [[ "$push" == "1" ]]; then
+      # login to GitHub
+      github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+      if [ "$github_auth_status" = "0" ]; then
+        eval "gh auth login"
+      fi
+
+      # get GitHub branch
+      if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
+        github_branch="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")"
+      fi
+
+      # delete remotely (stage deletion!)
+      if git ls-tree -r --name-only "$github_branch" -- "$name" | grep -q .; then
+        git add -A "$name"
+        git commit -m "Delete workflow $name"
+        git push origin "$github_branch"
+      fi
+    else
       echo "Workflow deleted: $name"
     fi
   fi

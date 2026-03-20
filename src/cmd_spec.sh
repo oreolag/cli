@@ -47,6 +47,7 @@ NEW_WORKFLOW_DESCRIPTION="Create a new accelerated workflow"
 NEW_WORKFLOW_FLAGS=(
   "name,n,Workflow name,-,-"
   "push,p,Push to an oreolag/workflows fork on GitHub,0|1,1"
+  "template,t,Use existing workflow as template,-,-"
 )
 NEW_WORKFLOW_FLAGS_MANDATORY="name,push"
 
