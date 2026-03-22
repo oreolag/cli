@@ -40,8 +40,8 @@ if [[ ! -d "$PROJECTS_PATH" ]]; then
 fi
 
 # set KEY
-#KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
-KEY="${COMMAND^^}"
+KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
+#KEY="${COMMAND^^}"
 
 # get cmd_spec.sh path
 target="$(readlink -f "$ODEV_PATH/cmd/$COMMAND/$SUBCOMMAND.sh")"
