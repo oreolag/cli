@@ -86,8 +86,8 @@ if [[ ! -d "$WORKFLOWS_USER_PATH/$name" ]]; then
 fi
 
 # read push (if applies)
-if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH" ]]; then
-  push=$(cat $WORKFLOWS_USER_PATH/GITHUB_PUSH)
+if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_FORK" ]]; then
+  push=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
 fi
 
 # login to GitHub

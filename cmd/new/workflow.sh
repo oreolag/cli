@@ -197,7 +197,7 @@ fi
 # create workflow folder
 mkdir -p "$WORKFLOWS_USER_PATH"
 
-# add GITHUB_FORK
+# add GITHUB_FORK (if not existing)
 [[ -f "$WORKFLOWS_USER_PATH/GITHUB_FORK" ]] || echo "$fork" > "$WORKFLOWS_USER_PATH/GITHUB_FORK"
 
 # check on template
@@ -265,6 +265,7 @@ sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" "$ODEV_PATH/cmd/delete/$name.sh"
 
 # commit cmd_spec.sh
+fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
 if [ "$fork" = "1" ]; then
   "$WORKFLOWS_USER_PATH/git_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
 fi
