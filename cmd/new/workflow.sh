@@ -180,6 +180,22 @@ if [ "$fork" == "1" ]; then #if [[ "$fork" == "1" && ! -d "$WORKFLOWS_USER_PATH"
   echo "$fork" > "GITHUB_FORK"
 
   # recreate symlinks when possible
+  scripts=(new build program run validate delete)
+  for d in "$WORKFLOWS_USER_PATH"/*; do
+    [[ -d "$d" ]] || continue
+    name="$(basename "$d")"
+
+    for script in "${scripts[@]}"; do
+      src="$WORKFLOWS_USER_PATH/$name/$script.sh"
+      dst="$ODEV_PATH/cmd/$script/$name.sh"
+
+      [[ -e "$src" ]] || continue
+
+      if [[ ! -e "$dst" && ! -L "$dst" ]]; then
+        sudo "$ODEV_PATH/src/ln_s.sh" "$ODEV_PATH" "$src" "$dst"
+      fi
+    done
+  done
 
   # successfully exit
   exit 0
@@ -257,9 +273,7 @@ sed -i "s/_COMMAND_/delete/g" "$WORKFLOWS_USER_PATH/$name/delete.sh"
 # create symlinks
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/new.sh" "$ODEV_PATH/cmd/new/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/build.sh" "$ODEV_PATH/cmd/build/$name.sh"
-#if [ "$program" = "1" ]; then
-  sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/program.sh" "$ODEV_PATH/cmd/program/$name.sh"
-#fi
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/program.sh" "$ODEV_PATH/cmd/program/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/run.sh" "$ODEV_PATH/cmd/run/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh" "$ODEV_PATH/cmd/validate/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" "$ODEV_PATH/cmd/delete/$name.sh"
