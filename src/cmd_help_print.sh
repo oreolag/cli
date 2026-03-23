@@ -83,7 +83,6 @@ normal=$(tput sgr0 2>/dev/null || true)
 echo "$COMMAND_DESCRIPTION."
 echo ""
 
-
 # usage
 echo "${bold}USAGE:${normal}"
 if [ "$SUBCOMMAND" = "examine" ] || [ "$SUBCOMMAND" = "update" ]; then
@@ -117,6 +116,9 @@ fi
 # print commands or flags
 for p in "${PARAMS[@]}"; do
   IFS=',' read -r name short desc range def <<< "$p"
+
+  [[ "$range" == "-" ]] && range=""
+  [[ "$def" == "-" ]] && def=""
 
   suffix=""
   if [[ "$print_both" == "1" ]]; then
