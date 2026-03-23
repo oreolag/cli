@@ -90,6 +90,10 @@ if [ "$SUBCOMMAND" = "examine" ] || [ "$SUBCOMMAND" = "update" ]; then
   echo "  $CLI_NAME $SUBCOMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
+elif [ "$COMMAND" = "new" ] && [ "$SUBCOMMAND" = "workflow" ]; then
+  echo "  $CLI_NAME $COMMAND $SUBCOMMAND [--fork] [flags]"
+  echo ""
+  echo "${bold}FLAGS:${normal}"
 #elif [ "$COMMAND" = "-" ] && [ ! "$SUBCOMMAND" = "-" ]; then
 #  # examine
 #  echo "  $CLI_NAME $SUBCOMMAND [flags]"
