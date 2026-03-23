@@ -126,6 +126,18 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
         eval "gh auth login"
       fi
 
+      # get GitHub user
+      github_user="$(gh api user --jq .login)"
+
+      # configure git identity if missing
+      if ! git config user.name >/dev/null; then
+        git config user.name "$github_user"
+      fi
+
+      if ! git config user.email >/dev/null; then
+        git config user.email "${github_user}@users.noreply.github.com"
+      fi
+
       # get GitHub branch
       if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
         github_branch="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")"
