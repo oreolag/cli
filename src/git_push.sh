@@ -20,11 +20,11 @@ print_help() {
   echo "${bold}FLAGS:${normal}"
   echo "    --workflow   Workflow name"
   echo "    --project    Project name"
-  echo "    --file       Project file name (add, modify, or delete)"
+  echo "    --file       Project file name (optional; if omitted, the whole project is staged)"
   echo "    --comment    Commit subject"
   echo
   echo "${bold}INHERITED FLAGS:${normal}"
-  echo "  -h, --help       Show this help"
+  echo "  -h, --help     Show this help"
 }
 
 # parse flags
@@ -68,8 +68,9 @@ if [[ -z "$project" ]]; then
   read -r project < /dev/tty
 fi
 
+# optional file prompt (press Enter to skip → whole project)
 if [[ -z "$file" ]]; then
-  printf "file: " > /dev/tty
+  printf "file (optional): " > /dev/tty
   read -r file < /dev/tty
 fi
 
@@ -100,10 +101,17 @@ fi
 
 cd "$repo"
 
-# validate file (existing or tracked-for-deletion)
-if [[ ! -f "$file" ]] && ! git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
-  echo "File not found: $file"
-  exit 1
+# set target
+if [[ -n "$file" ]]; then
+  target="$file"
+
+  # validate file (existing or tracked-for-deletion)
+  if [[ ! -f "$target" ]] && ! git ls-files --error-unmatch "$target" >/dev/null 2>&1; then
+    echo "File not found: $target"
+    exit 1
+  fi
+else
+  target="."
 fi
 
 # configure git identity if missing
@@ -116,10 +124,10 @@ if ! git config user.email >/dev/null; then
 fi
 
 # stage file change (including deletion)
-git add -A -- "$file"
+git add -A -- "$target"
 
 if git diff --cached --quiet; then
-  echo "Nothing to commit: $file"
+  echo "Nothing to commit: $target"
   exit 0
 fi
 
