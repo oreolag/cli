@@ -32,12 +32,12 @@ WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PAT
 # ...
 
 # set projects folder
-if [[ ! -d "$PROJECTS_PATH" ]]; then
-  mkdir -p "$PROJECTS_PATH"
-  cp "$ODEV_PATH/src/git_push.sh" "$PROJECTS_PATH"
-  cp "$ODEV_PATH/src/git_diff.sh" "$PROJECTS_PATH"
-  chmod +x "$PROJECTS_PATH/git_push.sh" "$PROJECTS_PATH/git_diff.sh"
-fi
+#if [[ ! -d "$PROJECTS_PATH" ]]; then
+#  mkdir -p "$PROJECTS_PATH"
+#  cp "$ODEV_PATH/src/git_push.sh" "$PROJECTS_PATH"
+#  cp "$ODEV_PATH/src/git_diff.sh" "$PROJECTS_PATH"
+#  chmod +x "$PROJECTS_PATH/git_push.sh" "$PROJECTS_PATH/git_diff.sh"
+#fi
 
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
@@ -100,6 +100,14 @@ name="${name// /_}"
 
 # derived
 # ...
+
+# set projects folder
+if [[ ! -d "$PROJECTS_PATH" ]]; then
+  mkdir -p "$PROJECTS_PATH"
+  cp "$ODEV_PATH/src/git_push.sh" "$PROJECTS_PATH"
+  cp "$ODEV_PATH/src/git_diff.sh" "$PROJECTS_PATH"
+  chmod +x "$PROJECTS_PATH/git_push.sh" "$PROJECTS_PATH/git_diff.sh"
+fi
 
 # check if exists
 if [[ -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
