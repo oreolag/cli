@@ -245,7 +245,14 @@ if [ ! "$template" = "-" ]; then
   # replace in cmd_spec.sh
   sed -i "s/_${template^^}_/_${name^^}_/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"
 else
-  cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
+  #cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
+  cp "$WORKFLOWS_TEMPLATE_PATH"/cmd_spec.sh .
+  cp "$WORKFLOWS_TEMPLATE_PATH"/new.sh .
+  cp "$WORKFLOWS_TEMPLATE_PATH"/build.sh .
+  cp "$WORKFLOWS_TEMPLATE_PATH"/program.sh .
+  cp "$WORKFLOWS_TEMPLATE_PATH"/run.sh .
+  cp "$WORKFLOWS_TEMPLATE_PATH"/validate.sh .
+  cp "$WORKFLOWS_TEMPLATE_PATH"/delete.sh .
 fi
 
 # check on program
@@ -283,6 +290,12 @@ fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
 if [ "$fork" = "1" ]; then
   "$WORKFLOWS_USER_PATH/git_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
 fi
+
+# copy helper scripts
+cd "$WORKFLOWS_USER_PATH"
+cp "$WORKFLOWS_TEMPLATE_PATH"/git_diff.sh .
+cp "$WORKFLOWS_TEMPLATE_PATH"/github_pr.sh .
+cp "$WORKFLOWS_TEMPLATE_PATH"/github_push.sh .
 
 # print
 #if [ "$fork" = "0" ]; then
