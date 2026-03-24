@@ -57,11 +57,6 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
 
 cd "$(git rev-parse --show-toplevel)"
 
-# ensure GitHub authentication
-if ! gh auth status >/dev/null 2>&1; then
-  gh auth login
-fi
-
 # -----------------------------
 # Interactive prompt
 # -----------------------------
