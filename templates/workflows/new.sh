@@ -93,9 +93,9 @@ name="${name// /_}"
 # set projects folder
 if [[ ! -d "$PROJECTS_PATH" ]]; then
   mkdir -p "$PROJECTS_PATH"
-  cp "$ODEV_PATH/src/git_push.sh" "$PROJECTS_PATH"
+  cp "$ODEV_PATH/src/github_push.sh" "$PROJECTS_PATH"
   cp "$ODEV_PATH/src/git_diff.sh" "$PROJECTS_PATH"
-  chmod +x "$PROJECTS_PATH/git_push.sh" "$PROJECTS_PATH/git_diff.sh"
+  chmod +x "$PROJECTS_PATH/github_push.sh" "$PROJECTS_PATH/git_diff.sh"
 fi
 
 # check if exists
