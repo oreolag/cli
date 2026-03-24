@@ -99,6 +99,11 @@ if [[ ! -d "$repo/.git" ]]; then
   exit 1
 fi
 
+# ensure GitHub authentication
+if ! gh auth status >/dev/null 2>&1; then
+  gh auth login
+fi
+
 cd "$repo"
 
 # set target
