@@ -288,7 +288,7 @@ sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" 
 # commit cmd_spec.sh
 fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
 if [ "$fork" = "1" ]; then
-  "$WORKFLOWS_USER_PATH/git_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
+  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
 fi
 
 # copy helper scripts
