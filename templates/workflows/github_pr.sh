@@ -14,7 +14,7 @@ print_help() {
   echo "Creates a PR to oreolag/workflows."
   echo
   echo "${bold}USAGE:${normal}"
-  echo "  git_pr.sh [flags]"
+  echo "  github_pr.sh [flags]"
   echo
   echo "${bold}FLAGS:${normal}"
   echo "    --my_workflow  Workflow name in my_workflows branch"
@@ -94,36 +94,34 @@ if [[ -z "$workflow" ]]; then
   workflow="$my_workflow"
 fi
 
-# validate source workflow
-if [[ ! -d "$my_workflow" ]]; then
+source_branch="$(cat ./GITHUB_PUSH_BRANCH)"
+pr_branch="pr-$workflow"
+
+git fetch upstream main
+
+# validate source workflow in source branch
+if ! git ls-tree -d --name-only "$source_branch" -- "$my_workflow" | grep -q .; then
   echo "Workflow not found: $my_workflow"
   exit 1
 fi
 
-# validate target workflow when different
-if [[ "$workflow" != "$my_workflow" ]] && [[ ! -d "$workflow" ]]; then
+# validate target workflow in upstream/main when different
+if [[ "$workflow" != "$my_workflow" ]] && ! git ls-tree -d --name-only upstream/main -- "$workflow" | grep -q .; then
   echo "Workflow not found: $workflow"
   exit 1
 fi
 
-pr_branch="pr-$workflow"
-
-git fetch upstream main
 git checkout -B "$pr_branch" upstream/main
 
-# copy/replace tracked files if target workflow is different
-if [[ "$workflow" != "$my_workflow" ]]; then
-  while IFS= read -r src; do
-    rel="${src#$my_workflow/}"
-    dst="$workflow/$rel"
+# copy/replace tracked files from source branch into PR branch
+while IFS= read -r src; do
+  rel="${src#$my_workflow/}"
+  dst="$workflow/$rel"
 
-    mkdir -p "$(dirname "$dst")"
-    cp -f -- "$src" "$dst"
-    git add -A -- "$dst"
-  done < <(git ls-files "$my_workflow")
-else
-  git add -A -- "$workflow"
-fi
+  mkdir -p "$(dirname "$dst")"
+  git show "$source_branch:$src" > "$dst"
+  git add -A -- "$dst"
+done < <(git ls-tree -r --name-only "$source_branch" -- "$my_workflow")
 
 if git diff --cached --quiet; then
   echo "Nothing to commit: $workflow"
