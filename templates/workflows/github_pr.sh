@@ -129,10 +129,12 @@ if git diff --cached --quiet; then
 fi
 
 git commit -m "$msg"
-git push -u origin "$pr_branch"
+#git push -u origin "$pr_branch"
+git push --force-with-lease -u origin "$pr_branch"
 
 gh pr create \
   --repo oreolag/workflows \
   --base main \
   --head "$(gh api user --jq .login):$pr_branch" \
-  --fill
+  --title "$msg" \
+  --body "This PR updates workflow '$workflow' using 'my_workflows:$my_workflow'."
