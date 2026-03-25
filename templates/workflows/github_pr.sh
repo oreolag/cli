@@ -59,6 +59,13 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
 
 cd "$(git rev-parse --show-toplevel)"
 
+source_branch="$(cat ./GITHUB_PUSH_BRANCH)"
+
+cleanup() {
+  git checkout "$source_branch" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
 # ensure GitHub authentication
 if ! gh auth status >/dev/null 2>&1; then
   gh auth login
@@ -94,10 +101,9 @@ if [[ -z "$workflow" ]]; then
   workflow="$my_workflow"
 fi
 
-source_branch="$(cat ./GITHUB_PUSH_BRANCH)"
 pr_branch="pr-$workflow"
-
 git fetch upstream main
+git fetch origin "$pr_branch:refs/remotes/origin/$pr_branch" >/dev/null 2>&1 || true
 
 # validate source workflow in source branch
 if ! git ls-tree -d --name-only "$source_branch" -- "$my_workflow" | grep -q .; then
@@ -128,8 +134,10 @@ if git diff --cached --quiet; then
   exit 0
 fi
 
+#git commit -m "$msg"
+#git push --force-with-lease -u origin "$pr_branch"
 git commit -m "$msg"
-#git push -u origin "$pr_branch"
+git fetch --prune origin
 git push --force-with-lease -u origin "$pr_branch"
 
 gh pr create \
