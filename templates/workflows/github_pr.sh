@@ -18,8 +18,8 @@ print_help() {
   echo
   echo "${bold}FLAGS:${normal}"
   echo "    --my_workflow  Workflow name in my_workflows branch"
+  echo "    --title        Pull request title"
   echo "    --workflow     Workflow name in upstream oreolag/workflows (optional; if omitted, the workflow will use the same name)"
-  echo "    --comment      Commit subject"
   echo
   echo "${bold}INHERITED FLAGS:${normal}"
   echo "  -h, --help       Show this help"
@@ -36,7 +36,7 @@ while [[ $# -gt 0 ]]; do
       workflow="${2:-}"
       shift 2
       ;;
-    --comment)
+    --title)
       msg="${2:-}"
       shift 2
       ;;
@@ -86,14 +86,14 @@ if [[ -z "$my_workflow" ]]; then
   read -r my_workflow < /dev/tty
 fi
 
+if [[ -z "$msg" ]]; then
+  printf "title: " > /dev/tty
+  read -r msg < /dev/tty
+fi
+
 if [[ -z "$workflow" ]]; then
   printf "workflow (optional): " > /dev/tty
   read -r workflow < /dev/tty
-fi
-
-if [[ -z "$msg" ]]; then
-  printf "comment: " > /dev/tty
-  read -r msg < /dev/tty
 fi
 
 # default target workflow
