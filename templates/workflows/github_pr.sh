@@ -3,7 +3,7 @@ set -euo pipefail
 
 my_workflow=""
 workflow=""
-msg=""
+#msg=""
 
 # format
 bold=$(tput bold)
@@ -18,7 +18,6 @@ print_help() {
   echo
   echo "${bold}FLAGS:${normal}"
   echo "    --my_workflow  Workflow name in my_workflows branch"
-  echo "    --title        Pull request title"
   echo "    --workflow     Workflow name in upstream oreolag/workflows (optional; if omitted, the workflow will use the same name)"
   echo
   echo "${bold}INHERITED FLAGS:${normal}"
@@ -34,10 +33,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     --workflow)
       workflow="${2:-}"
-      shift 2
-      ;;
-    --title)
-      msg="${2:-}"
       shift 2
       ;;
     --help|-h)
@@ -86,10 +81,10 @@ if [[ -z "$my_workflow" ]]; then
   read -r my_workflow < /dev/tty
 fi
 
-if [[ -z "$msg" ]]; then
-  printf "title: " > /dev/tty
-  read -r msg < /dev/tty
-fi
+#if [[ -z "$msg" ]]; then
+#  printf "title: " > /dev/tty
+#  read -r msg < /dev/tty
+#fi
 
 if [[ -z "$workflow" ]]; then
   printf "workflow (optional): " > /dev/tty
@@ -136,7 +131,7 @@ fi
 
 #git commit -m "$msg"
 #git push --force-with-lease -u origin "$pr_branch"
-git commit -m "$msg"
+git commit -m "Files changed with github_pr"
 git fetch --prune origin
 git push --force-with-lease -u origin "$pr_branch"
 
@@ -144,5 +139,5 @@ gh pr create \
   --repo oreolag/workflows \
   --base main \
   --head "$(gh api user --jq .login):$pr_branch" \
-  --title "$msg" \
+  --title "$pr_branch" \
   --body "This PR updates workflow '$workflow' using 'my_workflows:$my_workflow'."
