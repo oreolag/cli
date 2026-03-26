@@ -88,4 +88,4 @@ if [[ ! -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
 fi
 
 # add your code here!
-echo "Hi from $COMMAND $SUBCOMMAND!"
+echo "Hi from $COMMAND $SUBCOMMAND $name!"
