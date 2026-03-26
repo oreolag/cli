@@ -216,31 +216,48 @@ mkdir -p "$WORKFLOWS_USER_PATH"
 # add GITHUB_FORK (if not existing)
 [[ -f "$WORKFLOWS_USER_PATH/GITHUB_FORK" ]] || echo "$fork" > "$WORKFLOWS_USER_PATH/GITHUB_FORK"
 
-# check on template
-if [ ! "$template" = "-" ] && [[ ! -d "$WORKFLOWS_USER_PATH/$template" ]]; then
-  # this is in fact an existing workflow
-  echo "Template does not exist: $template"
-  exit 1
+# read fork
+fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
+
+# copy helper scripts
+if [[ ! -e "$WORKFLOWS_USER_PATH/git_diff.sh" ]]; then
+  cp "$WORKFLOWS_TEMPLATE_PATH"/git_diff.sh "$WORKFLOWS_USER_PATH"
+  if [ "$fork" = "1" ]; then
+    cp "$WORKFLOWS_TEMPLATE_PATH"/github_pr.sh "$WORKFLOWS_USER_PATH"
+    cp "$WORKFLOWS_TEMPLATE_PATH"/github_push.sh "$WORKFLOWS_USER_PATH"
+  fi
 fi
 
-# print
-#if [ ! "$msg1" = "" ]; then
-#  echo -e "$msg1"
-#  sleep 1
-#  echo "$msg2"
+# check on template
+#if [ ! "$template" = "-" ] && [[ ! -d "$WORKFLOWS_USER_PATH/$template" ]]; then
+#  # this is in fact an existing workflow
+#  echo "Template does not exist: $template"
+#  exit 1
 #fi
+
+# check on template
+template_path=""
+if [ ! "$template" = "-" ]; then
+  if [[ -d "$WORKFLOWS_USER_PATH/$template" ]]; then
+    template_path="$WORKFLOWS_USER_PATH/$template"
+  elif [[ -d "$WORKFLOWS_PATH/$template" ]]; then
+    template_path="$WORKFLOWS_PATH/$template"
+  else
+    # this is in fact an existing workflow
+    echo "Template does not exist: $template"
+    exit 1
+  fi
+fi
 
 # create workflow name folder
 mkdir -p "$WORKFLOWS_USER_PATH/$name"
 cd "$WORKFLOWS_USER_PATH/$name"
 
-# add GITHUB_FORK
-#[[ -f "$WORKFLOWS_USER_PATH/GITHUB_FORK" ]] || echo "$push" > "$WORKFLOWS_USER_PATH/GITHUB_FORK"
-
 # copy from existing workflow/template
 if [ ! "$template" = "-" ]; then
   # this is in fact an existing workflow
-  cp -r "$WORKFLOWS_USER_PATH/$template"/* .
+  #cp -r "$WORKFLOWS_USER_PATH/$template"/* .
+  cp -r "$template_path"/* .
 
   # replace in cmd_spec.sh
   sed -i "s/_${template^^}_/_${name^^}_/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"
@@ -255,21 +272,14 @@ else
   cp "$WORKFLOWS_TEMPLATE_PATH"/delete.sh .
 fi
 
-# check on program
-#if [ "$program" = "0" ]; then
-#  rm "$WORKFLOWS_USER_PATH/$name/program.sh"
-#fi
-
 # replace WFNAME (and _COMMAND_)
 sed -i "s/WFNAME/${name^^}/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
 sed -i "s/_COMMAND_/new/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
 sed -i "s/_COMMAND_/build/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
-#if [ "$program" = "1" ]; then
-  sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
-  sed -i "s/_COMMAND_/program/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
-#fi
+sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
+sed -i "s/_COMMAND_/program/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/run.sh"
 sed -i "s/_COMMAND_/run/g" "$WORKFLOWS_USER_PATH/$name/run.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/validate.sh"
@@ -285,21 +295,24 @@ sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/run.sh" "$O
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh" "$ODEV_PATH/cmd/validate/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" "$ODEV_PATH/cmd/delete/$name.sh"
 
+# copy helper scripts
+#cd "$WORKFLOWS_USER_PATH"
+#if [[ ! -e "./git_diff.sh" ]]; then
+#  cp "$WORKFLOWS_TEMPLATE_PATH"/git_diff.sh .
+#  if [ "$fork" = "1" ]; then
+#    cp "$WORKFLOWS_TEMPLATE_PATH"/github_pr.sh .
+#    cp "$WORKFLOWS_TEMPLATE_PATH"/github_push.sh .
+#  fi
+#fi
+
 # commit cmd_spec.sh
-fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
+#fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
+cd "$WORKFLOWS_USER_PATH"
 if [ "$fork" = "1" ]; then
   "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
 fi
 
-# copy helper scripts
-cd "$WORKFLOWS_USER_PATH"
-cp "$WORKFLOWS_TEMPLATE_PATH"/git_diff.sh .
-cp "$WORKFLOWS_TEMPLATE_PATH"/github_pr.sh .
-cp "$WORKFLOWS_TEMPLATE_PATH"/github_push.sh .
-
 # print
-#if [ "$fork" = "0" ]; then
-  echo "Workflow created: $name"
-#fi
+echo "Workflow created: $name"
 
 # author: https://github.com/jmoya82
