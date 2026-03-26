@@ -26,9 +26,10 @@ DELETE_WFNAME_FLAGS_MANDATORY="name"
 
 PROGRAM_WFNAME_DESCRIPTION="Program description"
 PROGRAM_WFNAME_FLAGS=(
+  "devices,d,Comma-separated list of device indices,-,-"
   "name,n,Project name,-,-"
 )
-PROGRAM_WFNAME_FLAGS_MANDATORY="name"
+PROGRAM_WFNAME_FLAGS_MANDATORY="devices,name"
 
 RUN_WFNAME_DESCRIPTION="Run description"
 RUN_WFNAME_FLAGS=(
@@ -38,7 +39,8 @@ RUN_WFNAME_FLAGS_MANDATORY="name"
 
 VALIDATE_WFNAME_DESCRIPTION="Validate description"
 VALIDATE_WFNAME_FLAGS=(
+  "devices,d,Comma-separated list of device indices,-,-"
   "flag1,a,Flag 1 description,1-8,1"
   "flag2,b,Flag 2 description,8|16,8"
 )
-VALIDATE_WFNAME_FLAGS_MANDATORY="flag1,flag2"
+VALIDATE_WFNAME_FLAGS_MANDATORY="devices,flag1,flag2"

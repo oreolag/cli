@@ -21,6 +21,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
+CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
 PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths projects)")"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths workflows)")"
@@ -75,6 +76,7 @@ if [[ -n "$parsed_flags" ]]; then
 fi
 
 # assign flags
+devices=${V[devices]}
 flag1=${V[flag1]}
 flag2=${V[flag2]}
 
@@ -84,6 +86,29 @@ flag2="${flag2// /_}"
 
 # check on flags
 # ...
+
+# check on devices
+if [[ ! "$devices" =~ ^[0-9]+(,\ ?[0-9]+)*$ ]]; then
+    echo "Invalid devices format: $devices"
+    exit 1
+fi
+
+# convert devices to an array
+devices_array=$(echo "$devices" | tr -d ' ')
+IFS=',' read -ra devices_array <<< "$devices_array"
+
+# remove duplicates
+mapfile -t devices_array < <(printf "%s\n" "${devices_array[@]}" | awk '!seen[$0]++')
+
+# device loop
+for d in "${devices_array[@]}"; do
+  name_system="A"
+  name_cmdb="A"
+  if [[ "$name_system" != "$name_cmdb" ]]; then
+    echo "Invalid device index: $d"
+    exit 1
+  fi
+done
 
 # set command flags
 # ...
