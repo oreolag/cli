@@ -129,12 +129,24 @@ if git diff --cached --quiet; then
   exit 0
 fi
 
-#git commit -m "$msg"
-#git push --force-with-lease -u origin "$pr_branch"
+# replace workflow name
+if [[ -n "$my_workflow" && -f "$workflow/cmd_spec.sh" ]]; then
+  c_my_workflow="${my_workflow^^}"
+  c_workflow="${workflow^^}"
+
+  # modify file
+  sed -i "s/${c_my_workflow}/${c_workflow}/g" "$workflow/cmd_spec.sh"
+
+  # stage modified file
+  git add "$workflow/cmd_spec.sh"
+fi
+
+# commit
 git commit -m "Files changed with github_pr"
 git fetch --prune origin
 git push --force-with-lease -u origin "$pr_branch"
 
+# create pull request
 gh pr create \
   --repo oreolag/workflows \
   --base main \
