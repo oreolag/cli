@@ -17,9 +17,9 @@ print_help() {
   echo "  github_sync.sh [flags]"
   echo
   echo "${bold}FLAGS:${normal}"
-  echo "    --main       Sync local main with upstream/main"
-  echo "    --workflows  Merge upstream/main into my_workflows"
-  echo "    --push       Push synced branches to origin"
+  echo "    --main          Sync local main with upstream/main"
+  echo "    --my_workflows  Merge upstream/main into my_workflows"
+  echo "    --push          Push synced branches to origin"
   echo
   echo "${bold}INHERITED FLAGS:${normal}"
   echo "  -h, --help     Show this help"
@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
       sync_main="1"
       shift
       ;;
-    --workflows)
+    --my_workflows)
       sync_workflows="1"
       shift
       ;;
@@ -53,7 +53,7 @@ done
 
 # require explicit branch selection
 if [[ "$sync_main" == "0" && "$sync_workflows" == "0" ]]; then
-  echo "Error: specify --main and/or --workflows"
+  echo "Error: specify --main and/or --my_workflows"
   exit 1
 fi
 

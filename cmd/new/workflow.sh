@@ -225,6 +225,7 @@ if [[ ! -e "$WORKFLOWS_USER_PATH/git_diff.sh" ]]; then
   if [ "$fork" = "1" ]; then
     cp "$WORKFLOWS_TEMPLATE_PATH"/github_pr.sh "$WORKFLOWS_USER_PATH"
     cp "$WORKFLOWS_TEMPLATE_PATH"/github_push.sh "$WORKFLOWS_USER_PATH"
+    cp "$WORKFLOWS_TEMPLATE_PATH"/github_sync.sh "$WORKFLOWS_USER_PATH"
   fi
 fi
 
