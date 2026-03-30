@@ -15,7 +15,10 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # command descriptions
+build="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "BUILD")"
 new="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "NEW")"
+program="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "PROGRAM")"
+run="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "RUN")"
 validate="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "VALIDATE")"
 examine="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "EXAMINE")"
 
@@ -38,7 +41,10 @@ print_help() {
   echo "  odev <command> <subcommand> [flags]"
   echo ""
   echo "${bold}CORE COMMANDS${normal}"
+  echo "  build:           $build"
   echo "  new:             $new"
+  echo "  program:         $program"
+  echo "  run:             $run"
   echo "  validate:        $validate"
   echo "  examine:         $examine"
   echo ""
@@ -47,9 +53,8 @@ print_help() {
   echo "  -v, --version    Show odev version"
   echo ""
   echo "${bold}EXAMPLES${normal}"
-  echo "  $ odev new vllm"
-  echo "  $ odev validate nccl"
   echo "  $ odev examine"
+  echo "  $ odev validate nccl"
   echo ""
   echo "${bold}LEARN MORE${normal}"
   echo "  Use ${bold}odev <command> <subcommand> --help${normal} for more information about a command."
