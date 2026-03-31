@@ -25,10 +25,6 @@ CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constant
 COLOR_NIC=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_NIC)
 COLOR_NVIDIA=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_NVIDIA)
 COLOR_XILINX=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_XILINX)
-#STORAGE_UNIT="TB"
-#STRING_ACCEL="Adaptive devices"
-#STRING_GPUS="GPUs"
-#STRING_NICS="NICs"
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
 
 # set KEY
