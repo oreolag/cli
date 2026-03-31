@@ -38,6 +38,11 @@ EXAMINE_FLAGS=(
   "servers,s,Show server list,-,-"
 )
 
+# ifconfig 
+IFCONFIG_DESCRIPTION="Network interface configuration for data-plane devices"
+IFCONFIG_FLAGS=(
+)
+
 # new
 NEW_DESCRIPTION="Create a new workflow or project based on the selected template"
 NEW_FLAGS=(

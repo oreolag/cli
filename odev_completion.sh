@@ -94,7 +94,7 @@ _odev_completions() {
   # Top-level commands (odev <TAB>)
   # -----------------------------
   if [[ $cword -eq 1 ]]; then
-    local extra_cmds="examine update"
+    local extra_cmds="examine update ifconfig"
     local cmds
     cmds="$(_odev_list_commands "$root") $extra_cmds"
     COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )

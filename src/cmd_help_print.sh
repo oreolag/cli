@@ -93,12 +93,11 @@ elif [ "$COMMAND" = "new" ] && [ "$SUBCOMMAND" = "workflow" ]; then
   echo "  $CLI_NAME $COMMAND $SUBCOMMAND [--fork] [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
-#elif [ "$COMMAND" = "-" ] && [ ! "$SUBCOMMAND" = "-" ]; then
-#  # examine
-#  echo "  $CLI_NAME $SUBCOMMAND [flags]"
-#  echo ""
-#  echo "${bold}FLAGS:${normal}"
-#  echo "  This command has no flags."
+elif [ "$SUBCOMMAND" = "ifconfig" ]; then
+  echo "  $CLI_NAME $SUBCOMMAND [flags]"
+  echo ""
+  echo "${bold}FLAGS:${normal}"
+  echo "  This command has no flags."
 elif [ ! "$COMMAND" = "" ] && [ "$SUBCOMMAND" = "-" ]; then
   # cmd/new.sh
   #usage="${CLI_NAME} ${COMMAND}"
