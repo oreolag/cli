@@ -95,20 +95,22 @@ bits_to_mask() {
 }
 
 print_iface() {
-    local name="$1"
-    local numa="$2"
-    local device="$3"
-    local port="$4"
-    local ip="$5"
-    local mask="$6"
-    local mac="$7"
+    local type="$1"
+    local name="$2"
+    local numa="$3"
+    local device="$4"
+    local port="$5"
+    #local ip="$6"
+    #local mask="$7"
+    #local mac="$8"
 
     mtu=$(ip link show $name | awk '{for(i=1;i<=NF;i++) if($i=="mtu") print $(i+1)}')
 
-    echo "$name: flags=<numa=$numa,device=$device,port=$port>  mtu $mtu"
-    echo "        inet $ip netmask $mask"
-    echo "        ether $mac"
-    echo ""
+    echo "$name: $type=<numa=$numa,device=$device,port=$port>  mtu $mtu"
+    #echo "        inet $ip netmask $mask"
+    #echo "        ether $mac"
+    ifconfig $name | tail -n +2
+    #echo ""
 }
 
 # run examine silently
@@ -119,38 +121,34 @@ fi
 # NUMA lscpu loop 
 numa_nodes_lscpu=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
 for ((i=0; i<numa_nodes_lscpu; i++)); do
-
     # endata
-    #cat "$TMP_PATH/examine_endata_$i"
     while read -r line; do
         name=$(awk '{print $NF}' <<< "$line")
         if [ "$name" != "-" ]; then
             device=$(awk '{print $1}' "$TMP_PATH/examine_endata_$i")
             port=$(awk '{print $2}' "$TMP_PATH/examine_endata_$i")
-            ip_and_mask=$(awk '{print $6}' "$TMP_PATH/examine_endata_$i")
+            #ip_and_mask=$(awk '{print $6}' "$TMP_PATH/examine_endata_$i")
+            #ip="${ip_and_mask%%/*}"
+            #mask="${ip_and_mask##*/}"
+            #mask=$(bits_to_mask "$mask")
+            #mac=$(awk '{print $7}' "$TMP_PATH/examine_endata_$i")
+            print_iface "endata" $name $i $device $port #$ip $mask $mac
+        fi
+    done < "$TMP_PATH/examine_endata_$i"
+    # accel
+    while read -r line; do
+        name=$(awk '{print $NF}' <<< "$line")
+        if [ "$name" != "-" ]; then
+            device=$(awk '{print $1}' "$TMP_PATH/examine_accel_$i")
+            port=$(awk '{print $2}' "$TMP_PATH/examine_accel_$i")
+            ip_and_mask=$(awk '{print $6}' "$TMP_PATH/examine_accel_$i")
             ip="${ip_and_mask%%/*}"
             mask="${ip_and_mask##*/}"
             mask=$(bits_to_mask "$mask")
-            mac=$(awk '{print $7}' "$TMP_PATH/examine_endata_$i")
-
-            echo $ip
-            echo $mac
-
-            mtu="100"
-
-            print_iface $name $i $device $port $ip $mask $mac
-
+            mac=$(awk '{print $7}' "$TMP_PATH/examine_accel_$i")
+            print_iface "accel" $name $i $device $port $ip $mask $mac
         fi
-    done < "$TMP_PATH/examine_endata_$i"
-
-
-
-
-    # accel
-    cat "$TMP_PATH/examine_accel_$i"
-
-
+    done < "$TMP_PATH/examine_accel_$i"
 done
-
 
 # author: https://github.com/jmoya82
