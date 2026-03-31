@@ -100,17 +100,11 @@ print_iface() {
     local numa="$3"
     local device="$4"
     local port="$5"
-    #local ip="$6"
-    #local mask="$7"
-    #local mac="$8"
 
     mtu=$(ip link show $name | awk '{for(i=1;i<=NF;i++) if($i=="mtu") print $(i+1)}')
 
     echo "$name: $type=<numa=$numa,device=$device,port=$port>  mtu $mtu"
-    #echo "        inet $ip netmask $mask"
-    #echo "        ether $mac"
     ifconfig $name | tail -n +2
-    #echo ""
 }
 
 # run examine silently
@@ -127,12 +121,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
         if [ "$name" != "-" ]; then
             device=$(awk '{print $1}' "$TMP_PATH/examine_endata_$i")
             port=$(awk '{print $2}' "$TMP_PATH/examine_endata_$i")
-            #ip_and_mask=$(awk '{print $6}' "$TMP_PATH/examine_endata_$i")
-            #ip="${ip_and_mask%%/*}"
-            #mask="${ip_and_mask##*/}"
-            #mask=$(bits_to_mask "$mask")
-            #mac=$(awk '{print $7}' "$TMP_PATH/examine_endata_$i")
-            print_iface "endata" $name $i $device $port #$ip $mask $mac
+            print_iface "endata" $name $i $device $port
         fi
     done < "$TMP_PATH/examine_endata_$i"
     # accel
@@ -141,12 +130,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
         if [ "$name" != "-" ]; then
             device=$(awk '{print $1}' "$TMP_PATH/examine_accel_$i")
             port=$(awk '{print $2}' "$TMP_PATH/examine_accel_$i")
-            ip_and_mask=$(awk '{print $6}' "$TMP_PATH/examine_accel_$i")
-            ip="${ip_and_mask%%/*}"
-            mask="${ip_and_mask##*/}"
-            mask=$(bits_to_mask "$mask")
-            mac=$(awk '{print $7}' "$TMP_PATH/examine_accel_$i")
-            print_iface "accel" $name $i $device $port $ip $mask $mac
+            print_iface "accel" $name $i $device $port
         fi
     done < "$TMP_PATH/examine_accel_$i"
 done
