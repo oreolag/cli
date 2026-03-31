@@ -16,6 +16,8 @@ normal=$(tput sgr0)
 
 # command descriptions
 build="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "BUILD")"
+get="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "GET")"
+ifconfig="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "IFCONFIG")"
 new="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "NEW")"
 program="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "PROGRAM")"
 run="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "RUN")"
@@ -47,6 +49,10 @@ print_help() {
   echo "  run:             $run"
   echo "  validate:        $validate"
   echo "  examine:         $examine"
+  echo ""
+  echo "${bold}ADDITIONAL COMMANDS${normal}"
+  echo "  get:             $get"
+  echo "  ifconfig:        $ifconfig"
   echo ""
   echo "${bold}FLAGS${normal}"
   echo "  -h, --help       Show help for command"

@@ -32,14 +32,29 @@ DELETE_WORKFLOW_FLAGS=(
 DELETE_WORKFLOW_FLAGS_MANDATORY="name"
 
 # examine 
-EXAMINE_DESCRIPTION="System and device information"
+EXAMINE_DESCRIPTION="System and device inspection"
 EXAMINE_FLAGS=(
   "tools,t,Show installed tools,-,-"
   "servers,s,Show server list,-,-"
 )
 
+# get 
+GET_DESCRIPTION="System and device information retrieval"
+GET_FLAGS=(
+)
+# ip
+GET_IP_DESCRIPTION="Get the IP address of a specific device"
+GET_IP_FLAGS=(
+  "device,d,Device index,-,-"
+  "numa,n,NUMA index,-,-"
+  "port,p,Port index,-,-"
+  "type,t,Device type,accel|endata,endata"
+)
+GET_IP_FLAGS_MANDATORY="numa,type,device,port"
+
+
 # ifconfig 
-IFCONFIG_DESCRIPTION="Network interface configuration for data-plane devices"
+IFCONFIG_DESCRIPTION="Data-plane network interface configuration"
 IFCONFIG_FLAGS=(
 )
 
