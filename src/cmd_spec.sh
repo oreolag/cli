@@ -51,6 +51,15 @@ GET_IP_FLAGS=(
   "type,t,Device type,accel|endata,endata"
 )
 GET_IP_FLAGS_MANDATORY="numa,type,device,port"
+# mac
+GET_MAC_DESCRIPTION="Get the MAC address of a specific device"
+GET_MAC_FLAGS=(
+  "device,d,Device index,-,-"
+  "numa,n,NUMA index,-,-"
+  "port,p,Port index,-,-"
+  "type,t,Device type,accel|endata,endata"
+)
+GET_MAC_FLAGS_MANDATORY="numa,type,device,port"
 
 
 # ifconfig 
