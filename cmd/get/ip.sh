@@ -97,6 +97,13 @@ if [[ "$found" == "0" ]]; then
   exit 1
 fi
 
+# check on port
+name_cmdb=$($CMDB_PATH/cmdb_get.py $type $device name $port)
+ip_cmdb=$($CMDB_PATH/cmdb_get.py $type $device ip_address $port)
+
+echo "name_cmdb: $name_cmdb"
+echo "ip_cmdb: $ip_cmdb"
+
 exit
 
 # check on flags
