@@ -67,10 +67,35 @@ numa=${V[numa]}
 port=${V[port]}
 type=${V[type]}
 
-echo $device
-echo $numa
-echo $port
-echo $type
+# check on numa
+numa_devices=$($CMDB_PATH/cmdb_get.py cpu numa $numa $type)
+if [[ ! "$numa" =~ ^[0-9]+$ ]] || [ "$numa_devices" = "" ]; then
+  echo "Invalid numa: $numa"
+  exit 1
+fi
+
+# check on device
+found=""
+if [[ ! "$device" =~ ^[0-9]+$ ]]; then
+  #echo "Invalid device: $device"
+  #exit 1
+  found="0"
+else
+  # check if device is part of numa
+  found="0"
+  for d in $numa_devices; do
+    if [[ "$d" == "$device" ]]; then
+      found="1"
+      break
+    fi
+  done
+fi
+
+# print error
+if [[ "$found" == "0" ]]; then
+  echo "Invalid device: $device"
+  exit 1
+fi
 
 exit
 
