@@ -70,7 +70,7 @@ type=${V[type]}
 # check on numa
 numa_devices=$($CMDB_PATH/cmdb_get.py cpu numa $numa $type)
 if [[ ! "$numa" =~ ^[0-9]+$ ]] || [ "$numa_devices" = "" ]; then
-  echo "Invalid numa: $numa"
+  echo "Invalid numa: $numa" >&2
   exit 1
 fi
 
@@ -93,121 +93,37 @@ fi
 
 # print error
 if [[ "$found" == "0" ]]; then
-  echo "Invalid device: $device"
+  echo "Invalid device: $device" >&2
   exit 1
 fi
 
 # check on port
 name_cmdb=$($CMDB_PATH/cmdb_get.py $type $device name $port)
 if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$name_cmdb" = "" ]; then
-  echo "Invalid port: $port"
+  echo "Invalid port: $port" >&2
   exit 1
 fi
 
 # get ip
+ip_system=$(ifconfig "$name_cmdb" | awk '/inet /{print $2; exit}')
 ip_cmdb=$($CMDB_PATH/cmdb_get.py $type $device ip_address $port)
 
-echo "name_cmdb: $name_cmdb"
-echo "ip_cmdb: $ip_cmdb"
-
-exit
-
-# check on flags
-# ...
-
-# check on devices
-if [[ ! "$devices" =~ ^[0-9]+(,\ ?[0-9]+)*$ ]]; then
-    echo "Invalid devices format: $devices"
-    exit 1
+# check on ip_system
+if [[ "$ip_system" == "$ip_cmdb" ]]; then
+  echo "$ip_system"
+  exit 0
 fi
 
-# convert devices to an array
-devices_array=$(echo "$devices" | tr -d ' ')
-IFS=',' read -ra devices_array <<< "$devices_array"
+#echo "Device not found: $type=<numa=$numa,device=$device,port=$port>  name $name_cmdb" >&2
+exit 1
 
-# remove duplicates
-mapfile -t devices_array < <(printf "%s\n" "${devices_array[@]}" | awk '!seen[$0]++')
-
-# set command flags
-# ...
-
-# print tools
-# ...
-
-# check on CMDB scripts
-cmdb_scripts="cmdb_get.py cmdb_get_cpu.sh cmdb_get_memory.sh cmdb_get_model.sh cmdb_get_storage.sh"
-for script in $cmdb_scripts; do
-    if [[ ! -f "$CMDB_PATH/$script" ]]; then
-        echo "Error: $CMDB_PATH/$script not found"
-        exit 1
-    fi
-done
-
-# check on CMDB
-if [[ ! -f "$CMDB_PATH/$hostname.yml" ]]; then
-    echo "Error: $CMDB_PATH/$hostname.yml not found"
-    exit 1
-fi
-
-# helper functions
-bits_to_mask() {
-    local p="$1"
-    local full=$((p/8))
-    local rem=$((p%8))
-    local mask=()
-
-    for ((i=0;i<4;i++)); do
-        if ((i<full)); then
-            mask+=(255)
-        elif ((i==full)); then
-            mask+=($((256 - 2**(8-rem))))
-        else
-            mask+=(0)
-        fi
-    done
-
-    printf "%d.%d.%d.%d\n" "${mask[@]}"
-}
-
-print_iface() {
-    local type="$1"
-    local name="$2"
-    local numa="$3"
-    local device="$4"
-    local port="$5"
-
-    mtu=$(ip link show $name | awk '{for(i=1;i<=NF;i++) if($i=="mtu") print $(i+1)}')
-
-    echo "$name: $type=<numa=$numa,device=$device,port=$port>  mtu $mtu"
-    ifconfig $name | tail -n +2
-}
-
-# run examine silently
-if ! compgen -G "$TMP_PATH/examine_*" > /dev/null; then
-  "$ODEV_PATH/cmd/examine.sh" > /dev/null 2>&1
-fi
-
-# NUMA lscpu loop 
-numa_nodes_lscpu=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
-for ((i=0; i<numa_nodes_lscpu; i++)); do
-    # endata
-    while read -r line; do
-        name=$(awk '{print $NF}' <<< "$line")
-        if [ "$name" != "-" ]; then
-            device=$(awk '{print $1}' "$TMP_PATH/examine_endata_$i")
-            port=$(awk '{print $2}' "$TMP_PATH/examine_endata_$i")
-            print_iface "endata" $name $i $device $port
-        fi
-    done < "$TMP_PATH/examine_endata_$i"
-    # accel
-    while read -r line; do
-        name=$(awk '{print $NF}' <<< "$line")
-        if [ "$name" != "-" ]; then
-            device=$(awk '{print $1}' "$TMP_PATH/examine_accel_$i")
-            port=$(awk '{print $2}' "$TMP_PATH/examine_accel_$i")
-            print_iface "accel" $name $i $device $port
-        fi
-    done < "$TMP_PATH/examine_accel_$i"
-done
+#if [[ "$ip_system" == *"Device not found"* ]]; then
+#  echo "Device not found: $type=<numa=$numa,device=$device,port=$port>"
+#  exit 1
+#elif [ "$ip_system" = "$ip_cmdb" ]; then
+#  echo "$ip_system"
+#else
+#  echo "${italic}$ip_system${normal}"
+#fi
 
 # author: https://github.com/jmoya82
