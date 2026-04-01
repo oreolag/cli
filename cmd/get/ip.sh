@@ -99,6 +99,12 @@ fi
 
 # check on port
 name_cmdb=$($CMDB_PATH/cmdb_get.py $type $device name $port)
+if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$name_cmdb" = "" ]; then
+  echo "Invalid port: $port"
+  exit 1
+fi
+
+# get ip
 ip_cmdb=$($CMDB_PATH/cmdb_get.py $type $device ip_address $port)
 
 echo "name_cmdb: $name_cmdb"
