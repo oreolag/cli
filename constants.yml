@@ -7,6 +7,7 @@ github:
 
 #paths
 paths:
+  banner: /opt
   cmdb: /opt
   models: "${HOME}/odev/models"
   projects: "${HOME}/odev/projects"
