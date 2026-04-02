@@ -33,9 +33,6 @@ normal=$(tput sgr0)
 #  cat "$BANNER_PATH/banner"
 #fi
 
-#print welcome message (1/2)
-echo ""
-echo "Welcome, ${bold}$username!${normal}"
 echo ""
 
 # run examine silently
@@ -48,6 +45,25 @@ while kill -0 "$pid" 2>/dev/null; do
 done
 wait "$pid"
 echo ""
+
+#print welcome message (1/2)
+echo ""
+echo "Welcome, ${bold}$username!${normal}"
+echo ""
+
+sleep 0.5
+
+# print operating system information (similar to odev examine)
+. /etc/os-release
+echo "${bold}${NAME} ${VERSION}${normal}"
+description=$(lsb_release -d | awk -F'\t' '{print $2}' | sed 's/^[^0-9]*//')
+codename=$(lsb_release -c | awk -F':' '{print $2}' | xargs)
+linux_kernel=$(uname -r)
+uptime_info=$(uptime -p)
+echo "Description : ${bold}$description${normal}"
+echo "Codename    : ${bold}$codename${normal}"
+echo "Linux kernel: ${bold}$linux_kernel${normal}"
+echo "Uptime      : ${bold}$uptime_info${normal}"
 echo ""
 
 # check on build
@@ -59,6 +75,8 @@ if [ "$is_build" = "1" ]; then
 else
   $ODEV_PATH/src/odev_login_deployment.sh
 fi
+
+sleep 0.5
 
 #print welcome message (2/2)
 weekday=$(date +%A)
