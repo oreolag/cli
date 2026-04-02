@@ -33,6 +33,9 @@ normal=$(tput sgr0)
 #  cat "$BANNER_PATH/banner"
 #fi
 
+#print welcome message (1/2)
+echo ""
+echo "Welcome, ${bold}$username!${normal}"
 echo ""
 
 # run examine silently
@@ -45,10 +48,6 @@ while kill -0 "$pid" 2>/dev/null; do
 done
 wait "$pid"
 echo ""
-
-#print welcome message (1/2)
-echo ""
-echo "Welcome, ${bold}$username!${normal}"
 echo ""
 
 # check on build
