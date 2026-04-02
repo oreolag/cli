@@ -15,9 +15,9 @@ username=$(getent passwd ${SUDO_UID})
 username=${username%%:*}
 
 #check on root
-#if [ "$username" = "root" ]; then
-#    exit 1
-#fi
+if [ "$username" = "root" ]; then
+    exit 1
+fi
 
 #get hostname
 url="${HOSTNAME}"
