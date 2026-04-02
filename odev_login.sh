@@ -28,8 +28,6 @@ bold=$(tput bold)
 italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
-#----------------
-
 # print banner
 #if [ -f "$BANNER_PATH/banner" ]; then
 #  cat "$BANNER_PATH/banner"
@@ -46,7 +44,7 @@ while kill -0 "$pid" 2>/dev/null; do
   sleep 0.5
 done
 wait "$pid"
-#echo " done"
+echo ""
 
 #print welcome message (1/2)
 echo ""
@@ -55,17 +53,15 @@ echo ""
 
 # check on build
 is_build=$($ODEV_PATH/src/is_server.sh "$CMDB_PATH" "build")
-echo "is_build: $is_build"
 
-#is_build="0"
-#if [ "$is_build" = "1" ]; then
-#
-#else
-#
-#fi
+# run 
+if [ "$is_build" = "1" ]; then
+  $ODEV_PATH/src/odev_login_build.sh
+else
+  $ODEV_PATH/src/odev_login_deployment.sh
+fi
 
 #print welcome message (2/2)
 weekday=$(date +%A)
-#echo ""
 echo "Have a nice ${bold}$weekday!${normal}"
 echo ""
