@@ -228,15 +228,15 @@ get_connection_name() {
 
 # print operating system information
 . /etc/os-release
-echo "${bold}${NAME} ${VERSION}${normal}"
+echo "Operating system: ${bold}${NAME} ${VERSION}${normal}"
 description=$(lsb_release -d | awk -F'\t' '{print $2}' | sed 's/^[^0-9]*//')
 codename=$(lsb_release -c | awk -F':' '{print $2}' | xargs)
 linux_kernel=$(uname -r)
 uptime_info=$(uptime -p)
-echo "Description : ${bold}$description${normal}"
-echo "Codename    : ${bold}$codename${normal}"
-echo "Linux kernel: ${bold}$linux_kernel${normal}"
-echo "Uptime      : ${bold}$uptime_info${normal}"
+echo "Description     : ${bold}$description${normal}"
+echo "Codename        : ${bold}$codename${normal}"
+echo "Linux kernel    : ${bold}$linux_kernel${normal}"
+echo "Uptime          : ${bold}$uptime_info${normal}"
 
 # lstopo
 #rm -rf $TMP_PATH/lstopo_output
@@ -264,11 +264,12 @@ total_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT")
 total_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
 total_storage=$(cmdb_print "$total_storage_system" "$total_storage_cmdb")
 
+# print CPU information
 echo ""
-echo "${bold}$model_name${normal}"
-echo "CPU(s)       : $cpu_count"
-echo "Total memory : $total_memory"
-echo "Total storage: $total_storage"
+echo "CPU model       : ${bold}$model_name${normal}"
+echo "CPU(s)          : $cpu_count"
+echo "Total memory    : $total_memory"
+echo "Total storage   : $total_storage"
 echo ""
 
 # remove examine files

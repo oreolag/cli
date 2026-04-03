@@ -9,6 +9,7 @@ ODEV_PATH="$ODEV_PATH/odev"
 #BANNER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths banner)")"
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
 COLOR_OREOL=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_OREOL)
+STORAGE_UNIT="TB"
 
 #get username
 username=$(getent passwd ${SUDO_UID})
@@ -33,8 +34,9 @@ normal=$(tput sgr0)
 #  cat "$BANNER_PATH/banner"
 #fi
 
+# similar to odev examine
 os_print() {
-  # print operating system information (similar to odev examine)
+  # print operating system information
   . /etc/os-release
   echo "  Operating system: ${bold}${NAME} ${VERSION}${normal}"
   description=$(lsb_release -d | awk -F'\t' '{print $2}' | sed 's/^[^0-9]*//')
@@ -45,6 +47,50 @@ os_print() {
   echo "  Codename        : ${bold}$codename${normal}"
   echo "  Linux kernel    : ${bold}$linux_kernel${normal}"
   echo "  Uptime          : ${bold}$uptime_info${normal}"
+  echo ""
+}
+
+cmdb_print() {
+    local topo="$1"
+    local cmdb="$2"
+
+    if [[ -z "$cmdb" && -z "$topo" ]]; then
+        echo "na"
+    elif [[ -n "$cmdb" && "$cmdb" == "$topo" ]]; then
+        echo "$cmdb"
+    else
+        # topo wins
+        local val="${topo:-$cmdb}"
+        printf "%b%s%b\n" "$italic" "$val" "$normal"
+    fi
+}
+
+cpu_print() {
+  # CPU model
+  model_name_system=$($CMDB_PATH/cmdb_get_model.sh)
+  model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model)
+  model_name=$(cmdb_print "$model_name_system" "$model_name_cmdb")
+
+  # CPU count
+  cpu_count_system=$($CMDB_PATH/cmdb_get_cpu.sh)
+  cpu_count_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu count)
+  cpu_count=$(cmdb_print "$cpu_count_system" "$cpu_count_cmdb")
+
+  # total memory
+  total_memory_system=$($CMDB_PATH/cmdb_get_memory.sh)
+  total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu memory)
+  total_memory=$(cmdb_print "$total_memory_system" "$total_memory_cmdb")
+
+  # total storage
+  total_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT")
+  total_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
+  total_storage=$(cmdb_print "$total_storage_system" "$total_storage_cmdb")
+
+  # print CPU information
+  echo "  CPU model       : ${bold}$model_name${normal}"
+  echo "  CPU(s)          : $cpu_count"
+  echo "  Total memory    : $total_memory"
+  echo "  Total storage   : $total_storage"
   echo ""
 }
 
@@ -68,8 +114,6 @@ echo ""
 
 sleep 0.5
 
-
-
 # check on build
 is_build=$($ODEV_PATH/src/is_server.sh "$CMDB_PATH" "build")
 
@@ -78,11 +122,13 @@ if [ "$is_build" = "1" ]; then
   echo "This is a ${bold}development${normal} server"
   echo ""
   os_print
+  cpu_print
   $ODEV_PATH/src/odev_login_build.sh
 else
   echo "This is a ${bold}deployment${normal} server"
   echo ""
   os_print
+  cpu_print
   $ODEV_PATH/src/odev_login_deployment.sh
 fi
 
