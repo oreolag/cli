@@ -88,9 +88,9 @@ cpu_print() {
 
   # print CPU information
   echo "  CPU model       : ${bold}$model_name${normal}"
-  echo "  CPU(s)          : $cpu_count"
-  echo "  Total memory    : $total_memory"
-  echo "  Total storage   : $total_storage"
+  echo "  CPU(s)          : ${bold}$cpu_count${normal}"
+  echo "  Total memory    : ${bold}$total_memory${normal}"
+  echo "  Total storage   : ${bold}$total_storage${normal}"
   echo ""
 }
 
@@ -119,13 +119,13 @@ is_build=$($ODEV_PATH/src/is_server.sh "$CMDB_PATH" "build")
 
 # run 
 if [ "$is_build" = "1" ]; then
-  echo "This is a ${bold}development${normal} server"
+  echo "This is a ${bold}development${normal} server:"
   echo ""
   os_print
   cpu_print
   $ODEV_PATH/src/odev_login_build.sh
 else
-  echo "This is a ${bold}deployment${normal} server"
+  echo "This is a ${bold}deployment${normal} server:"
   echo ""
   os_print
   cpu_print
