@@ -33,6 +33,21 @@ normal=$(tput sgr0)
 #  cat "$BANNER_PATH/banner"
 #fi
 
+os_print() {
+  # print operating system information (similar to odev examine)
+  . /etc/os-release
+  echo "  Operating system: ${bold}${NAME} ${VERSION}${normal}"
+  description=$(lsb_release -d | awk -F'\t' '{print $2}' | sed 's/^[^0-9]*//')
+  codename=$(lsb_release -c | awk -F':' '{print $2}' | xargs)
+  linux_kernel=$(uname -r)
+  uptime_info=$(uptime -p)
+  echo "  Description     : ${bold}$description${normal}"
+  echo "  Codename        : ${bold}$codename${normal}"
+  echo "  Linux kernel    : ${bold}$linux_kernel${normal}"
+  echo "  Uptime          : ${bold}$uptime_info${normal}"
+  echo ""
+}
+
 echo ""
 
 # run examine silently
@@ -53,26 +68,21 @@ echo ""
 
 sleep 0.5
 
-# print operating system information (similar to odev examine)
-. /etc/os-release
-echo "${bold}${NAME} ${VERSION}${normal}"
-description=$(lsb_release -d | awk -F'\t' '{print $2}' | sed 's/^[^0-9]*//')
-codename=$(lsb_release -c | awk -F':' '{print $2}' | xargs)
-linux_kernel=$(uname -r)
-uptime_info=$(uptime -p)
-echo "Description : ${bold}$description${normal}"
-echo "Codename    : ${bold}$codename${normal}"
-echo "Linux kernel: ${bold}$linux_kernel${normal}"
-echo "Uptime      : ${bold}$uptime_info${normal}"
-echo ""
+
 
 # check on build
 is_build=$($ODEV_PATH/src/is_server.sh "$CMDB_PATH" "build")
 
 # run 
 if [ "$is_build" = "1" ]; then
+  echo "This is a ${bold}development${normal} server"
+  echo ""
+  os_print
   $ODEV_PATH/src/odev_login_build.sh
 else
+  echo "This is a ${bold}deployment${normal} server"
+  echo ""
+  os_print
   $ODEV_PATH/src/odev_login_deployment.sh
 fi
 
