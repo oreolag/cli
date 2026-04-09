@@ -5,6 +5,10 @@ github:
   push_branch: my_workflows
   odev_repo: "https://github.com/oreolag/cli"
 
+#mpi
+mpi:
+  home: /usr/lib/aarch64-linux-gnu/openmpi
+
 #paths
 paths:
   banner: /opt
