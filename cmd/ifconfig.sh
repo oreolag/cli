@@ -56,13 +56,13 @@ print_both="0"
 # ...
 
 # check on CMDB scripts
-cmdb_scripts="cmdb_get.py cmdb_get_cpu.sh cmdb_get_memory.sh cmdb_get_model.sh cmdb_get_storage.sh"
-for script in $cmdb_scripts; do
-    if [[ ! -f "$CMDB_PATH/$script" ]]; then
-        echo "Error: $CMDB_PATH/$script not found"
-        exit 1
-    fi
-done
+#cmdb_scripts="cmdb_get.py cmdb_get_cpu.sh cmdb_get_memory.sh cmdb_get_model.sh cmdb_get_storage.sh"
+#for script in $cmdb_scripts; do
+#    if [[ ! -f "$CMDB_PATH/$script" ]]; then
+#        echo "Error: $CMDB_PATH/$script not found"
+#        exit 1
+#    fi
+#done
 
 # check on CMDB
 if [[ ! -f "$CMDB_PATH/$hostname.yml" ]]; then

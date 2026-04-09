@@ -72,13 +72,13 @@ if [ "$flag" = "--servers" ] || [ "$flag" = "-s" ]; then
 fi
 
 # check on CMDB scripts
-cmdb_scripts="cmdb_get.py cmdb_get_cpu.sh cmdb_get_memory.sh cmdb_get_model.sh cmdb_get_storage.sh"
-for script in $cmdb_scripts; do
-    if [[ ! -f "$CMDB_PATH/$script" ]]; then
-        echo "Error: $CMDB_PATH/$script not found"
-        exit 1
-    fi
-done
+#cmdb_scripts="cmdb_get.py cmdb_get_cpu.sh cmdb_get_memory.sh cmdb_get_model.sh cmdb_get_storage.sh"
+#for script in $cmdb_scripts; do
+#    if [[ ! -f "$CMDB_PATH/$script" ]]; then
+#        echo "Error: $CMDB_PATH/$script not found"
+#        exit 1
+#    fi
+#done
 
 # check on CMDB
 if [[ ! -f "$CMDB_PATH/$hostname.yml" ]]; then
@@ -245,31 +245,35 @@ sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$TMP_PATH/lstopo_output"
 lstopo-no-graphics 2>/dev/null > $TMP_PATH/lstopo_output
 
 # CPU model
-model_name_system=$($CMDB_PATH/cmdb_get_model.sh)
+#model_name_system=$($CMDB_PATH/cmdb_get_model.sh)
+model_name_system=$($ODEV_PATH/src/cmdb_get_model.sh)
 model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model)
 model_name=$(cmdb_print "$model_name_system" "$model_name_cmdb")
 
 # CPU count
-cpu_count_system=$($CMDB_PATH/cmdb_get_cpu.sh)
+#cpu_count_system=$($CMDB_PATH/cmdb_get_cpu.sh)
+cpu_count_system=$($ODEV_PATH/src/cmdb_get_cpu.sh)
 cpu_count_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu count)
 cpu_count=$(cmdb_print "$cpu_count_system" "$cpu_count_cmdb")
 
 # total memory
-total_memory_system=$($CMDB_PATH/cmdb_get_memory.sh)
+#total_memory_system=$($CMDB_PATH/cmdb_get_memory.sh)
+total_memory_system=$($ODEV_PATH/src/cmdb_get_memory.sh)
 total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu memory)
 total_memory=$(cmdb_print "$total_memory_system" "$total_memory_cmdb")
 
 # total storage
-total_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT")
+#total_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT")
+total_storage_system=$($ODEV_PATH/src/cmdb_get_storage.sh "$STORAGE_UNIT")
 total_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
 total_storage=$(cmdb_print "$total_storage_system" "$total_storage_cmdb")
 
 # print CPU information
 echo ""
 echo "CPU model       : ${bold}$model_name${normal}"
-echo "CPU(s)          : $cpu_count"
-echo "Total memory    : $total_memory"
-echo "Total storage   : $total_storage"
+echo "CPU(s)          : ${bold}$cpu_count${normal}"
+echo "Total memory    : ${bold}$total_memory${normal}"
+echo "Total storage   : ${bold}$total_storage${normal}"
 echo ""
 
 # remove examine files
@@ -282,15 +286,18 @@ done
 numa_nodes_lscpu=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
 for ((i=0; i<numa_nodes_lscpu; i++)); do
     # CPU list
-    numa_cpus_system=$($CMDB_PATH/cmdb_get_cpu.sh $i)
+    #numa_cpus_system=$($CMDB_PATH/cmdb_get_cpu.sh $i)
+    numa_cpus_system=$($ODEV_PATH/src/cmdb_get_cpu.sh $i)
     numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i list)
     numa_cpus=$(cmdb_print "$numa_cpus_system" "$numa_cpus_cmdb")
     # memory
-    numa_memory_system=$($CMDB_PATH/cmdb_get_memory.sh $i)
+    #numa_memory_system=$($CMDB_PATH/cmdb_get_memory.sh $i)
+    numa_memory_system=$($ODEV_PATH/src/cmdb_get_memory.sh $i)
     numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i memory)
     numa_memory=$(cmdb_print "$numa_memory_system" "$numa_memory_cmdb")
     # storage
-    numa_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT" "$i")
+    #numa_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT" "$i")
+    numa_storage_system=$($ODEV_PATH/src/cmdb_get_storage.sh "$STORAGE_UNIT" "$i")
     numa_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i storage)
     numa_storage=$(cmdb_print "$numa_storage_system" "$numa_storage_cmdb")
     # endata NICs
