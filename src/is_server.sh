@@ -1,11 +1,11 @@
 #!/bin/bash
 
-CMDB_PATH=$1
+ODEV_PATH=$1
 server_type=$2
 
 # get devices from CMDB
-accel=$($CMDB_PATH/cmdb_get.py cpu numa 0 accel)
-gpu=$($CMDB_PATH/cmdb_get.py cpu numa 0 gpu)
+accel=$($ODEV_PATH/src/cmdb_get.py cpu numa 0 accel)
+gpu=$($ODEV_PATH/src/cmdb_get.py cpu numa 0 gpu)
 
 # print
 if [ "$server_type" = "accel" ]; then

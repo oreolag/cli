@@ -247,25 +247,25 @@ lstopo-no-graphics 2>/dev/null > $TMP_PATH/lstopo_output
 # CPU model
 #model_name_system=$($CMDB_PATH/cmdb_get_model.sh)
 model_name_system=$($ODEV_PATH/src/cmdb_get_model.sh)
-model_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model)
+model_name_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model)
 model_name=$(cmdb_print "$model_name_system" "$model_name_cmdb")
 
 # CPU count
 #cpu_count_system=$($CMDB_PATH/cmdb_get_cpu.sh)
 cpu_count_system=$($ODEV_PATH/src/cmdb_get_cpu.sh)
-cpu_count_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu count)
+cpu_count_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu count)
 cpu_count=$(cmdb_print "$cpu_count_system" "$cpu_count_cmdb")
 
 # total memory
 #total_memory_system=$($CMDB_PATH/cmdb_get_memory.sh)
 total_memory_system=$($ODEV_PATH/src/cmdb_get_memory.sh)
-total_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu memory)
+total_memory_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu memory)
 total_memory=$(cmdb_print "$total_memory_system" "$total_memory_cmdb")
 
 # total storage
 #total_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT")
 total_storage_system=$($ODEV_PATH/src/cmdb_get_storage.sh "$STORAGE_UNIT")
-total_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
+total_storage_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
 total_storage=$(cmdb_print "$total_storage_system" "$total_storage_cmdb")
 
 # print CPU information
@@ -288,33 +288,33 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     # CPU list
     #numa_cpus_system=$($CMDB_PATH/cmdb_get_cpu.sh $i)
     numa_cpus_system=$($ODEV_PATH/src/cmdb_get_cpu.sh $i)
-    numa_cpus_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i list)
+    numa_cpus_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i list)
     numa_cpus=$(cmdb_print "$numa_cpus_system" "$numa_cpus_cmdb")
     # memory
     #numa_memory_system=$($CMDB_PATH/cmdb_get_memory.sh $i)
     numa_memory_system=$($ODEV_PATH/src/cmdb_get_memory.sh $i)
-    numa_memory_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i memory)
+    numa_memory_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i memory)
     numa_memory=$(cmdb_print "$numa_memory_system" "$numa_memory_cmdb")
     # storage
     #numa_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT" "$i")
     numa_storage_system=$($ODEV_PATH/src/cmdb_get_storage.sh "$STORAGE_UNIT" "$i")
-    numa_storage_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i storage)
+    numa_storage_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i storage)
     numa_storage=$(cmdb_print "$numa_storage_system" "$numa_storage_cmdb")
     # endata NICs
-    endata_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i endata)
+    endata_idx_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i endata)
     endata_num_cmdb=$(wc -w <<< "$endata_idx_cmdb")
     # device loop
     touch $TMP_PATH/examine_endata_$i
     for ((j=0; j<endata_num_cmdb; j++)); do
-        ports_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ports)
+        ports_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ports)
         # port loop
         endata_num_ifconfig=0
         for ((k=0; k<ports_i_cmdb; k++)); do
             # cmdb values
-            name_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j name $k)
-            mac_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j mac $k)
-            ip_address_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_address $k)
-            ip_mask_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_mask $k)
+            name_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j name $k)
+            mac_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j mac $k)
+            ip_address_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_address $k)
+            ip_mask_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j ip_mask $k)
             ip_mask_i_cmdb_mask=$(bits_to_mask "$ip_mask_i_cmdb")
             # ifconfig values
             mac_i_ifconfig=$(ifconfig "$name_i_cmdb" 2>/dev/null | awk '/ether/{print $2}')
@@ -328,9 +328,9 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
                 # add to file
                 device_index="$j"
                 port_index="$k"
-                model=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j model)
+                model=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j model)
                 serial_number="-"
-                bdf=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j bdf $k)
+                bdf=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml endata $j bdf $k)
                 ip_address="$ip_address_i_ifconfig/$ip_mask_i_cmdb"
                 mac_address="$mac_i_ifconfig"
                 connection_name="$name_i_cmdb"
@@ -351,14 +351,14 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     done
     
     # GPUs
-    gpu_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i gpu)
+    gpu_idx_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i gpu)
     gpu_num_cmdb=$(wc -w <<< "$gpu_idx_cmdb")
     # device loop
     touch $TMP_PATH/examine_gpu_$i
     gpu_num_lspci=0
     for ((j=0; j<gpu_num_cmdb; j++)); do
-        vendor_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j vendor)
-        bdf_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j bdf)
+        vendor_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j vendor)
+        bdf_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j bdf)
         bdf_i_lspci=$(lspci -D | grep -i "^$bdf_i_cmdb.*$vendor_i_cmdb")
         if [ ! "$bdf_i_lspci" = "" ]; then
             # increase counter
@@ -367,9 +367,9 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
             # add to file
             device_index="$j"
             port_index="-"
-            model=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j model)
-            serial_number=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j uuid)
-            bdf=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j bdf)
+            model=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j model)
+            serial_number=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j uuid)
+            bdf=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j bdf)
             ip_address="-"
             mac_address="-"
             connection_name="-"
@@ -378,14 +378,14 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     done
     
     # ADs
-    accel_idx_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i accel)
+    accel_idx_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i accel)
     accel_num_cmdb=$(wc -w <<< "$accel_idx_cmdb")
     # device loop
     touch $TMP_PATH/examine_accel_$i
     accel_num_lspci=0
     for ((j=0; j<accel_num_cmdb; j++)); do
-        vendor_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j vendor)
-        bdf_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j bdf)
+        vendor_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j vendor)
+        bdf_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j bdf)
         bdf_i_lspci=$(lspci -D | grep -i "^$bdf_i_cmdb.*$vendor_i_cmdb")
         bdf_i_lspci="0000:c4:00.0 Processing accelerators: Xilinx Corporation Alveo U55C" # remove for final version!!!!!!!
         if [ ! "$bdf_i_lspci" = "" ]; then
@@ -394,10 +394,10 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
 
             # add to file
             device_index="$j"
-            model=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j model)
-            serial_number=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j serial)
-            bdf=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j bdf)
-            ports_i_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ports)
+            model=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j model)
+            serial_number=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j serial)
+            bdf=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j bdf)
+            ports_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ports)
             # port loop
             for ((k=0; k<ports_i_cmdb; k++)); do
                 port_index=$k
@@ -408,13 +408,13 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
                     serial_number="-"
                     bdf="-"
                 fi
-                ip_address_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ip_address $k)
-                ip_mask_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ip_mask $k)
+                ip_address_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ip_address $k)
+                ip_mask_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j ip_mask $k)
                 ip_address_cmdb="$ip_address_cmdb/$ip_mask_cmdb"
-                mac_address_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j mac $k)
+                mac_address_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j mac $k)
                 # check on connection name
                 connection_name_ifconfig=$(get_connection_name "$ip_address_cmdb" "$mac_address_cmdb")
-                connection_name_cmdb=$($CMDB_PATH/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j name $k)
+                connection_name_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j name $k)
                 if [[ "$connection_name_cmdb" != "$connection_name_ifconfig" ]]; then
                     connection_name="-"
                 else

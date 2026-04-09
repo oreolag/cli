@@ -40,7 +40,7 @@ if [[ "$installed" == "1" ]]; then
 fi
 
 # check on build
-is_build=$($ODEV_PATH/src/is_server.sh "$CMDB_PATH" "build")
+is_build=$($ODEV_PATH/src/is_server.sh "$ODEV_PATH" "build")
 
 print_help() {
   echo "The CLI for hetero${italic}genius${normal} computing."

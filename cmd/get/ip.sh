@@ -68,7 +68,7 @@ port=${V[port]}
 type=${V[type]}
 
 # check on numa
-numa_devices=$($CMDB_PATH/cmdb_get.py cpu numa $numa $type)
+numa_devices=$($ODEV_PATH/src/cmdb_get.py cpu numa $numa $type)
 if [[ ! "$numa" =~ ^[0-9]+$ ]] || [ "$numa_devices" = "" ]; then
   echo "Invalid numa: $numa" >&2
   exit 1
@@ -98,7 +98,7 @@ if [[ "$found" == "0" ]]; then
 fi
 
 # check on port
-name_cmdb=$($CMDB_PATH/cmdb_get.py $type $device name $port)
+name_cmdb=$($ODEV_PATH/src/cmdb_get.py $type $device name $port)
 if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$name_cmdb" = "" ]; then
   echo "Invalid port: $port" >&2
   exit 1
@@ -106,7 +106,7 @@ fi
 
 # get ip
 ip_system=$(ifconfig "$name_cmdb" | awk '/inet /{print $2; exit}')
-ip_cmdb=$($CMDB_PATH/cmdb_get.py $type $device ip_address $port)
+ip_cmdb=$($ODEV_PATH/src/cmdb_get.py $type $device ip_address $port)
 
 # check on ip_system
 if [[ "$ip_system" == "$ip_cmdb" ]]; then
