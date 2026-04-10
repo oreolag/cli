@@ -6,7 +6,7 @@ ODEV_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ODEV_PATH="$ODEV_PATH/odev"
 
 # constants
-#BANNER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths banner)")"
+BANNER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths banner)")"
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths cmdb)")"
 COLOR_OREOL=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_OREOL)
 STORAGE_UNIT="TB"
@@ -30,9 +30,9 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # print banner
-#if [ -f "$BANNER_PATH/banner" ]; then
-#  cat "$BANNER_PATH/banner"
-#fi
+if [ -f "$BANNER_PATH/odev_banner.sh" ]; then
+  $BANNER_PATH/odev_banner.sh
+fi
 
 # similar to odev examine
 os_print() {
