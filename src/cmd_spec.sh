@@ -46,20 +46,20 @@ GET_FLAGS=(
 GET_IP_DESCRIPTION="Get the IP address of a specific device"
 GET_IP_FLAGS=(
   "device,d,Device index,-,-"
-  "numa,n,NUMA index,-,-"
-  "port,p,Port index,-,-"
+  "numa,n,Non-Uniform Memory Access (NUMA) index,-,-"
+  "port,p,Port index,-,0"
   "type,t,Device type,accel|endata,endata"
 )
-GET_IP_FLAGS_MANDATORY="numa,type,device,port"
+GET_IP_FLAGS_MANDATORY="numa,device" #"numa,type,device,port"
 # mac
 GET_MAC_DESCRIPTION="Get the MAC address of a specific device"
 GET_MAC_FLAGS=(
   "device,d,Device index,-,-"
-  "numa,n,NUMA index,-,-"
-  "port,p,Port index,-,-"
+  "numa,n,Non-Uniform Memory Access (NUMA) index,-,-"
+  "port,p,Port index,-,0"
   "type,t,Device type,accel|endata,endata"
 )
-GET_MAC_FLAGS_MANDATORY="numa,type,device,port"
+GET_MAC_FLAGS_MANDATORY="numa,device" #"numa,type,device,port"
 
 
 # ifconfig 
