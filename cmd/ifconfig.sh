@@ -112,21 +112,33 @@ fi
 numa_nodes_lscpu=$(lscpu | grep -i "NUMA node(s)" | awk '{print $NF}')
 for ((i=0; i<numa_nodes_lscpu; i++)); do
     # endata
+    last_device=""
     while read -r line; do
         name=$(awk '{print $NF}' <<< "$line")
         if [ "$name" != "-" ]; then
-            device=$(awk '{print $1}' "$TMP_PATH/examine_endata_$i")
-            port=$(awk '{print $2}' "$TMP_PATH/examine_endata_$i")
-            print_iface "endata" $name $i $device $port
+            device=$(awk '{print $1}' <<< "$line")
+            port=$(awk '{print $2}' <<< "$line")
+            if [ "$device" = "-" ]; then
+                device="$last_device"
+            else
+                last_device="$device"
+            fi
+            print_iface "endata" "$name" "$i" "$device" "$port"
         fi
     done < "$TMP_PATH/examine_endata_$i"
     # accel
+    last_device=""
     while read -r line; do
         name=$(awk '{print $NF}' <<< "$line")
         if [ "$name" != "-" ]; then
-            device=$(awk '{print $1}' "$TMP_PATH/examine_accel_$i")
-            port=$(awk '{print $2}' "$TMP_PATH/examine_accel_$i")
-            print_iface "accel" $name $i $device $port
+            device=$(awk '{print $1}' <<< "$line")
+            port=$(awk '{print $2}' <<< "$line")
+            if [ "$device" = "-" ]; then
+                device="$last_device"
+            else
+                last_device="$device"
+            fi
+            print_iface "accel" "$name" "$i" "$device" "$port"
         fi
     done < "$TMP_PATH/examine_accel_$i"
 done
