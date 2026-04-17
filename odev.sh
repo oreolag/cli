@@ -33,9 +33,9 @@ if [[ "$installed" == "1" ]]; then
   logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
   if [[ "$logged_in" == "1" ]]; then
     github_user="$(gh api user --jq .login)"
-    gh_status="You are logged in to GitHub CLI as ${bold}$github_user${normal}"
+    gh_status="You are logged into the GitHub CLI as ${bold}$github_user${normal}"
   else
-    gh_status="Please use login to GitHub CLI with ${bold}gh auth login${normal}"
+    gh_status="Please authenticate with the GitHub CLI using ${bold}gh auth login${normal}"
   fi
 fi
 
