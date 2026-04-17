@@ -16,7 +16,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # build
-BUILD_DESCRIPTION="Hetero${italic}genius${normal} project build"
+BUILD_DESCRIPTION="Project build using the workflow recipe"
 BUILD_FLAGS=(
 )
 
