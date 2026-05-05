@@ -23,8 +23,8 @@ normal=$(tput sgr0)
 
 # constants
 COLOR_PASSED=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_PASSED)
-ODEV_REPO="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" github odev_repo)")"
-TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/constants.yml" paths tmp)")"
+ODEV_REPO="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github odev_repo)")"
+TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"
 
 # check on users
 is_odev_admins=$($ODEV_PATH/src/is_member.sh $USER odev-admins)
@@ -94,7 +94,7 @@ fi
 git -C "$CHECKOUT_PATH" submodule update --init --recursive
 
 # top level files
-for f in LICENSE README.md RELEASE_DATE VERSION cli-removebg.png constants.yml odev_completion.sh submodules_update.sh; do
+for f in LICENSE README.md RELEASE_DATE VERSION cli-removebg.png vars.yml odev_completion.sh submodules_update.sh; do
   if [[ -f "$CHECKOUT_PATH/$f" ]]; then
     sudo cp -f -- "$CHECKOUT_PATH/$f" "$ODEV_PATH/$f"
   fi

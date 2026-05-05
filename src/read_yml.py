@@ -2,7 +2,7 @@
 """
 read_yml.py
 
-Read a constants.yml-style YAML file and print a value.
+Read a vars.yml-style YAML file and print a value.
 
 Usage:
   read_yml.py <section> <key> [--db PATH] [--sep SEP]
@@ -41,8 +41,8 @@ def resolve_db_path(arg_db: Optional[str]) -> Path:
     Resolve constants DB path:
       1) --db PATH
       2) $CONSTANTS_DB_FILE
-      3) ./constants.yml
-      4) /opt/constants.yml
+      3) ./vars.yml
+      4) /opt/vars.yml
     """
     if arg_db:
         return Path(arg_db)
@@ -51,11 +51,11 @@ def resolve_db_path(arg_db: Optional[str]) -> Path:
     if env_db:
         return Path(env_db)
 
-    local = Path("./constants.yml")
+    local = Path("./vars.yml")
     if local.exists():
         return local
 
-    return Path("/opt/constants.yml")
+    return Path("/opt/vars.yml")
 
 
 def format_value(val: Any, sep: str) -> str:
@@ -81,7 +81,7 @@ def main() -> int:
     ap.add_argument(
         "--db",
         default=None,
-        help="Path to constants YAML. If omitted: $CONSTANTS_DB_FILE, ./constants.yml, or /opt/constants.yml",
+        help="Path to constants YAML. If omitted: $CONSTANTS_DB_FILE, ./vars.yml, or /opt/vars.yml",
     )
     ap.add_argument("--sep", default=",", help="Separator for list output (default: ',')")
 
