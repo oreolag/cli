@@ -1,0 +1,614 @@
+---
+
+- hosts: all
+  become: true
+  become_method: community.general.sudosu
+  become_user: root
+  ignore_unreachable: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    cli_remote_path: /opt
+    cli_repository: "https://github.com/oreolag/cli.git"
+    # control variables
+    all : false
+    build: false
+    #constants: false
+    delete: false
+    examine: false
+    get: false
+    ifconfig: false
+    main: false
+    new: false
+    program: false
+    run: false
+    src: false
+    # repo (all does not apply)
+    repo: false
+    #submodules: false
+    sudoers_d: false
+    update: false
+    validate: false
+    vars_yml: false
+    #submodules (all does not apply)
+    hdev: false
+    workflows: false
+    # templates (all does not apply)
+    templates: false 
+  vars_files: vars.yml
+  tasks:
+    - name: Show control variables
+      ansible.builtin.debug:
+        msg:
+          #- "constants={{ constants }}"
+          - "all={{ all }}"
+          - "build={{ build }}"
+          - "delete={{ delete }}"
+          - "examine={{ examine }}"
+          - "get={{ get }}"
+          - "ifconfig={{ ifconfig }}"
+          - "main={{ main }}"
+          - "new={{ new }}"
+          - "src={{ src }}"
+          - "sudoers_d={{ sudoers_d }}"
+          - "update={{ update }}"
+          - "validate={{ validate }}"
+          - "vars_yml={{ vars_yml }}"
+          # repo
+          - "repo={{ repo }}"
+          # submodules
+          - "hdev={{ hdev }}"
+          - "workflows={{ workflows }}"
+          # templates
+          - "templates={{ templates }}"
+      run_once: true
+      delegate_to: localhost
+    
+    # build
+    - block:
+        - name: Copy build.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/build.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/build.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        #- name: Delete remote folder first
+        #  ansible.builtin.file:
+        #    path: "{{ cli_remote_path }}/odev/cmd/build"
+        #    state: absent
+        - name: Copy cmd/build directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/build/"
+            dest: "{{ cli_remote_path }}/odev/cmd/build/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on build folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/build/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (build or all) | bool
+        - cli.local_path is defined
+
+    # delete
+    - block:
+        - name: Copy delete.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/delete.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/delete.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        #- name: Delete remote folder first
+        #  ansible.builtin.file:
+        #    path: "{{ cli_remote_path }}/odev/cmd/delete"
+        #    state: absent
+        #- name: Copy cmd/delete directory from local path
+        #  ansible.builtin.copy:
+        #    src: "{{ cli.local_path }}/cmd/delete/"
+        #    dest: "{{ cli_remote_path }}/odev/cmd/delete/"
+        #    owner: root
+        #    group: root
+        #    mode: "0755"
+        - name: Copy cmd/delete directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/delete/"
+            dest: "{{ cli_remote_path }}/odev/cmd/delete/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on delete folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/delete/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (delete or all) | bool
+        - cli.local_path is defined
+
+    # examine
+    - name: Copy examine.sh with executable mode (0755)
+      ansible.builtin.copy:
+        src: "{{ cli.local_path }}/cmd/examine.sh"
+        dest: "{{ cli_remote_path }}/odev/cmd/examine.sh"
+        owner: root
+        group: root
+        mode: "0755"
+      when:
+        - (examine or all) | bool
+        - cli.local_path is defined
+
+    # get
+    - block:
+        - name: Copy get.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/get.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/get.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        - name: Copy cmd/get directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/get/"
+            dest: "{{ cli_remote_path }}/odev/cmd/get/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on get folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/get/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (get or all) | bool
+        - cli.local_path is defined
+
+    # ifconfig
+    - name: Copy ifconfig.sh with executable mode (0755)
+      ansible.builtin.copy:
+        src: "{{ cli.local_path }}/cmd/ifconfig.sh"
+        dest: "{{ cli_remote_path }}/odev/cmd/ifconfig.sh"
+        owner: root
+        group: root
+        mode: "0755"
+      when:
+        - (ifconfig or all) | bool
+        - cli.local_path is defined
+
+    # main
+    - block:
+        - name: Copy odev with executable mode (0755)
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/odev.sh"
+            dest: "{{ cli_remote_path }}/odev/odev"
+            owner: root
+            group: root
+            mode: "0755"
+        - name: Copy odev_completion.sh with executable mode
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/odev_completion.sh"
+            dest: "{{ cli_remote_path }}/odev/odev_completion.sh"
+            owner: root
+            group: root
+            mode: "0644"
+        - name: Install bash completion for odev
+          ansible.builtin.copy:
+            src: "{{ cli_remote_path }}/odev/odev_completion.sh"
+            dest: "/usr/share/bash-completion/completions/odev"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0644"
+        # copy odev_login.sh
+        - name: Copy odev_login.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/odev_login.sh"
+            dest: "{{ cli_remote_path }}/odev_login.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        - name: Show odev_login.sh at login
+          ansible.builtin.lineinfile:
+            path: /etc/profile.d/odev_login.sh
+            regexp: '^sudo {{ cli_remote_path }}/odev_login\.sh$'
+            line: 'sudo {{ cli_remote_path }}/odev_login.sh'
+            create: true
+            owner: root
+            group: root
+            mode: "0644"    
+      when:
+        - (main or all) | bool
+        - cli.local_path is defined
+
+    # new
+    - block:
+        - name: Copy new.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/new.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/new.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        #- name: Copy cmd/new directory from local path
+        #  ansible.builtin.copy:
+        #    src: "{{ cli.local_path }}/cmd/new/"
+        #    dest: "{{ cli_remote_path }}/odev/cmd/new/"
+        #    owner: root
+        #    group: root
+        #    mode: "0755"
+        #- name: Delete remote folder first
+        #  ansible.builtin.file:
+        #    path: "{{ cli_remote_path }}/odev/cmd/new"
+        #    state: absent
+        - name: Copy cmd/new directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/new/"
+            dest: "{{ cli_remote_path }}/odev/cmd/new/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on new folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/new/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (new or all) | bool
+        - cli.local_path is defined
+
+    # program
+    - block:
+        - name: Copy program.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/program.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/program.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        #- name: Delete remote folder first
+        #  ansible.builtin.file:
+        #    path: "{{ cli_remote_path }}/odev/cmd/program"
+        #    state: absent
+        - name: Copy cmd/program directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/program/"
+            dest: "{{ cli_remote_path }}/odev/cmd/program/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on program folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/program/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (program or all) | bool
+        - cli.local_path is defined
+
+    # repo
+    - block:
+        - name: Ensure required packages are installed
+          ansible.builtin.apt:
+            name:
+              - git
+              - bash-completion
+            state: present
+            update_cache: true
+
+        - name: Remove {{ cli_remote_path }}/odev if it exists
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev"
+            state: absent
+
+        - name: Create {{ cli_remote_path }}/odev
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev"
+            state: directory
+            owner: root
+            group: root
+            mode: "0755"
+
+        - name: Clone odev repository into {{ cli_remote_path }}/odev
+          ansible.builtin.git:
+            repo: "{{ cli_repository }}"
+            dest: "{{ cli_remote_path }}/odev"
+            version: main
+            update: true
+            force: true
+
+        - name: Update all submodules
+          ansible.builtin.command:
+            cmd: git submodule update --init --recursive --remote --merge
+            chdir: "{{ cli_remote_path }}/odev"
+
+        - name: Rename odev.sh to odev (canonical entrypoint)
+          command: mv {{ cli_remote_path }}/odev/odev.sh {{ cli_remote_path }}/odev/odev
+          args:
+            creates: "{{ cli_remote_path }}/odev/odev"
+
+        - name: Ensure odev is executable
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/odev"
+            mode: "0755"
+
+        # Install completion (system-wide)
+        - name: Install bash completion for odev
+          ansible.builtin.copy:
+            src: "{{ cli_remote_path }}/odev/odev_completion.sh"
+            dest: "/usr/share/bash-completion/completions/odev"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0644"
+
+        # PATH for all users
+        - name: Add odev to PATH (system-wide)
+          ansible.builtin.copy:
+            dest: "/etc/profile.d/odev.sh"
+            content: |
+              # odev CLI
+              export PATH="$PATH:{{ cli_remote_path }}/odev"
+            owner: root
+            group: root
+            mode: "0644"
+
+        # Export ODEV_PATH for completion (and for the CLI if you want)
+        - name: Export ODEV_PATH (system-wide bash)
+          ansible.builtin.lineinfile:
+            path: "/etc/bash.bashrc"
+            line: "export ODEV_PATH={{ cli_remote_path }}/odev"
+            create: true
+
+        # Add extended capabilities
+        - name: Copy odev-users to /etc/sudoers.d
+          ansible.builtin.copy:
+            src: "{{ cli_remote_path }}/odev/src/odev-users"
+            dest: "/etc/sudoers.d/odev-users"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0440"
+        - name: Copy odev-developers to /etc/sudoers.d
+          ansible.builtin.copy:
+            src: "{{ cli_remote_path }}/odev/src/odev-developers"
+            dest: "/etc/sudoers.d/odev-developers"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0440"
+        - name: Copy odev-admins to /etc/sudoers.d
+          ansible.builtin.copy:
+            src: "{{ cli_remote_path }}/odev/src/odev-admins"
+            dest: "/etc/sudoers.d/odev-admins"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0440"
+
+        # copy odev_login.sh
+        - name: Copy odev_login.sh script
+          ansible.builtin.copy:
+            src: "{{ cli_remote_path }}/odev/odev_login.sh"
+            dest: "{{ cli_remote_path }}/odev_login.sh"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0755"
+        - name: Show odev_login.sh at login
+          ansible.builtin.lineinfile:
+            path: /etc/profile.d/odev_login.sh
+            regexp: '^sudo {{ cli_remote_path }}/odev_login\.sh$'
+            line: 'sudo {{ cli_remote_path }}/odev_login.sh'
+            create: true
+            owner: root
+            group: root
+            mode: "0644"
+      become: true
+      when: repo | bool
+
+    # run
+    - block:
+        - name: Copy run.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/run.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/run.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        #- name: Delete remote folder first
+        #  ansible.builtin.file:
+        #    path: "{{ cli_remote_path }}/odev/cmd/run"
+        #    state: absent
+        - name: Copy cmd/run directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/run/"
+            dest: "{{ cli_remote_path }}/odev/cmd/run/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on run folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/run/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (run or all) | bool
+        - cli.local_path is defined
+
+    # src
+    - name: Copy src folder
+      block:
+        - name: Copy src folder (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/src/"
+            dest: "{{ cli_remote_path }}/odev/src/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on src folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/src/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (src or all) | bool
+        - cli.local_path is defined
+
+    # submodules (all does not apply)
+    - block:
+        - name: Delete remote hdev submodule content
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/submodules/hdev"
+            state: absent
+
+        - name: Copy hdev submodule from local path
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/submodules/hdev/"
+            dest: "{{ cli_remote_path }}/odev/submodules/hdev/"
+            owner: root
+            group: root
+            mode: "0755"
+      when:
+        - hdev | bool
+        - cli.local_path is defined
+    - block:
+        - name: Delete remote workflows submodule content
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/submodules/workflows"
+            state: absent
+
+        - name: Copy workflows submodule from local path
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/submodules/workflows/"
+            dest: "{{ cli_remote_path }}/odev/submodules/workflows/"
+            owner: root
+            group: root
+            mode: "0755"
+      when:
+        - workflows | bool
+        - cli.local_path is defined
+
+    # sudoers_d
+    - block:
+        - name: Copy odev-users to /etc/sudoers.d
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/src/odev-users"
+            dest: "/etc/sudoers.d/odev-users"
+            owner: root
+            group: root
+            mode: "0440"
+        - name: Copy odev-developers to /etc/sudoers.d
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/src/odev-developers"
+            dest: "/etc/sudoers.d/odev-developers"
+            owner: root
+            group: root
+            mode: "0440"
+        - name: Copy odev-admins to /etc/sudoers.d
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/src/odev-admins"
+            dest: "/etc/sudoers.d/odev-admins"
+            owner: root
+            group: root
+            mode: "0440"
+      when:
+        - (sudoers_d or all) | bool
+        - cli.local_path is defined
+
+    # templates (all does not apply)
+    - block:
+        - name: Delete remote templates folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/templates"
+            state: absent
+        - name: Copy templates from local path
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/templates/"
+            dest: "{{ cli_remote_path }}/odev/templates/"
+            owner: root
+            group: root
+            mode: "0755"
+      when:
+        - templates | bool
+        - cli.local_path is defined
+
+    # update
+    - name: Copy update.sh with executable mode (0755)
+      ansible.builtin.copy:
+        src: "{{ cli.local_path }}/cmd/update.sh"
+        dest: "{{ cli_remote_path }}/odev/cmd/update.sh"
+        owner: root
+        group: root
+        mode: "0755"
+      when:
+        - (update or all) | bool
+        - cli.local_path is defined
+
+    # validate
+    - block:
+        - name: Copy validate.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/validate.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/validate.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        #- name: Delete remote folder first
+        #  ansible.builtin.file:
+        #    path: "{{ cli_remote_path }}/odev/cmd/validate"
+        #    state: absent
+        - name: Copy cmd/validate directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/validate/"
+            dest: "{{ cli_remote_path }}/odev/cmd/validate/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on validate folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/validate/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (validate or all) | bool
+        - cli.local_path is defined
+
+    # vars
+    - name: Copy vars.yml
+      ansible.builtin.copy:
+        src: "{{ cli.local_path }}/vars.yml"
+        dest: "{{ cli_remote_path }}/odev/vars.yml"
+        owner: root
+        group: root
+        mode: "0644"
+      when:
+        - (vars_yml or all) | bool
+        - cli.local_path is defined
+
+    # cleanup
+    - name: Delete legacy files or folders
+      ansible.builtin.file:
+        path: "{{ cli_remote_path }}/odev/{{ item }}"
+        state: absent
+      loop:
+        - cmd/delete/delete.sh
+        - constants.yml
+        #- cmd/delete
