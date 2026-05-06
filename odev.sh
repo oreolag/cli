@@ -103,7 +103,7 @@ print_version() {
   fi
 
   echo "odev version ${ver} (${date})"
-  echo "https://github.com/oreolag/cli/releases/tag/v${ver}"
+  echo "https://github.com/oreolag/cli/releases/tag/${ver}"
 }
 
 # ------------------------------------------------------------
