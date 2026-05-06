@@ -10,7 +10,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
-COLOR_NVIDIA=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_NVIDIA)
+COLOR_NVIDIA=$($ODEV_PATH/src/constant_get.sh $ODEV_PATH COLOR_NVIDIA)
 
 # nvidia-smi
 tool="nvidia-smi"

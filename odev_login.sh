@@ -8,7 +8,7 @@ ODEV_PATH="$ODEV_PATH/odev"
 # constants
 BANNER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths banner)")"
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths cmdb)")"
-COLOR_OREOL=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_OREOL)
+COLOR_OREOL=$($ODEV_PATH/src/constant_get.sh $ODEV_PATH COLOR_OREOL)
 STORAGE_UNIT="TB"
 
 #get username

@@ -22,8 +22,11 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
-COLOR_PASSED=$($ODEV_PATH/src/color_get.sh $ODEV_PATH COLOR_PASSED)
+COLOR_PASSED=$($ODEV_PATH/src/constant_get.sh $ODEV_PATH COLOR_PASSED)
 ODEV_REPO="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github odev_repo)")"
+
+ODEV_REPO=$($ODEV_PATH/src/constant_get.sh $ODEV_PATH ODEV_REPO)
+
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"
 
 # check on users
