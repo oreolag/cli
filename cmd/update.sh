@@ -76,9 +76,12 @@ sudo rm -rf -- "$CHECKOUT_PATH"
 
 # repository checkout
 msg=""
+ver=""
 if [[ "$flag" == "--main" ]] || [[ "$flag" == "-m" ]]; then
   git clone --branch main "$ODEV_REPO" "$CHECKOUT_PATH"
+  release_date="$(git -C "$CHECKOUT_PATH" log -1 --format=%cs)"
   msg="${COLOR_PASSED}✓${normal} odev updated: main"
+  ver="main"
 else
   tag="$(gh release view --repo oreolag/cli --json tagName -q .tagName)"
 
@@ -87,7 +90,9 @@ else
   fi
 
   git clone --branch "$tag" "$ODEV_REPO" "$CHECKOUT_PATH"
+  release_date="$(git -C "$CHECKOUT_PATH" log -1 --format=%cs)"
   msg="${COLOR_PASSED}✓${normal} odev updated: $tag"
+  ver="$tag"
 fi
 
 # get submodules
@@ -158,6 +163,10 @@ sudo install -o root -g root -m 0440 \
 
 # consolidate ownership
 sudo "$ODEV_PATH/src/chown.sh" root root "$ODEV_PATH"
+
+# update VERSION and RELEASE_DATE
+echo "$ver" | sudo tee /opt/odev/VERSION >/dev/null
+echo "$release_date" | sudo tee /opt/odev/RELEASE_DATE >/dev/null
 
 # print 
 echo -e "$msg"

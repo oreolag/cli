@@ -5,4 +5,5 @@
   /usr/bin/rm, \
   /usr/bin/rsync, \
   /usr/bin/mv, \
-  /usr/bin/install
+  /usr/bin/install, \
+  /usr/bin/tee
