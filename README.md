@@ -14,7 +14,11 @@
 * [Ecosystem](#ecosystem)
 
 # Start Here
-For installing....
+Install odev with:
+
+```bash
+
+curl -fsSL https://raw.githubusercontent.com/oreolag/cli/main/install.sh | sudo bash
 
 ## Ecosystem 
 Academic, industrial, and investment partners supporting odev.
