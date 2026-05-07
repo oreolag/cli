@@ -1,6 +1,8 @@
 [submodule "submodules/hdev"]
 	path = submodules/hdev
 	url = https://github.com/fpgasystems/hdev.git
+	branch = main
 [submodule "submodules/workflows"]
 	path = submodules/workflows
 	url = https://github.com/oreolag/workflows.git
+	branch = main
