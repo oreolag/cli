@@ -4,12 +4,12 @@ set -euo pipefail
 
 
 # constants
-ODEV_REPO=$(cat ./src/ODEV_REPO)
-#REPO_URL="https://github.com/oreolag/cli.git"
+#ODEV_REPO=$(cat ./src/ODEV_REPO)
+REPO_URL="https://github.com/oreolag/cli.git"
 TMP_PATH="$(mktemp -d)"
 
 # get repository URL for checkout
-REPO_URL="$ODEV_REPO.git"
+#REPO_URL="$ODEV_REPO.git"
 
 cleanup() {
     rm -rf "$TMP_PATH"
