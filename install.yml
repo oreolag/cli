@@ -17,6 +17,7 @@
     examine: false
     get: false
     ifconfig: false
+    install: false
     main: false
     new: false
     program: false
@@ -46,6 +47,7 @@
           - "examine={{ examine }}"
           - "get={{ get }}"
           - "ifconfig={{ ifconfig }}"
+          - "install={{ install }}"
           - "main={{ main }}"
           - "new={{ new }}"
           - "src={{ src }}"
@@ -181,6 +183,18 @@
         mode: "0755"
       when:
         - (ifconfig or all) | bool
+        - cli.local_path is defined
+
+    # install
+    - name: Copy install.sh with executable mode (0755)
+      ansible.builtin.copy:
+        src: "{{ cli.local_path }}/install.sh"
+        dest: "{{ cli_remote_path }}/odev/install.sh"
+        owner: root
+        group: root
+        mode: "0755"
+      when:
+        - (install or all) | bool
         - cli.local_path is defined
 
     # main
