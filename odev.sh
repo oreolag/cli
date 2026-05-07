@@ -103,7 +103,11 @@ print_version() {
   fi
 
   echo "odev version ${ver} (${date})"
-  echo "https://github.com/oreolag/cli/releases/tag/${ver}"
+  if [ "$ver" = "main" ]; then
+    echo "https://github.com/oreolag/cli/tree/main"
+  else
+    echo "https://github.com/oreolag/cli/releases/tag/${ver}"
+  fi
 }
 
 # ------------------------------------------------------------
