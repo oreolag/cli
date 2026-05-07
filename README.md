@@ -17,7 +17,8 @@
 Install odev with:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/oreolag/cli/main/install.sh | sudo bash
+curl -H 'Cache-Control: no-cache' \
+  -fsSL https://raw.githubusercontent.com/oreolag/cli/main/install.sh | sudo bash
 ```
 
 ## Ecosystem 
