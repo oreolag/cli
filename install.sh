@@ -8,7 +8,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
-#ODEV_REPO=$(cat ./src/ODEV_REPO)
+COLOR_PASSED=$(printf '\033[38;2;96;186;66m')
 REPO_URL="https://github.com/oreolag/cli.git"
 TMP_PATH="$(mktemp -d)"
 
@@ -74,7 +74,7 @@ ansible-playbook \
     install.yml \
     --extra-vars "repo=true" #--check
 
-echo "${bold}[INFO] odev installation completed${normal}"
-echo ""
+echo "${bold}${COLOR_PASSED}✓${normal} odev installation completed${normal}"
+#echo ""
 #echo "Try:"
 #echo "  odev --help"
