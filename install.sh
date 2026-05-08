@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+# format
+bold=$(tput bold)
+italic=$(tput sitm 2>/dev/null || true)
+normal=$(tput sgr0)
 
 # constants
 #ODEV_REPO=$(cat ./src/ODEV_REPO)
@@ -42,7 +46,7 @@ fi
 #echo "Hey I am here"
 #exit 
 
-echo "[INFO] Installing prerequisites..."
+echo "${bold}[INFO] Installing prerequisites...${normal}"
 
 apt-get update
 
@@ -54,23 +58,23 @@ apt-get install -y \
     rsync \
     sudo
 
-echo "[INFO] Cloning odev repository..."
+echo ""
+echo "${bold}[INFO] Cloning odev repository...${normal}"
 
 git clone --recursive "$REPO_URL" "$TMP_PATH/cli"
 
 cd "$TMP_PATH/cli"
 
-echo "[INFO] Running installer..."
+echo ""
+echo "${bold}[INFO] Running installer...${normal}"
 
 ansible-playbook \
     -i localhost, \
     -c local \
     install.yml \
-    --extra-vars "repo=true" \
-    --check
+    --extra-vars "repo=true" #--check
 
-echo
-echo "[INFO] odev installation completed"
-echo
-echo "Try:"
-echo "  odev --help"
+echo "${bold}[INFO] odev installation completed${normal}"
+echo ""
+#echo "Try:"
+#echo "  odev --help"
