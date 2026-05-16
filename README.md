@@ -22,10 +22,8 @@ curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo b
 
 # Citation
 
-<!-- [![DOI](https://zenodo.org/badge/20229347.svg)](https://doi.org/10.5281/zenodo.20229347)
-[![Paper](https://img.shields.io/badge/DOI-10.1145%2F3805700-blue)](https://doi.org/10.1145/3805700) -->
-
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20229347-blue)](https://doi.org/10.5281/zenodo.20229347) [![Paper](https://img.shields.io/badge/DOI-10.1145%2F3805700-blue)](https://doi.org/10.1145/3805700)
+[![Software DOI](https://img.shields.io/badge/software%20DOI-10.5281%2Fzenodo.20229347-blue)](https://doi.org/10.5281/zenodo.20229347)
+[![Paper DOI](https://img.shields.io/badge/paper%20DOI-10.1145%2F3805700-green)](https://doi.org/10.1145/3805700)
 
 If you use `odev` in your research, development, or publications, please cite the following references:
 
