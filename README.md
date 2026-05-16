@@ -13,7 +13,7 @@
 
 ```odev``` is the CLI for hetero*genius* computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units, simplifying deployment while enabling reproducible experimentation and consistent performance baselines through NUMA-aware execution.
 
-Combined with integrated community workflows for popular HPC, ML, and AI environments such as NCCL, Metaflow, and vLLM, ```odev``` empowers researchers and engineers to easily build and deploy their applications across advanced heterogeneous hardware—including CPUs, GPUs, FPGAs, storage, and high-performance networking systems—to solve real-world problems.
+Combined with integrated community workflows for popular HPC, ML, and AI environments such as NCCL, Metaflow, and vLLM, ```odev``` empowers researchers and engineers to easily build and run their applications across advanced heterogeneous hardware—including CPUs, GPUs, FPGAs, storage, and high-performance networking systems—to solve real-world problems.
 
 [Start here](#start-here) to configure your heterogeneous computing infrastructure.
 
@@ -25,11 +25,19 @@ Combined with integrated community workflows for popular HPC, ML, and AI environ
 Follow these steps to set up your `odev` infrastructure and start building topology-aware heterogeneous computing environments.
 
 ## Installation
-Run the following command on your Linux host:
+Run the following command on your Linux host (see [Supported Platforms](#supported-platforms)):
 
 ```bash
 curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo bash
 ```
+
+## Supported Platforms
+`odev` currently supports Ubuntu-based Linux distributions. Validated environments include:
+
+- Ubuntu
+- NVIDIA DGX
+
+Additional Linux distributions may work but are not officially validated yet.
 
 # Citation
 
