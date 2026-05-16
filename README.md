@@ -12,6 +12,7 @@
 ## Sections
 * [Start here](#start-here)
 * [Ecosystem](#ecosystem)
+* [Citation](#citation)
 
 # Start Here
 Install odev with:
@@ -23,8 +24,5 @@ curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo b
 ## Ecosystem 
 Academic, industrial, and investment partners supporting odev.
 
-# License
-Copyright (C) 2025 Oreol KLG
-All rights reserved.
-
-This software is proprietary and confidential. Unauthorized distribution, copying, or modification is prohibited. Access is granted only to authorized users under the terms of a valid subscription agreement.
+# Citation
+If you use odev in your research work, we kindly request that add these cites to your references:
