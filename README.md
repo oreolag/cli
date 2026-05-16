@@ -9,16 +9,23 @@
 
  <!-- ```odev``` is the CLI for hetero*genious* computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` extends device-centric workflows with [Metaflow](https://metaflow.org) orchestration to help scientists and engineers build and manage real-life AI and ML systems across Slurm and Kubernetes. [Start here](#start-here) to experience the Just Work™ workflows! -->
 
-```odev``` is the CLI for hetero*genius* computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units. This dramatically simplifies the deployment and execution of real-world AI, HPC, and ML workloads across modern accelerated computing infrastructures. Combined with integrated community workflows for popular HPC and AI environments such as NCCL, Metaflow, and vLLM, ```odev``` empowers researchers and engineers to build, deploy, and operate reproducible workloads across CPUs, GPUs, FPGAs, storage, and high-performance networking systems.
+<!-- ```odev``` is the CLI for hetero*genius* computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units. This dramatically simplifies the deployment and execution of real-world AI, HPC, and ML workloads across modern accelerated computing infrastructures. Combined with integrated community workflows for popular HPC and AI environments such as NCCL, Metaflow, and vLLM, ```odev``` empowers researchers and engineers to build, deploy, and operate reproducible workloads across CPUs, GPUs, FPGAs, storage, and high-performance networking systems. -->
+
+```odev``` is the CLI for hetero*genius* computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units, simplifying deployment while enabling reproducible experimentation and consistent performance baselines through NUMA-aware execution.
+
+Combined with integrated community workflows for popular HPC, ML, and AI environments such as NCCL, Metaflow, and vLLM, ```odev``` empowers researchers and engineers to easily build and deploy their applications across advanced heterogeneous hardware—including CPUs, GPUs, FPGAs, storage, and high-performance networking systems—to solve real-world problems.
 
 [Start here](#start-here) to configure your heterogeneous computing infrastructure.
 
-## Sections
+<!-- ## Sections
 * [Start here](#start-here)
-* [Citation](#citation)
+* [Citation](#citation) -->
 
 # Start Here
-Install odev with:
+Follow these steps to set up your `odev` infrastructure and start building topology-aware heterogeneous computing environments.
+
+## Installation
+Run the following command on your Linux host:
 
 ```bash
 curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo bash
