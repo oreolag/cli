@@ -41,8 +41,8 @@ Additional Linux distributions may work but are not officially validated yet.
 
 # Citation
 
-[![Zenodo](https://img.shields.io/badge/software%20DOI-10.5281%2Fzenodo.20229347-blue)](https://doi.org/10.5281/zenodo.20229347)
-[![ACM](https://img.shields.io/badge/paper%20DOI-10.1145%2F3805700-green)](https://doi.org/10.1145/3805700)
+[![Zenodo](https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.20229347-blue)](https://doi.org/10.5281/zenodo.20229347)
+[![ACM](https://img.shields.io/badge/ACM-10.1145%2F3805700-green)](https://doi.org/10.1145/3805700)
 
 If you use `odev` in your research, development, or publications, please cite the following references:
 
