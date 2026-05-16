@@ -1,3 +1,7 @@
+<p align="right">
+<a href="https://oreol.ch/numa">NUMA</a>
+</p>
+
 <p align="center" style="margin-bottom: 0px;">
   <img src="https://github.com/oreolag/cli/blob/main/cli-removebg.png" 
        align="center" style="width: 200px; height: auto;">
