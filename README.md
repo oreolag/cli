@@ -11,7 +11,6 @@
 
 ## Sections
 * [Start here](#start-here)
-* [Ecosystem](#ecosystem)
 * [Citation](#citation)
 
 # Start Here
@@ -21,8 +20,31 @@ Install odev with:
 curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo bash
 ```
 
-## Ecosystem 
-Academic, industrial, and investment partners supporting odev.
-
 # Citation
-If you use odev in your research work, we kindly request that add these cites to your references:
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20229347.svg)](https://doi.org/10.5281/zenodo.20229347)
+[![Paper](https://img.shields.io/badge/DOI-10.1145%2F3805700-blue)](https://doi.org/10.1145/3805700)
+
+If you use `odev` in your research, development, or publications, please cite the following references:
+
+```bibtex
+@misc{moya2026odev,
+  author       = {Javier Moya},
+  title        = {oreolag/cli: odev},
+  howpublished = {Zenodo},
+  year         = {2026},
+  note         = {\url{https://doi.org/10.5281/zenodo.20229347}},
+  doi          = {10.5281/zenodo.20229347}
+}
+```
+
+```bibtex
+@article{moya2025hacc,
+  author    = {Javier Moya and Mario Ruiz and Gustavo Alonso},
+  title     = {A Development Platform for Managed Heterogeneous Accelerated Compute Clusters: A Case Study on ETH Zurich’s AMD HACC},
+  journal   = {ACM Transactions on Reconfigurable Technology and Systems},
+  year      = {2025},
+  doi       = {10.1145/3805700},
+  url       = {https://doi.org/10.1145/3805700}
+}
+```
