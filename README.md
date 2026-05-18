@@ -21,9 +21,13 @@ Combined with integrated community workflows for popular HPC, ML, and AI environ
 
 [Start here](#start-here) to configure your heterogeneous computing infrastructure.
 
-<!-- ## Sections
+## Sections
+* [How It Works](#how-it-works)
 * [Start here](#start-here)
-* [Citation](#citation) -->
+* [Citation](#citation)
+
+# How It Works
+`odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth.
 
 # Start Here
 Follow these steps to set up your `odev` infrastructure and start building topology-aware heterogeneous computing environments.
