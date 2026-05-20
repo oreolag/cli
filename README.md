@@ -68,11 +68,11 @@ If you use `odev` in your research, development, or publications, please cite th
 ```
 
 ```bibtex
-@article{moya2025hacc,
-  author    = {Javier Moya and Mario Ruiz and Gustavo Alonso},
+@article{moya2026hacc,
+  author    = {Javier Moya and Matthias Gabathuler and Mario Ruiz and Gustavo Alonso},
   title     = {A Development Platform for Managed Heterogeneous Accelerated Compute Clusters: A Case Study on ETH Zurich’s AMD HACC},
   journal   = {ACM Transactions on Reconfigurable Technology and Systems},
-  year      = {2025},
+  year      = {2026},
   doi       = {10.1145/3805700},
   url       = {https://doi.org/10.1145/3805700}
 }
