@@ -3,7 +3,7 @@
 </p>
 
 <p align="center" style="margin-bottom: 0px;">
-  <img src="https://github.com/oreolag/cli/blob/2026.3/CLI.svg" 
+  <img src="https://github.com/oreolag/cli/blob/2026.3/CLI_blue.svg" 
        align="center" style="width: 200px; height: auto;">
 </p>
 
