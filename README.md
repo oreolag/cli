@@ -1,5 +1,5 @@
 <p align="right">
-<a href="https://oreol.ch">Oreol</a> <a href="https://github.com/oreolag/ansible-collection/">Ansible Collection</a>
+<a href="https://oreol.ch">Oreol</a> <a href="https://github.com/oreolag/cli/">Ansible Collection</a>
 </p>
 
 <p align="center" style="margin-bottom: 0px;">
@@ -7,9 +7,15 @@
        align="center" style="width: 200px; height: auto;">
 </p>
 
-<!-- <h1 align="center">
-  Oreol CLI
-</h1> -->
+<h1 align="center">
+  <!-- Oreol CLI -->
+  <p align="center">
+    <a href="https://github.com/oreolag/cli/releases"><img src="https://img.shields.io/github/v/release/oreolag/cli" alt="Latest release" /></a>
+    <a href="https://github.com/oreolag/cli/blob/main/LICENSE"><img src="https://img.shields.io/github/license/oreolag/cli" alt="License" /></a>
+    <a href="https://github.com/oreolag/cli/graphs/contributors"><img src="https://img.shields.io/github/contributors/oreolag/cli?color=blue" alt="Contributors" /></a>
+    <a href="https://github.com/oreolag/cli/stargazers"><img src="https://img.shields.io/github/stars/oreolag/cli?style=flat" alt="GitHub stars" /></a>
+  </p>
+</h1>
 
 ```odev``` is the CLI for hetero*genius* computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units, simplifying deployment while enabling reproducible experimentation and consistent performance baselines through hardware-aware execution.
 
