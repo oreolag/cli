@@ -28,22 +28,22 @@ Combined with integrated community [workflows](https://github.com/oreolag/workfl
 * [Start here](#start-here)
 * [Citation](#citation)
 
-# How It Works
+## How It Works
 `odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth.
 
 <!-- To learn more about `odev`, please check out the [Oreol CLI Book.](https://books.oreol.ch/6/cli) -->
 
-# Start Here
+## Start Here
 Follow these steps to set up your `odev` infrastructure and start building topology-aware heterogeneous computing environments.
 
-## Installation
+### Installation
 Run the following command on your Linux host (see [Supported Platforms](#supported-platforms)):
 
 ```bash
 curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo bash
 ```
 
-## Supported Platforms
+### Supported Platforms
 `odev` currently supports Ubuntu-based Linux distributions. Validated environments include:
 
 - Ubuntu
@@ -51,7 +51,7 @@ curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo b
 
 Additional Linux distributions may work but are not officially validated yet.
 
-# Citation
+## Citation
 
 [![Zenodo](https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.20229347-blue)](https://doi.org/10.5281/zenodo.20229347)
 [![ACM](https://img.shields.io/badge/ACM-10.1145%2F3805700-green)](https://doi.org/10.1145/3805700)
