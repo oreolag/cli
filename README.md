@@ -8,7 +8,7 @@
 </p>
 
 <h1 align="center">
-  <!-- Oreol CLI -->
+  Oreol CLI
   <p align="center">
     <a href="https://github.com/oreolag/cli/releases"><img src="https://img.shields.io/github/v/release/oreolag/cli" alt="Latest release" /></a>
     <a href="https://github.com/oreolag/cli/blob/main/LICENSE"><img src="https://img.shields.io/github/license/oreolag/cli" alt="License" /></a>
