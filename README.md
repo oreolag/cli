@@ -7,9 +7,9 @@
        align="center" style="width: 200px; height: auto;">
 </p>
 
-<h1 align="center">
+<!-- <h1 align="center">
   Oreol CLI
-</h1>
+</h1> -->
 
 ```odev``` is the CLI for hetero*genius* computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units, simplifying deployment while enabling reproducible experimentation and consistent performance baselines through hardware-aware execution.
 
