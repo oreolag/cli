@@ -21,22 +21,12 @@
 
 Combined with integrated community [workflows](https://github.com/oreolag/workflows) for popular HPC, ML, and AI environments such as NCCL, Metaflow, and vLLM, ```odev``` empowers researchers and engineers to easily build and run their applications across advanced heterogeneous hardware—including CPUs, GPUs, FPGAs, storage, and high-performance networking systems—to solve real-world problems.
 
-[Start here](#start-here) to configure your heterogeneous computing infrastructure.
-
-## Sections
-* [How It Works](#how-it-works)
-* [Start here](#start-here)
-* [Citation](#citation)
-
 ## How It Works
 `odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth.
 
 <!-- To learn more about `odev`, please check out the [Oreol CLI Book.](https://books.oreol.ch/6/cli) -->
 
-## Start Here
-Follow these steps to set up your `odev` infrastructure and start building topology-aware heterogeneous computing environments.
-
-### Installation
+## Installation
 Run the following command on your Linux host (see [Supported Platforms](#supported-platforms)):
 
 ```bash
