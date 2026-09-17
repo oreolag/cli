@@ -455,15 +455,15 @@
           when: not cmdb_template_directory.stat.exists
         # X grants traversal to directories without making YAML files executable.
         # Run even when copying is skipped, to repair older installations.
-        #- name: Make CMDB templates readable and directories traversable by all users
-        #  ansible.builtin.file:
-        #    path: "{{ cli_remote_path }}/cmdb"
-        #    state: directory
-        #    recurse: true
-        #    follow: false
-        #    owner: root
-        #    group: root
-        #    mode: "u=rwX,g=rX,o=rX"
+        - name: Make CMDB templates readable and directories traversable by all users
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/cmdb"
+            state: directory
+            recurse: true
+            follow: false
+            owner: root
+            group: root
+            mode: "u=rwX,g=rX,o=rX"
         - name: Determine the target server short hostname
           ansible.builtin.set_fact:
             short_hostname: "{{ ansible_facts['hostname'].split('.')[0] }}"
