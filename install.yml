@@ -492,6 +492,28 @@
               using commands that depend on CMDB device data. Switch examples
               are available in {{ cli_remote_path }}/cmdb/switches.yml.
           when: cmdb_server_copy.changed
+
+        # groups
+        - name: Identify the user who invoked sudo for installation
+          ansible.builtin.set_fact:
+            installation_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') }}"
+        - name: Ensure odev groups exist
+          ansible.builtin.group:
+            state: present
+            name: "{{ item }}"
+          loop:
+            - odev-admins
+            - odev-developers
+            - odev-users
+        - name: Add the installing user to the odev groups
+          ansible.builtin.user:
+            name: "{{ installation_user }}"
+            groups:
+              - odev-admins
+              - odev-developers
+              - odev-users
+            append: true
+          when: installation_user not in ['', 'root']
       become: true
       when: repo | bool
 
