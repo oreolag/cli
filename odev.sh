@@ -29,6 +29,7 @@ examine="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "EXAMINE")"
 
 # check on GitHub CLI
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
+gh_status=""
 if [[ "$installed" == "1" ]]; then
   logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
   if [[ "$logged_in" == "1" ]]; then
