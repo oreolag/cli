@@ -52,6 +52,7 @@ apt-get update
 
 apt-get install -y \
     git \
+    hwloc \
     ansible \
     python3 \
     python3-pip \
