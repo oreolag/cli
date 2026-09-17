@@ -38,6 +38,8 @@ if [[ "$installed" == "1" ]]; then
   else
     gh_status="Please authenticate with the GitHub CLI using ${bold}gh auth login${normal}"
   fi
+else
+  gh_status="Please install the GitHub CLI"
 fi
 
 # check on build
