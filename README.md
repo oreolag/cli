@@ -1,5 +1,5 @@
 <p align="right">
-<a href="https://oreol.ch">Oreol</a> <a href="https://github.com/oreolag/ansible-collection/">Ansible Collection</a>
+<a href="https://oreol.ch">Oreol</a> <a href="https://github.com/oreolag/mgmt">Management</a>
 </p>
 
 <p align="center" style="margin-bottom: 0px;">
