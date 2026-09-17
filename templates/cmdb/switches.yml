@@ -1,0 +1,195 @@
+# Out-Of-Band
+oob:
+  - name: oob-01
+    rack: rack-01
+    vendor: NVIDIA
+    model: SN100GB
+    speed: 100GB
+    ports: 64
+    enmgmt:
+      speed: 10GB
+      ports: 2
+      access:
+        - id: 0
+          name: Ethernet1
+          peer:
+            device: mgmt-01
+            port: Management1
+        - id: 1
+          name: Ethernet2
+          peer:
+            device: spark-bb24
+            port: bmc1
+        - id: 2
+          name: Ethernet3
+          peer:
+            device: spark-8a75
+            port: bmc1
+
+# Management
+mgmt:
+  - name: mgmt-01
+    rack: rack-01
+    vendor: NVIDIA
+    model: SN100GB
+    speed: 100GB
+    ports: 64
+    enmgmt:
+      speed: 10GB
+      ports: 2
+      access:
+        - id: 0
+          name: Management1
+          ip_address: 10.0.1.1
+          ip_mask: 24
+          peer:
+            device: oob-01
+            port: Ethernet1
+        - id: 1
+          name: Ethernet2
+          peer:
+            device: leaf-01
+            port: Management1
+        - id: 2
+          name: Ethernet3
+          peer:
+            device: leaf-02
+            port: Management1
+        - id: 3
+          name: Ethernet4
+          peer:
+            device: spark-bb24
+            port: eno1
+        - id: 4
+          name: Ethernet5
+          peer:
+            device: spark-8a75
+            port: eno1
+
+# Data fabric
+spine:
+  - name: spine-01
+    rack: rack-01
+    vendor: NVIDIA
+    model: SN800GB
+    speed: 800GB
+    ports: 64
+    enmgmt:
+      speed: 100GB
+      ports: 2
+      access:
+        - id: 0
+          name: Management1
+          ip_address: 10.0.2.1
+          ip_mask: 24
+          peer:
+            device: mgmt-01
+            port: Ethernet1
+    endata:
+      breakout: 2
+      downlinks:
+        - id: 0
+          name: Ethernet1/1
+          peer:
+            device: leaf-01
+            port: Ethernet33
+        - id: 1
+          name: Ethernet1/2
+          peer:
+            device: leaf-02
+            port: Ethernet33
+
+leaf:
+  - name: leaf-01
+    rack: rack-01
+    vendor: NVIDIA
+    model: SN400GB
+    speed: 400GB
+    ports: 64
+    enmgmt:
+      speed: 100GB
+      ports: 2
+      access:
+        - id: 0
+          name: Management1
+          ip_address: 10.0.2.2
+          ip_mask: 24
+          peer:
+            device: mgmt-01
+            port: Ethernet2
+    endata:
+      breakout: 2
+      uplinks:
+        - id: 0
+          name: Ethernet33
+          peer:
+            device: spine-01
+            port: Ethernet1/1
+      downlinks:
+        - id: 0
+          name: Ethernet1/1
+          peer:
+            device: spark-bb24
+            port: endata0/0
+        - id: 1
+          name: Ethernet1/2
+          peer:
+            device: spark-bb24
+            port: accel0/0
+        - id: 2
+          name: Ethernet2/1
+          peer:
+            device: spark-8a75
+            port: endata0/0
+        - id: 3
+          name: Ethernet2/2
+          peer:
+            device: spark-8a75
+            port: accel0/0
+
+  - name: leaf-02
+    rack: rack-01
+    vendor: NVIDIA
+    model: SN400GB
+    speed: 400GB
+    ports: 64
+    enmgmt:
+      speed: 100GB
+      ports: 2
+      access:
+        - id: 0
+          name: Management1
+          ip_address: 10.0.2.3
+          ip_mask: 24
+          peer:
+            device: mgmt-01
+            port: Ethernet3
+    endata:
+      breakout: 2
+      uplinks:
+        - id: 0
+          name: Ethernet33
+          peer:
+            device: spine-01
+            port: Ethernet1/2
+      downlinks:
+        - id: 0
+          name: Ethernet1/1
+          peer:
+            device: spark-bb24
+            port: endata0/1
+        - id: 1
+          name: Ethernet1/2
+          peer:
+            device: spark-bb24
+            port: accel0/1
+        - id: 2
+          name: Ethernet2/1
+          peer:
+            device: spark-8a75
+            port: endata0/1
+        - id: 3
+          name: Ethernet2/2
+          peer:
+            device: spark-8a75
+            port: accel0/1
