@@ -1,195 +1,200 @@
-# Out-Of-Band
+# SYNTHETIC EXAMPLE: companion topology for server.yml (server-01).
+# Switch vendor/models describe fictional capabilities, not product SKUs.
+# peer.port is the exact remote interface name; all listed links are reciprocal.
+# Top-level ports counts front-panel ports, excluding dedicated Management1.
+# Nested ports counts physical ports in that group, not just connected entries.
+# Only connected switch ports are listed. Unlisted ports are unused.
+# Top-level speed is maximum front-panel rate; per-link speed overrides it.
+# breakout: 1 means no breakout. Leaves use native 200G NIC / 100G FPGA links.
+# The OOB switch uses front-panel ports for management traffic; other switches
+# have a separate 1G Management1 port. IPs shown are management endpoint IPs.
+# VLANs and routing for server.yml data subnets are deployment-specific and
+# intentionally not modeled here. One spine is illustrative, not redundant.
+
 oob:
-  - name: oob-01
-    rack: rack-01
-    vendor: NVIDIA
-    model: SN100GB
-    speed: 100GB
-    ports: 64
+  - name: "oob-01"
+    rack: "rack-01"
+    vendor: "Example"
+    model: "24-port 1GbE OOB switch"
+    speed: "1Gbps"
+    ports: 24
     enmgmt:
-      speed: 10GB
-      ports: 2
+      speed: "1Gbps"
+      ports: 24
       access:
         - id: 0
-          name: Ethernet1
+          name: "Ethernet1"
           peer:
-            device: mgmt-01
-            port: Management1
+            device: "mgmt-01"
+            port: "Management1"
         - id: 1
-          name: Ethernet2
+          name: "Ethernet2"
           peer:
-            device: spark-bb24
-            port: bmc1
-        - id: 2
-          name: Ethernet3
-          peer:
-            device: spark-8a75
-            port: bmc1
-
-# Management
+            device: "server-01"
+            port: "bmc1"
 mgmt:
-  - name: mgmt-01
-    rack: rack-01
-    vendor: NVIDIA
-    model: SN100GB
-    speed: 100GB
-    ports: 64
+  - name: "mgmt-01"
+    rack: "rack-01"
+    vendor: "Example"
+    model: "24-port 1GbE management switch"
+    speed: "1Gbps"
+    ports: 24
     enmgmt:
-      speed: 10GB
-      ports: 2
+      speed: "1Gbps"
+      ports: 1
       access:
         - id: 0
-          name: Management1
-          ip_address: 10.0.1.1
+          name: "Management1"
+          ip_address: "10.0.1.2"
           ip_mask: 24
           peer:
-            device: oob-01
-            port: Ethernet1
+            device: "oob-01"
+            port: "Ethernet1"
+    endata:
+      speed: "1Gbps"
+      ports: 24
+      downlinks:
+        - id: 0
+          name: "Ethernet1"
+          peer:
+            device: "spine-01"
+            port: "Management1"
         - id: 1
-          name: Ethernet2
+          name: "Ethernet2"
           peer:
-            device: leaf-01
-            port: Management1
+            device: "leaf-01"
+            port: "Management1"
         - id: 2
-          name: Ethernet3
+          name: "Ethernet3"
           peer:
-            device: leaf-02
-            port: Management1
+            device: "leaf-02"
+            port: "Management1"
         - id: 3
-          name: Ethernet4
+          name: "Ethernet4"
           peer:
-            device: spark-bb24
-            port: eno1
-        - id: 4
-          name: Ethernet5
-          peer:
-            device: spark-8a75
-            port: eno1
-
-# Data fabric
+            device: "server-01"
+            port: "eno1"
 spine:
-  - name: spine-01
-    rack: rack-01
-    vendor: NVIDIA
-    model: SN800GB
-    speed: 800GB
-    ports: 64
+  - name: "spine-01"
+    rack: "rack-01"
+    vendor: "Example"
+    model: "32-port 400GbE spine switch"
+    speed: "400Gbps"
+    ports: 32
     enmgmt:
-      speed: 100GB
-      ports: 2
+      speed: "1Gbps"
+      ports: 1
       access:
         - id: 0
-          name: Management1
-          ip_address: 10.0.2.1
+          name: "Management1"
+          ip_address: "10.0.2.1"
           ip_mask: 24
           peer:
-            device: mgmt-01
-            port: Ethernet1
+            device: "mgmt-01"
+            port: "Ethernet1"
     endata:
-      breakout: 2
+      breakout: 1
       downlinks:
         - id: 0
-          name: Ethernet1/1
+          name: "Ethernet1"
+          speed: "400Gbps"
           peer:
-            device: leaf-01
-            port: Ethernet33
+            device: "leaf-01"
+            port: "Ethernet32"
         - id: 1
-          name: Ethernet1/2
+          name: "Ethernet2"
+          speed: "400Gbps"
           peer:
-            device: leaf-02
-            port: Ethernet33
-
+            device: "leaf-02"
+            port: "Ethernet32"
 leaf:
-  - name: leaf-01
-    rack: rack-01
-    vendor: NVIDIA
-    model: SN400GB
-    speed: 400GB
-    ports: 64
+  - name: "leaf-01"
+    rack: "rack-01"
+    vendor: "Example"
+    model: "32-port multi-rate 100/200/400GbE leaf switch"
+    speed: "400Gbps"
+    ports: 32
     enmgmt:
-      speed: 100GB
-      ports: 2
+      speed: "1Gbps"
+      ports: 1
       access:
         - id: 0
-          name: Management1
-          ip_address: 10.0.2.2
+          name: "Management1"
+          ip_address: "10.0.2.2"
           ip_mask: 24
           peer:
-            device: mgmt-01
-            port: Ethernet2
+            device: "mgmt-01"
+            port: "Ethernet2"
     endata:
-      breakout: 2
+      breakout: 1
       uplinks:
         - id: 0
-          name: Ethernet33
+          name: "Ethernet32"
+          speed: "400Gbps"
           peer:
-            device: spine-01
-            port: Ethernet1/1
+            device: "spine-01"
+            port: "Ethernet1"
       downlinks:
         - id: 0
-          name: Ethernet1/1
+          name: "Ethernet1"
+          speed: "200Gbps"
           peer:
-            device: spark-bb24
-            port: endata0/0
+            device: "server-01"
+            port: "enp1s0f0np0"
         - id: 1
-          name: Ethernet1/2
+          name: "Ethernet2"
+          speed: "100Gbps"
           peer:
-            device: spark-bb24
-            port: accel0/0
+            device: "server-01"
+            port: "enaccel0f0np0"
         - id: 2
-          name: Ethernet2/1
+          name: "Ethernet3"
+          speed: "100Gbps"
           peer:
-            device: spark-8a75
-            port: endata0/0
-        - id: 3
-          name: Ethernet2/2
-          peer:
-            device: spark-8a75
-            port: accel0/0
-
-  - name: leaf-02
-    rack: rack-01
-    vendor: NVIDIA
-    model: SN400GB
-    speed: 400GB
-    ports: 64
+            device: "server-01"
+            port: "enaccel1f0np0"
+  - name: "leaf-02"
+    rack: "rack-01"
+    vendor: "Example"
+    model: "32-port multi-rate 100/200/400GbE leaf switch"
+    speed: "400Gbps"
+    ports: 32
     enmgmt:
-      speed: 100GB
-      ports: 2
+      speed: "1Gbps"
+      ports: 1
       access:
         - id: 0
-          name: Management1
-          ip_address: 10.0.2.3
+          name: "Management1"
+          ip_address: "10.0.2.3"
           ip_mask: 24
           peer:
-            device: mgmt-01
-            port: Ethernet3
+            device: "mgmt-01"
+            port: "Ethernet3"
     endata:
-      breakout: 2
+      breakout: 1
       uplinks:
         - id: 0
-          name: Ethernet33
+          name: "Ethernet32"
+          speed: "400Gbps"
           peer:
-            device: spine-01
-            port: Ethernet1/2
+            device: "spine-01"
+            port: "Ethernet2"
       downlinks:
         - id: 0
-          name: Ethernet1/1
+          name: "Ethernet1"
+          speed: "200Gbps"
           peer:
-            device: spark-bb24
-            port: endata0/1
+            device: "server-01"
+            port: "enp1s0f1np1"
         - id: 1
-          name: Ethernet1/2
+          name: "Ethernet2"
+          speed: "100Gbps"
           peer:
-            device: spark-bb24
-            port: accel0/1
+            device: "server-01"
+            port: "enaccel0f1np1"
         - id: 2
-          name: Ethernet2/1
+          name: "Ethernet3"
+          speed: "100Gbps"
           peer:
-            device: spark-8a75
-            port: endata0/1
-        - id: 3
-          name: Ethernet2/2
-          peer:
-            device: spark-8a75
-            port: accel0/1
+            device: "server-01"
+            port: "enaccel1f1np1"

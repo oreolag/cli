@@ -1,182 +1,188 @@
+# SYNTHETIC EXAMPLE: server-01. Do not install unchanged as live inventory.
+# All addresses, IDs, serials and PCI topology are illustrative; replace them.
+# CPU example: two sockets, 16 cores each, SMT disabled, one NUMA node/socket.
+# count is logical CPUs; NUMA memory/storage are disjoint allocations of totals.
+# NUMA device lists reference category IDs. BMC is outside host NUMA topology.
+# speed is configured per-port link rate; ports is physical port count.
+# peer.port matches the remote interface name in switches.yml exactly.
+# Locally administered MACs and private IPs are synthetic. Data links use
+# separate subnets; switching/VLAN/routing configuration is outside this CMDB.
+# eno2 is an unused management port. BMC name is an inventory label.
+# FPGA interface names assume a suitable network design/driver; they are not
+# supplied by every FPGA image. Their bdf is null: no separate PCI function
+# is assumed for a fabric Ethernet port. platform and LinkCtl must be discovered
+# for the actual deployment (LinkCtl is a register offset, not a link speed).
+# Hardware references: https://docs.amd.com/r/en-US/ug1469-alveo-u55c/Card-Features
+# https://www.intel.com/content/www/us/en/products/sku/52968/intel-ethernet-controller-i350am2/specifications.html
+# https://www.nvidia.com/en-us/data-center/a100/
+
 devices:
-  # Accelerators
   accel:
     - id: 0
-      vendor: Xilinx
-      model: u55c
-      bdf: "0000:c4:00.0"
-      upstream_port: c4:00.0
-      root_port: c0:01.1
-      LinkCtl: 58
-      type: fpga
-      name: xcu280_u55c_0
-      serial: XFL1W5OWZCXXA
-      platform: xilinx_u55c_gen3x16_xdma_3_202210_1
-      part: xcu55c-fsvh2892-2L-e
-      #endata
-      speed: 200GB
+      vendor: "Xilinx"
+      model: "u55c"
+      bdf: "0000:41:00.0"
+      upstream_port: "41:00.0"
+      root_port: "40:01.1"
+      LinkCtl: null
+      type: "fpga"
+      name: "xcu55c_0"
+      serial: "EXAMPLE-FPGA-001"
+      platform: null
+      part: "xcu55c-fsvh2892-2L-e"
+      speed: "100Gbps"
       ports: 2
       uplinks:
         - id: 0
-          name: enaccel0f0np0
-          bdf: xxxx:xx:xx.x
-          mac: 00:0A:35:0B:24:98
-          ip_address: 10.0.3.12
+          name: "enaccel0f0np0"
+          bdf: null
+          mac: "02:00:00:04:00:00"
+          ip_address: "10.0.4.10"
           ip_mask: 24
           peer:
-            device: leaf-01
-            port: Ethernet1/2
+            device: "leaf-01"
+            port: "Ethernet2"
         - id: 1
-          name: enaccel0f1np1
-          bdf: yyyy:yy:yy.y
-          mac: 00:0A:35:0B:24:9C
-          ip_address: 10.0.3.13
+          name: "enaccel0f1np1"
+          bdf: null
+          mac: "02:00:00:04:00:01"
+          ip_address: "10.0.5.10"
           ip_mask: 24
           peer:
-            device: leaf-02
-            port: Ethernet1/2
+            device: "leaf-02"
+            port: "Ethernet2"
     - id: 1
-      vendor: Xilinx
-      model: u55c
-      bdf: "0000:c4:00.0"
-      upstream_port: c4:00.0
-      root_port: c0:01.1
-      LinkCtl: 58
-      type: fpga
-      name: xcu280_u55c_0
-      serial: XFL1W5OWZCXXA
-      platform: xilinx_u55c_gen3x16_xdma_3_202210_1
-      part: xcu55c-fsvh2892-2L-e
-      #endata
-      speed: 200GB
+      vendor: "Xilinx"
+      model: "u55c"
+      bdf: "0000:c1:00.0"
+      upstream_port: "c1:00.0"
+      root_port: "c0:01.1"
+      LinkCtl: null
+      type: "fpga"
+      name: "xcu55c_1"
+      serial: "EXAMPLE-FPGA-002"
+      platform: null
+      part: "xcu55c-fsvh2892-2L-e"
+      speed: "100Gbps"
       ports: 2
       uplinks:
         - id: 0
-          name: enaccel0f0np0
-          bdf: xxxx:xx:xx.x
-          mac: 00:0A:35:0B:24:98
-          ip_address: 10.0.3.12
+          name: "enaccel1f0np0"
+          bdf: null
+          mac: "02:00:00:04:01:00"
+          ip_address: "10.0.4.11"
           ip_mask: 24
           peer:
-            device: leaf-01
-            port: Ethernet1/2
+            device: "leaf-01"
+            port: "Ethernet3"
         - id: 1
-          name: enaccel0f1np1
-          bdf: yyyy:yy:yy.y
-          mac: 00:0A:35:0B:24:9C
-          ip_address: 10.0.3.13
+          name: "enaccel1f1np1"
+          bdf: null
+          mac: "02:00:00:04:01:01"
+          ip_address: "10.0.5.11"
           ip_mask: 24
           peer:
-            device: leaf-02
-            port: Ethernet1/2
-
-  # CPUs
+            device: "leaf-02"
+            port: "Ethernet3"
   cpu:
-    model: "ARM Cortex-X925"
-    count: 20
-    list: 0-19
-    memory: 122GB
-    storage: 3.7TB
+    model: "Example dual-socket x86_64 server"
+    count: 32
+    list: "0-31"
+    memory: "256GB"
+    storage: "3.8TB"
     numa:
       - id: 0
-        list: 0-9
-        memory: 122GB
-        storage: 3.7TB
+        list: "0-15"
+        memory: "128GB"
+        storage: "1.9TB"
         enoob: null
-        enmgm: null
+        enmgmt: [0]
         endata: [0]
-        gpu: [0,1,2]
+        gpu: [0]
         accel: [0]
       - id: 1
-        list: 10-19
-        memory: 64GB
-        storage: 1.9TB
+        list: "16-31"
+        memory: "128GB"
+        storage: "1.9TB"
         enoob: null
-        enmgm: null
+        enmgmt: null
         endata: null
-        gpu: null
+        gpu: [1]
         accel: [1]
-  
-  # NICs
   enoob:
     - id: 0
-      vendor: ASPEED
-      model: AST2600 BMC
-      speed: 10GB
+      vendor: "ASPEED"
+      model: "AST2600 BMC"
+      speed: "1Gbps"
       ports: 1
       access:
         - id: 0
-          name: bmc1
-          mac: 3c:ec:ef:dd:ee:ff
-          ip_address: 10.0.1.10
+          name: "bmc1"
+          mac: "02:00:00:01:00:10"
+          ip_address: "10.0.1.10"
           ip_mask: 24
           peer:
-            device: oob-01
-            port: Ethernet2
-
+            device: "oob-01"
+            port: "Ethernet2"
   enmgmt:
     - id: 0
-      vendor: Intel
-      model: I350-AM2
-      speed: 10GB
-      ports: 1
+      vendor: "Intel"
+      model: "I350-AM2"
+      speed: "1Gbps"
+      ports: 2
       access:
         - id: 0
-          name: eno1
-          bdf: 0000:00:1f.6
-          mac: 3c:ec:ef:aa:bb:cc
-          ip_address: 10.0.2.10
+          name: "eno1"
+          bdf: "0000:02:00.0"
+          mac: "02:00:00:02:00:10"
+          ip_address: "10.0.2.10"
           ip_mask: 24
           peer:
-            device: mgmt-01
-            port: Ethernet4
-
+            device: "mgmt-01"
+            port: "Ethernet4"
+        - id: 1
+          name: "eno2"
+          bdf: "0000:02:00.1"
+          mac: "02:00:00:02:00:11"
+          ip_address: null
+          ip_mask: null
   endata:
     - id: 0
-      vendor: Mellanox
-      model: ConnectX-7
-      speed: 200GB
+      vendor: "Mellanox"
+      model: "ConnectX-7"
+      speed: "200Gbps"
       ports: 2
       uplinks:
         - id: 0
-          name: enp1s0f0np0
+          name: "enp1s0f0np0"
           bdf: "0000:01:00.0"
-          mac: 4c:bb:47:2e:bb:25
-          ip_address: 10.0.3.10
+          mac: "02:00:00:03:00:0a"
+          ip_address: "10.0.6.10"
           ip_mask: 24
           peer:
-            device: leaf-01
-            port: Ethernet1/1
+            device: "leaf-01"
+            port: "Ethernet1"
         - id: 1
-          name: enp1s0f1np1
+          name: "enp1s0f1np1"
           bdf: "0000:01:00.1"
-          mac: 4c:bb:47:2e:bb:26
-          ip_address: 10.0.3.11
+          mac: "02:00:00:03:00:0b"
+          ip_address: "10.0.7.10"
           ip_mask: 24
           peer:
-            device: leaf-02
-            port: Ethernet1/1
-
-  # GPUs
+            device: "leaf-02"
+            port: "Ethernet1"
   gpu:
-    - id: 0 
-      name: "NVIDIA GB10" 
-      uuid: "c3af336dba18"
-      pci_bus_id: "0000000F:01:00.0"
-      vendor: NVIDIA 
-      model: GB10
-      bdf: "000f:01:00.0"
-    - id: 1 
-      name: "NVIDIA GB10" 
-      uuid: "c3af336dba18"
-      pci_bus_id: "0000000F:01:00.0"
-      vendor: NVIDIA 
-      model: GB10
-      bdf: "000f:01:00.0"
-    - id: 2 
-      name: "NVIDIA GB10" 
-      uuid: "c3af336dba18"
-      pci_bus_id: "0000000F:01:00.0"
-      vendor: NVIDIA 
-      model: GB11
-      bdf: "000f:01:00.0"
+    - id: 0
+      name: "NVIDIA A100 80GB PCIe"
+      uuid: "GPU-00000000-0000-4000-8000-000000000001"
+      pci_bus_id: "00000000:21:00.0"
+      vendor: "NVIDIA"
+      model: "A100 80GB PCIe"
+      bdf: "0000:21:00.0"
+    - id: 1
+      name: "NVIDIA A100 80GB PCIe"
+      uuid: "GPU-00000000-0000-4000-8000-000000000002"
+      pci_bus_id: "00000000:a1:00.0"
+      vendor: "NVIDIA"
+      model: "A100 80GB PCIe"
+      bdf: "0000:a1:00.0"
