@@ -431,6 +431,10 @@
             mode: "0644"
 
         # Copy examples from the repository already cloned on the target host.
+        - name: Check whether the CMDB template directory already exists
+          ansible.builtin.stat:
+            path: "{{ cli_remote_path }}/cmdb"
+          register: cmdb_template_directory
         - name: Ensure CMDB template directory exists
           ansible.builtin.file:
             path: "{{ cli_remote_path }}/cmdb"
@@ -438,6 +442,7 @@
             owner: root
             group: root
             mode: "0755"
+          when: not cmdb_template_directory.stat.exists
         - name: Copy CMDB templates to {{ cli_remote_path }}/cmdb
           ansible.builtin.copy:
             src: "{{ cli_remote_path }}/odev/templates/cmdb/"
@@ -447,12 +452,13 @@
             group: root
             mode: "0644"
             directory_mode: "0755"
+          when: not cmdb_template_directory.stat.exists
         - name: Determine the target server short hostname
           ansible.builtin.set_fact:
             short_hostname: "{{ ansible_facts['hostname'].split('.')[0] }}"
         - name: Create server CMDB from the example if missing
           ansible.builtin.copy:
-            src: "{{ cli_remote_path }}/cmdb/a_remote_server.yml"
+            src: "{{ cli_remote_path }}/odev/templates/cmdb/a_remote_server.yml"
             dest: "{{ cli_remote_path }}/{{ short_hostname }}.yml"
             remote_src: true
             force: false
