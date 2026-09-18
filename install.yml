@@ -40,7 +40,6 @@
     - name: Show control variables
       ansible.builtin.debug:
         msg:
-          #- "constants={{ constants }}"
           - "all={{ all }}"
           - "build={{ build }}"
           - "delete={{ delete }}"
@@ -50,6 +49,8 @@
           - "install={{ install }}"
           - "main={{ main }}"
           - "new={{ new }}"
+          - "program={{ program }}"
+          - "run={{ run }}"
           - "src={{ src }}"
           - "sudoers_d={{ sudoers_d }}"
           - "update={{ update }}"
