@@ -41,6 +41,12 @@ curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo b
 
 Additional Linux distributions may work but are not officially validated yet.
 
+## Examples
+
+`odev` supports Tab completion for command names and workflows.
+
+![](examples.gif)
+
 ## Citation
 
 [![Zenodo](https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.20229347-blue)](https://doi.org/10.5281/zenodo.20229347)
