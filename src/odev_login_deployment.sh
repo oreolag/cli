@@ -27,6 +27,7 @@ if [ "$is_installed" = "1" ]; then
     echo "  GPUs            : ${bold}$gpus${normal}"
     echo "  Driver          : ${bold}$driver${normal}"
     echo "  CUDA            : ${bold}$cuda${normal}"
+    echo ""
 fi
 
-echo ""
+#echo ""
