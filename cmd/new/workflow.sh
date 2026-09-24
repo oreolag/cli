@@ -37,7 +37,14 @@ fi
 # check on tools
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 if [[ "$installed" == "0" ]]; then
-  echo "Missing tool: $tool"
+  echo "Missing tool: gh"
+fi
+
+# check on GitHub CLI
+logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
+if [[ "$logged_in" == "0" ]]; then
+  echo "Login failed: gh"
+  exit 1
 fi
 
 # set KEY
