@@ -110,7 +110,7 @@ fi
 
 # check on workflows
 if [[ "$fork" == "1" ]] && [[ -d "$WORKFLOWS_USER_PATH" ]]; then
-  echo "Error: $WORKFLOWS_USER_PATH already exists"
+  echo "Already exists: $WORKFLOWS_USER_PATH"
   exit 1
 fi
 
