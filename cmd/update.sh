@@ -38,6 +38,14 @@ fi
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 if [[ "$installed" == "0" ]]; then
   echo "Missing tool: $tool"
+  exit 1
+fi
+
+# check on GitHub CLI
+logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
+if [[ "$logged_in" == "0" ]]; then
+  echo "Login failed: gh"
+  exit 1
 fi
 
 # set KEY
@@ -74,6 +82,8 @@ CHECKOUT_PATH="$TMP_PATH/odev"
 # remove first
 sudo rm -rf -- "$CHECKOUT_PATH"
 #sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$CHECKOUT_PATH"
+
+echo "hola"
 
 # repository checkout
 msg=""
