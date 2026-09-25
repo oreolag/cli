@@ -74,7 +74,7 @@ NEW_FLAGS=(
 # workflow
 NEW_WORKFLOW_DESCRIPTION="Create a new accelerated workflow"
 NEW_WORKFLOW_FLAGS=(
-  "fork,f,Create GitHub fork of oreolag/workflows,-,-"
+  #"fork,f,Create GitHub fork of oreolag/workflows,-,-"
   "name,n,Workflow name,-,-"
   "template,t,Use existing workflow as template,-,-"
 )

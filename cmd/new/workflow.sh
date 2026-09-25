@@ -41,11 +41,11 @@ if [[ "$installed" == "0" ]]; then
 fi
 
 # check on GitHub CLI
-logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
-if [[ "$logged_in" == "0" ]]; then
-  echo "Login failed: gh"
-  exit 1
-fi
+#logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
+#if [[ "$logged_in" == "0" ]]; then
+#  echo "Login failed: use gh auth login"
+#  exit 1
+#fi
 
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
@@ -69,25 +69,32 @@ print_both="0"
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
 
+# check on GitHub CLI
+logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
+if [[ "$logged_in" == "0" ]]; then
+  echo "Login failed: use gh auth login"
+  exit 1
+fi
+
 # detect fork before parsing
-fork="0"
-for arg in "$@"; do
-  if [[ "$arg" == "--fork" || "$arg" == "-f" ]]; then
-    fork="1"
-  fi
-done
+#fork="0"
+#for arg in "$@"; do
+#  if [[ "$arg" == "--fork" || "$arg" == "-f" ]]; then
+#    fork="1"
+#  fi
+#done
 
 # parse flags and run interactive prompt
-parsed_flags=""
-if [[ "$fork" == "1" ]]; then
-  # fork should be alone
-  if [[ $# -ne 1 ]]; then
-    echo "Invalid flag usage: --fork"
-    exit 1
-  fi
-  name="-"
-  template="-"
-else
+#parsed_flags=""
+#if [[ "$fork" == "1" ]]; then
+#  # fork should be alone
+#  if [[ $# -ne 1 ]]; then
+#    echo "Invalid flag usage: --fork"
+#    exit 1
+#  fi
+#  name="-"
+#  template="-"
+#else
   # parse flags
   parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
@@ -103,23 +110,30 @@ else
   fi
 
   # assign flags
-  fork="-"
+  #fork="-"
   name=${V[name]}
   template=${V[template]}
 
   # replace spaces with "_"
   name="${name// /_}"
-fi
+#fi
 
 #echo "fork: $fork"
 #echo "name: $name"
 #echo "template: $template"
 
+# check on GitHub CLI (before creating a fork)
+#logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
+#if [[ "$logged_in" == "0" ]]; then
+#  echo "Login failed: gh"
+#  exit 1
+#fi
+
 # check on workflows
-if [[ "$fork" == "1" ]] && [[ -d "$WORKFLOWS_USER_PATH" ]]; then
-  echo "Already exists: $WORKFLOWS_USER_PATH"
-  exit 1
-fi
+#if [[ "$fork" == "1" ]] && [[ -d "$WORKFLOWS_USER_PATH" ]]; then
+#  echo "Already exists: $WORKFLOWS_USER_PATH"
+#  exit 1
+#fi
 
 # set command flags
 # ...
@@ -136,13 +150,18 @@ if [[ ! -d "$odev_path" ]]; then
   mkdir -p "$odev_path"
 fi
 
+#echo "$WORKFLOWS_USER_PATH"
+#echo "$odev_path"
+#exit
+
 # create a fork
-if [ "$fork" == "1" ]; then #if [[ "$fork" == "1" && ! -d "$WORKFLOWS_USER_PATH" ]]; then
+#if [ "$fork" == "1" ]; then #if [[ "$fork" == "1" && ! -d "$WORKFLOWS_USER_PATH" ]]; then
+if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
   # login to GitHub
-  github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
-  if [ "$github_auth_status" = "0" ]; then
-    eval "gh auth login"
-  fi
+  #github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+  #if [ "$github_auth_status" = "0" ]; then
+  #  eval "gh auth login"
+  #fi
 
   # get GitHub user
   github_user="$(gh api user --jq .login)"
@@ -184,17 +203,17 @@ if [ "$fork" == "1" ]; then #if [[ "$fork" == "1" && ! -d "$WORKFLOWS_USER_PATH"
 
   # save branch and fork
   echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
-  echo "$fork" > "GITHUB_FORK"
+  #echo "$fork" > "GITHUB_FORK"
 
   # recreate symlinks when possible
   scripts=(new build program run validate delete)
   for d in "$WORKFLOWS_USER_PATH"/*; do
     [[ -d "$d" ]] || continue
-    name="$(basename "$d")"
+    name_i="$(basename "$d")"
 
     for script in "${scripts[@]}"; do
-      src="$WORKFLOWS_USER_PATH/$name/$script.sh"
-      dst="$ODEV_PATH/cmd/$script/$name.sh"
+      src="$WORKFLOWS_USER_PATH/$name_i/$script.sh"
+      dst="$ODEV_PATH/cmd/$script/$name_i.sh"
 
       [[ -e "$src" ]] || continue
 
@@ -205,10 +224,10 @@ if [ "$fork" == "1" ]; then #if [[ "$fork" == "1" && ! -d "$WORKFLOWS_USER_PATH"
   done
 
   # successfully exit
-  exit 0
+  #exit 0
 fi
 
-# check if exists
+# check if workflow name exists
 if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
    [[ -d "$WORKFLOWS_USER_PATH/$name" ]] || \
    [[ -e "$ODEV_PATH/cmd/new/$name.sh" ]] || \
@@ -218,22 +237,22 @@ if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
 fi
 
 # create workflow folder
-mkdir -p "$WORKFLOWS_USER_PATH"
+#mkdir -p "$WORKFLOWS_USER_PATH"
 
 # add GITHUB_FORK (if not existing)
-[[ -f "$WORKFLOWS_USER_PATH/GITHUB_FORK" ]] || echo "$fork" > "$WORKFLOWS_USER_PATH/GITHUB_FORK"
+#[[ -f "$WORKFLOWS_USER_PATH/GITHUB_FORK" ]] || echo "$fork" > "$WORKFLOWS_USER_PATH/GITHUB_FORK"
 
 # read fork
-fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
+#fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
 
 # copy helper scripts
 if [[ ! -e "$WORKFLOWS_USER_PATH/git_diff.sh" ]]; then
   cp "$WORKFLOWS_TEMPLATE_PATH"/git_diff.sh "$WORKFLOWS_USER_PATH"
-  if [ "$fork" = "1" ]; then
+  #if [ "$fork" = "1" ]; then
     cp "$WORKFLOWS_TEMPLATE_PATH"/github_pr.sh "$WORKFLOWS_USER_PATH"
     cp "$WORKFLOWS_TEMPLATE_PATH"/github_push.sh "$WORKFLOWS_USER_PATH"
     cp "$WORKFLOWS_TEMPLATE_PATH"/github_sync.sh "$WORKFLOWS_USER_PATH"
-  fi
+  #fi
 fi
 
 # check on template
@@ -316,9 +335,9 @@ sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" 
 # commit cmd_spec.sh
 #fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
 cd "$WORKFLOWS_USER_PATH"
-if [ "$fork" = "1" ]; then
+#if [ "$fork" = "1" ]; then
   "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
-fi
+#fi
 
 # print
 echo "Workflow created: $name"

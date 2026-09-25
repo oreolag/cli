@@ -90,7 +90,8 @@ if [ "$SUBCOMMAND" = "examine" ] || [ "$SUBCOMMAND" = "update" ]; then
   echo ""
   echo "${bold}FLAGS:${normal}"
 elif [ "$COMMAND" = "new" ] && [ "$SUBCOMMAND" = "workflow" ]; then
-  echo "  $CLI_NAME $COMMAND $SUBCOMMAND [--fork] [flags]"
+  #echo "  $CLI_NAME $COMMAND $SUBCOMMAND [--fork] [flags]"
+  echo "  $CLI_NAME $COMMAND $SUBCOMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
 elif [ "$SUBCOMMAND" = "ifconfig" ]; then
