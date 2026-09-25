@@ -76,73 +76,27 @@ if [[ "$logged_in" == "0" ]]; then
   exit 1
 fi
 
-# detect fork before parsing
-#fork="0"
-#for arg in "$@"; do
-#  if [[ "$arg" == "--fork" || "$arg" == "-f" ]]; then
-#    fork="1"
-#  fi
-#done
+# parse flags
+parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
-# parse flags and run interactive prompt
-#parsed_flags=""
-#if [[ "$fork" == "1" ]]; then
-#  # fork should be alone
-#  if [[ $# -ne 1 ]]; then
-#    echo "Invalid flag usage: --fork"
-#    exit 1
-#  fi
-#  name="-"
-#  template="-"
-#else
-  # parse flags
-  parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
+# run interactive prompt
+parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
-  # run interactive prompt
-  parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+# read flags
+if [[ -n "$parsed_flags" ]]; then
+  declare -A V
+  while IFS='=' read -r k v; do
+    V["$k"]="$v"
+  done <<< "$parsed_flags"
+fi
 
-  # read flags
-  if [[ -n "$parsed_flags" ]]; then
-    declare -A V
-    while IFS='=' read -r k v; do
-      V["$k"]="$v"
-    done <<< "$parsed_flags"
-  fi
+# assign flags
+#fork="-"
+name=${V[name]}
+template=${V[template]}
 
-  # assign flags
-  #fork="-"
-  name=${V[name]}
-  template=${V[template]}
-
-  # replace spaces with "_"
-  name="${name// /_}"
-#fi
-
-#echo "fork: $fork"
-#echo "name: $name"
-#echo "template: $template"
-
-# check on GitHub CLI (before creating a fork)
-#logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
-#if [[ "$logged_in" == "0" ]]; then
-#  echo "Login failed: gh"
-#  exit 1
-#fi
-
-# check on workflows
-#if [[ "$fork" == "1" ]] && [[ -d "$WORKFLOWS_USER_PATH" ]]; then
-#  echo "Already exists: $WORKFLOWS_USER_PATH"
-#  exit 1
-#fi
-
-# set command flags
-# ...
-
-# derived
-# ...
-
-#echo "I am here"
-#exit
+# replace spaces with "_"
+name="${name// /_}"
 
 # check on ~/odev
 odev_path="$(dirname "$WORKFLOWS_USER_PATH")"
@@ -150,19 +104,8 @@ if [[ ! -d "$odev_path" ]]; then
   mkdir -p "$odev_path"
 fi
 
-#echo "$WORKFLOWS_USER_PATH"
-#echo "$odev_path"
-#exit
-
 # create a fork
-#if [ "$fork" == "1" ]; then #if [[ "$fork" == "1" && ! -d "$WORKFLOWS_USER_PATH" ]]; then
 if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
-  # login to GitHub
-  #github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
-  #if [ "$github_auth_status" = "0" ]; then
-  #  eval "gh auth login"
-  #fi
-
   # get GitHub user
   github_user="$(gh api user --jq .login)"
 
@@ -222,9 +165,6 @@ if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
       fi
     done
   done
-
-  # successfully exit
-  #exit 0
 fi
 
 # check if workflow name exists
@@ -236,15 +176,6 @@ if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
   exit 1
 fi
 
-# create workflow folder
-#mkdir -p "$WORKFLOWS_USER_PATH"
-
-# add GITHUB_FORK (if not existing)
-#[[ -f "$WORKFLOWS_USER_PATH/GITHUB_FORK" ]] || echo "$fork" > "$WORKFLOWS_USER_PATH/GITHUB_FORK"
-
-# read fork
-#fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
-
 # copy helper scripts
 if [[ ! -e "$WORKFLOWS_USER_PATH/git_diff.sh" ]]; then
   cp "$WORKFLOWS_TEMPLATE_PATH"/git_diff.sh "$WORKFLOWS_USER_PATH"
@@ -254,13 +185,6 @@ if [[ ! -e "$WORKFLOWS_USER_PATH/git_diff.sh" ]]; then
     cp "$WORKFLOWS_TEMPLATE_PATH"/github_sync.sh "$WORKFLOWS_USER_PATH"
   #fi
 fi
-
-# check on template
-#if [ ! "$template" = "-" ] && [[ ! -d "$WORKFLOWS_USER_PATH/$template" ]]; then
-#  # this is in fact an existing workflow
-#  echo "Template does not exist: $template"
-#  exit 1
-#fi
 
 # check on template
 template_path=""
