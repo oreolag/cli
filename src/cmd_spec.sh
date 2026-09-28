@@ -98,8 +98,8 @@ SET_FLAGS=(
 SET_MTU_DESCRIPTION="Set the MTU (Maximum Transmission Unit) for a network interface"
 SET_MTU_FLAGS=(
   "interface,i,Interface index,-,-"
-  "port,p,Interface port index,-,-"
-  "mtu,m,MTU value,-,-"
+  "port,p,Interface port index,-,0"
+  "mtu,m,MTU value,1500-9000,1500"
 )
 SET_MTU_FLAGS_MANDATORY="interface,mtu"
 
