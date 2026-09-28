@@ -91,7 +91,7 @@ RUN_FLAGS=(
 )
 
 # set
-SET_DESCRIPTION="Devices and host configuration."
+SET_DESCRIPTION="Devices and host configuration"
 SET_FLAGS=(
 )
 # mtu
