@@ -58,6 +58,8 @@ apt-get install -y \
     python3-pip \
     rsync \
     net-tools \
+    ethtool \
+    pciutils \
     sudo
 
 echo ""
