@@ -90,6 +90,19 @@ RUN_DESCRIPTION="Accelerated application execution"
 RUN_FLAGS=(
 )
 
+# set
+SET_DESCRIPTION="Devices and host configuration."
+SET_FLAGS=(
+)
+# mtu
+SET_MTU_DESCRIPTION="Set the MTU (Maximum Transmission Unit) for a network interface"
+SET_MTU_FLAGS=(
+  "interface,i,Interface index,-,-"
+  "port,p,Interface port index,-,-"
+  "mtu,m,MTU value,-,-"
+)
+SET_MTU_FLAGS_MANDATORY="interface,mtu"
+
 # update
 UPDATE_DESCRIPTION="Update odev to latest release (github.com/oreolag/cli/releases)"
 UPDATE_FLAGS=(
