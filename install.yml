@@ -22,6 +22,7 @@
     new: false
     program: false
     run: false
+    set: false
     src: false
     # repo (all does not apply)
     repo: false
@@ -51,6 +52,7 @@
           - "new={{ new }}"
           - "program={{ program }}"
           - "run={{ run }}"
+          - "set={{ set }}"
           - "src={{ src }}"
           - "sudoers_d={{ sudoers_d }}"
           - "update={{ update }}"
@@ -527,10 +529,6 @@
             owner: root
             group: root
             mode: "0755"
-        #- name: Delete remote folder first
-        #  ansible.builtin.file:
-        #    path: "{{ cli_remote_path }}/odev/cmd/run"
-        #    state: absent
         - name: Copy cmd/run directory from local path (preserve symlinks)
           ansible.posix.synchronize:
             src: "{{ cli.local_path }}/cmd/run/"
@@ -547,6 +545,33 @@
             recurse: true
       when:
         - (run or all) | bool
+        - cli.local_path is defined
+
+    # set
+    - block:
+        - name: Copy set.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/set.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/set.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        - name: Copy cmd/set directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/set/"
+            dest: "{{ cli_remote_path }}/odev/cmd/set/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on set folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/set/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (set or all) | bool
         - cli.local_path is defined
 
     # src
