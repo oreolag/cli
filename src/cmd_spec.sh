@@ -95,7 +95,7 @@ SET_DESCRIPTION="Devices and host configuration"
 SET_FLAGS=(
 )
 # mtu
-SET_MTU_DESCRIPTION="Set the MTU (Maximum Transmission Unit) for a network interface"
+SET_MTU_DESCRIPTION="Set the Maximum Transmission Unit (MTU) for a data network interface"
 SET_MTU_FLAGS=(
   "interface,i,Interface index,-,-"
   "port,p,Interface port index,-,0"
