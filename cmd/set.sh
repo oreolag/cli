@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# example: odev run
+# example: odev set
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMAND="run"
+COMMAND="set"
 
 # derive from SCRIPT_DIR
 CLI_NAME="$(basename "$(dirname "$SCRIPT_DIR")")"
