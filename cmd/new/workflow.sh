@@ -91,7 +91,6 @@ if [[ -n "$parsed_flags" ]]; then
 fi
 
 # assign flags
-#fork="-"
 name=${V[name]}
 template=${V[template]}
 
@@ -106,6 +105,14 @@ fi
 
 # create a fork
 if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
+  # early exit (name already exists in oreolag/workflows)
+  folders="$(gh api repos/oreolag/workflows/contents --jq '.[] | select(.type == "dir") | .name')" || exit 1
+
+  if grep -Fxq -- "$name" <<< "$folders"; then
+    echo "Workflow already exists: $name"
+    exit 1
+  fi
+
   # get GitHub user
   github_user="$(gh api user --jq .login)"
 
