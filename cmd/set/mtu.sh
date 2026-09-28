@@ -22,7 +22,22 @@ normal=$(tput sgr0)
 
 # constants
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths cmdb)")"
+IPV6_HEADER_SIZE=40
+PAYLOAD_MULTIPLES=64
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"
+
+# functions
+calculate_closest_mtu() {
+    local desired_mtu=$1
+    local header_size=$2
+    local base=$3
+
+    # Calculate the closest multiple of 64
+    local closest_mtu=$(( ((desired_mtu - header_size) + base - 1) / base * base ))
+    local closest_mtu=$(( closest_mtu + header_size ))
+
+    echo $closest_mtu
+}
 
 # check on users
 # ...
@@ -66,13 +81,9 @@ interface=${V[interface]}
 port=${V[port]}
 mtu=${V[mtu]}
 
-#echo "interface: $interface"
-#echo "port: $port"
-#echo "mtu: $mtu"
-#exit
-
 # check on interface
 interface_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface)
+interface_name_cmdb=""
 if [[ ! "$interface" =~ ^[0-9]+$ ]] || [ "$interface_cmdb" = "" ]; then
   echo "Invalid interface: $interface" >&2
   exit 1
@@ -85,7 +96,17 @@ if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$port_cmdb" = "" ]; then
   exit 1
 fi
 
-echo "here"
-exit
+# get interface name
+interface_name_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface name $port)
+
+# calculate closest MTU
+mtu=$(calculate_closest_mtu $mtu $IPV6_HEADER_SIZE $PAYLOAD_MULTIPLES)
+
+#echo "mtu: $mtu"
+#echo "interface_name_cmdb: $interface_name_cmdb"
+#exit
+
+
+
 
 # author: https://github.com/jmoya82
