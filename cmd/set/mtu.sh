@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: get ip
+# example: set mtu
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -40,9 +40,6 @@ calculate_closest_mtu() {
     echo $closest_mtu
 }
 
-# check on users
-# ...
-
 # check on tools
 # ...
 
@@ -62,6 +59,13 @@ print_both="0"
   "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$command_description" \
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
+
+# check on users
+is_odev_developers=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
+if [ "$is_odev_developers" = "0" ]; then
+  echo "Permission denied: $USER"
+  exit 1
+fi
 
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
