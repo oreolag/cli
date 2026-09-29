@@ -21,10 +21,10 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
-CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths cmdb)")"
 IPV6_HEADER_SIZE=40
 MGMT_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths mgmt)")"
 PAYLOAD_MULTIPLES=64
+TEMPLATES_PATH="$ODEV_PATH/templates"
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"
 
 # functions
@@ -112,18 +112,18 @@ mtu=$(calculate_closest_mtu $mtu $IPV6_HEADER_SIZE $PAYLOAD_MULTIPLES)
 #echo "interface_name_cmdb: $interface_name_cmdb"
 #exit
 
-# check on remote
-if [[ "$remote" == "1" && -f "$TMP_PATH/hosts" ]]; then
-  inventory="my_hosts"
+# set inventory
+inventory_file="$TMP_PATH/hosts_$USER"
+
+# get target
+if [[ "$remote" == "1" && -f "$inventory_file" ]]; then
+  target="my_hosts"
 else
-  inventory="local"
+  target="local"
 fi
 
-#echo "$ODEV_PATH"
-#echo "$MGMT_PATH"
-
 # call the playbook
-$MGMT_PATH/ansible-play.sh $ODEV_PATH/cmd/set/mtu.yml "$inventory"
+"$MGMT_PATH/ansible-play.sh" "$ODEV_PATH/cmd/set/mtu.yml" "$target" -i "$inventory_file"
 
 #echo "remote: $remote"
 #echo "inventory: $inventory"

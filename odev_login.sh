@@ -116,6 +116,12 @@ echo ""
 # fillup hosts
 cp -f "$TEMPLATES_PATH/hosts" "$TMP_PATH/hosts_$username"
 
+# add local host after [my_hosts]
+echo "$hostname ansible_connection=local" >> "$TMP_PATH/hosts_$username"
+
+# add remote hosts
+# ...
+
 #print welcome message (1/2)
 echo ""
 echo "Welcome, ${bold}$username!${normal}"
