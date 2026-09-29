@@ -13,6 +13,7 @@ mpi:
 paths:
   banner: /opt
   cmdb: /opt
+  mgmt: /opt/mgmt
   models: "${HOME}/odev/models"
   projects: "${HOME}/odev/projects"
   tmp: /tmp

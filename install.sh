@@ -78,6 +78,9 @@ ansible-playbook \
     install.yml \
     --extra-vars "repo=true" #--check
 
+# install /opt/mgmt
+curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/mgmt/install.sh | sudo bash -s -- odev_plugin
+
 echo "${bold}${COLOR_PASSED}✓${normal} odev installation completed${normal}"
 #echo ""
 #echo "Try:"
