@@ -100,6 +100,7 @@ SET_MTU_FLAGS=(
   "interface,i,Interface index,-,-"
   "port,p,Interface port index,-,0"
   "mtu,m,MTU value,1500-9000,1500"
+  "remote,r,Also configure remote hosts when set to 1,0|1,0"
 )
 SET_MTU_FLAGS_MANDATORY="interface,mtu"
 

@@ -1,0 +1,14 @@
+---
+- name: Test Ansible connectivity and show server information
+  hosts: "{{ oreol_target }}"
+  become: false
+  gather_facts: true
+
+  tasks:
+    - name: Show server information
+      ansible.builtin.debug:
+        msg:
+          - "Ansible is working!"
+          - "Server: {{ ansible_facts['hostname'] }}"
+          - "Operating system: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+          - "Connection: {{ ansible_connection | default('ssh') }}"

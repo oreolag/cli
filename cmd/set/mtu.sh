@@ -80,6 +80,7 @@ fi
 interface=${V[interface]}
 port=${V[port]}
 mtu=${V[mtu]}
+remote=${V[remote]}
 
 # check on interface
 interface_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface)
@@ -106,7 +107,19 @@ mtu=$(calculate_closest_mtu $mtu $IPV6_HEADER_SIZE $PAYLOAD_MULTIPLES)
 #echo "interface_name_cmdb: $interface_name_cmdb"
 #exit
 
+# check on remote
+if [[ "$remote" == "1" && -f "$TMP_PATH/hosts" ]]; then
+  inventory="my_hosts"
+else
+  inventory="local"
+fi
 
+#echo "$ODEV_PATH"
 
+# call the playbook
+/opt/mgmt/ansible-play.sh $ODEV_PATH/cmd/set/mtu.yml "$inventory"
+
+#echo "remote: $remote"
+#echo "inventory: $inventory"
 
 # author: https://github.com/jmoya82
