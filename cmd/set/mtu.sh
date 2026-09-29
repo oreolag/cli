@@ -23,6 +23,7 @@ normal=$(tput sgr0)
 # constants
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths cmdb)")"
 IPV6_HEADER_SIZE=40
+MGMT_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths mgmt)")"
 PAYLOAD_MULTIPLES=64
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"
 
@@ -115,9 +116,10 @@ else
 fi
 
 #echo "$ODEV_PATH"
+#echo "$MGMT_PATH"
 
 # call the playbook
-/opt/mgmt/ansible-play.sh $ODEV_PATH/cmd/set/mtu.yml "$inventory"
+$MGMT_PATH/ansible-play.sh $ODEV_PATH/cmd/set/mtu.yml "$inventory"
 
 #echo "remote: $remote"
 #echo "inventory: $inventory"
