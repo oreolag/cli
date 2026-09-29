@@ -1,0 +1,20 @@
+---
+- name: Test Ansible connectivity and show server information
+  hosts: "{{ oreol_target }}"
+  become: false
+  gather_facts: true
+
+  tasks:
+    - name: Show server information
+      ansible.builtin.debug:
+        msg:
+          - "Ansible is working!"
+          - "Server: {{ ansible_facts['hostname'] }}"
+          - "Operating system: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+          - "Connection: {{ ansible_connection | default('ssh') }}"
+
+    - name: Edit your WFNAME program playbook!
+      ansible.builtin.debug:
+        msg:
+          - "This is intended to program firmware based devices, so you can use Ansible modules to perform actions like flashing firmware, configuring settings, etc."
+          - "You can also use it to manage remote devices, but make sure to set the 'remote' flag to 1 when running odev program WFNAME."

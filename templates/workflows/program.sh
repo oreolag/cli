@@ -22,7 +22,9 @@ normal=$(tput sgr0)
 
 # constants
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths cmdb)")"
+MGMT_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths mgmt)")"
 PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths projects)")"
+TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
 
@@ -70,6 +72,7 @@ fi
 # assign flags
 devices=${V[devices]}
 name=${V[name]}
+remote=${V[remote]}
 
 # replace spaces with "_"
 name="${name// /_}"
@@ -112,5 +115,15 @@ if [[ ! -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
   exit 1
 fi
 
-# add your code here!
-echo "Hi from $COMMAND $SUBCOMMAND $name!"
+# set inventory
+inventory_file="$TMP_PATH/hosts_$USER"
+
+# get target
+if [[ "$remote" == "1" && -f "$inventory_file" ]]; then
+  target="my_hosts"
+else
+  target="local"
+fi
+
+# call the playbook (add your code here!)
+"$MGMT_PATH/ansible-play.sh" "$WORKFLOWS_USER_PATH/$SUBCOMMAND/program.yml" "$target" -i "$inventory_file"

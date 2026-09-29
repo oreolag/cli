@@ -24,10 +24,11 @@ DELETE_WFNAME_FLAGS=(
 )
 DELETE_WFNAME_FLAGS_MANDATORY="name"
 
-PROGRAM_WFNAME_DESCRIPTION="Program description"
+PROGRAM_WFNAME_DESCRIPTION="Program device description"
 PROGRAM_WFNAME_FLAGS=(
   "devices,d,Comma-separated list of device indices,-,-"
   "name,n,Project name,-,-"
+  "remote,r,Also configure remote devices when set to 1,0|1,0"
 )
 PROGRAM_WFNAME_FLAGS_MANDATORY="devices,name"
 

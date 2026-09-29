@@ -225,6 +225,7 @@ else
   cp "$WORKFLOWS_TEMPLATE_PATH"/new.sh .
   cp "$WORKFLOWS_TEMPLATE_PATH"/build.sh .
   cp "$WORKFLOWS_TEMPLATE_PATH"/program.sh .
+  cp "$WORKFLOWS_TEMPLATE_PATH"/program.yml .
   cp "$WORKFLOWS_TEMPLATE_PATH"/run.sh .
   cp "$WORKFLOWS_TEMPLATE_PATH"/validate.sh .
   cp "$WORKFLOWS_TEMPLATE_PATH"/delete.sh .
@@ -238,6 +239,8 @@ sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
 sed -i "s/_COMMAND_/build/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
 sed -i "s/_COMMAND_/program/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
+sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/program.yml"
+sed -i "s/_COMMAND_/program/g" "$WORKFLOWS_USER_PATH/$name/program.yml"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/run.sh"
 sed -i "s/_COMMAND_/run/g" "$WORKFLOWS_USER_PATH/$name/run.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/validate.sh"
