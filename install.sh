@@ -56,6 +56,7 @@ apt-get install -y \
     ansible \
     python3 \
     python3-pip \
+    gh \
     rsync \
     net-tools \
     ethtool \
