@@ -81,6 +81,9 @@ ansible-playbook \
 # install /opt/mgmt
 curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/mgmt/install.sh | sudo bash -s -- odev_plugin
 
+# install tailscale
+curl -fsSL https://tailscale.com/install.sh | sh
+
 echo "${bold}${COLOR_PASSED}✓${normal} odev installation completed${normal}"
 #echo ""
 #echo "Try:"
