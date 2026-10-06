@@ -1,3 +1,5 @@
+# Commands in comments are manual discovery hints; replace example interface names.
+# Storage helper commands report live available space, not the example capacity.
 # SYNTHETIC EXAMPLE: server-01. Do not install unchanged as live inventory.
 # All addresses, IDs, serials and PCI topology are illustrative; replace them.
 # CPU example: two sockets, 16 cores each, SMT disabled, one NUMA node/socket.
@@ -39,18 +41,18 @@ devices:
         - id: 0
           name: "enaccel0f0np0"
           bdf: null
-          mac: "02:00:00:04:00:00"
-          ip_address: "10.0.4.20"
-          ip_mask: 24
+          mac: "02:00:00:04:00:00" # cat /sys/class/net/enaccel0f0np0/address
+          ip_address: "10.0.4.20" # ip -4 -o addr show dev enaccel0f0np0 | awk '{split($4, a, "/"); print a[1]}'
+          ip_mask: 24 # ip -4 -o addr show dev enaccel0f0np0 | awk '{split($4, a, "/"); print a[2]}'
           peer:
             device: "leaf-01"
             port: "Ethernet2"
         - id: 1
           name: "enaccel0f1np1"
           bdf: null
-          mac: "02:00:00:04:00:01"
-          ip_address: "10.0.4.21"
-          ip_mask: 24
+          mac: "02:00:00:04:00:01" # cat /sys/class/net/enaccel0f1np1/address
+          ip_address: "10.0.4.21" # ip -4 -o addr show dev enaccel0f1np1 | awk '{split($4, a, "/"); print a[1]}'
+          ip_mask: 24 # ip -4 -o addr show dev enaccel0f1np1 | awk '{split($4, a, "/"); print a[2]}'
           peer:
             device: "leaf-02"
             port: "Ethernet2"
@@ -72,41 +74,41 @@ devices:
         - id: 0
           name: "enaccel1f0np0"
           bdf: null
-          mac: "02:00:00:04:01:00"
-          ip_address: "10.0.4.22"
-          ip_mask: 24
+          mac: "02:00:00:04:01:00" # cat /sys/class/net/enaccel1f0np0/address
+          ip_address: "10.0.4.22" # ip -4 -o addr show dev enaccel1f0np0 | awk '{split($4, a, "/"); print a[1]}'
+          ip_mask: 24 # ip -4 -o addr show dev enaccel1f0np0 | awk '{split($4, a, "/"); print a[2]}'
           peer:
             device: "leaf-01"
             port: "Ethernet3"
         - id: 1
           name: "enaccel1f1np1"
           bdf: null
-          mac: "02:00:00:04:01:01"
-          ip_address: "10.0.4.23"
-          ip_mask: 24
+          mac: "02:00:00:04:01:01" # cat /sys/class/net/enaccel1f1np1/address
+          ip_address: "10.0.4.23" # ip -4 -o addr show dev enaccel1f1np1 | awk '{split($4, a, "/"); print a[1]}'
+          ip_mask: 24 # ip -4 -o addr show dev enaccel1f1np1 | awk '{split($4, a, "/"); print a[2]}'
           peer:
             device: "leaf-02"
             port: "Ethernet3"
   cpu:
-    model: "Example dual-socket x86_64 server"
-    count: 32
-    list: "0-31"
-    memory: "256GB"
-    storage: "3.8TB"
+    model: "Example dual-socket x86_64 server" # "$ODEV_PATH/src/cmdb_get_model.sh"
+    count: 32 # "$ODEV_PATH/src/cmdb_get_cpu.sh"
+    list: "0-31" # cat /sys/devices/system/cpu/online
+    memory: "256GB" # "$ODEV_PATH/src/cmdb_get_memory.sh"
+    storage: "3.8TB" # Available: "$ODEV_PATH/src/cmdb_get_storage.sh" TB
     numa:
       - id: 0
-        list: "0-15"
-        memory: "128GB"
-        storage: "1.9TB"
+        list: "0-15" # "$ODEV_PATH/src/cmdb_get_cpu.sh" 0
+        memory: "128GB" # "$ODEV_PATH/src/cmdb_get_memory.sh" 0
+        storage: "1.9TB" # Available: "$ODEV_PATH/src/cmdb_get_storage.sh" TB 0
         enoob: null
         enmgmt: [0]
         endata: [0]
         gpu: [0]
         accel: [0]
       - id: 1
-        list: "16-31"
-        memory: "128GB"
-        storage: "1.9TB"
+        list: "16-31" # "$ODEV_PATH/src/cmdb_get_cpu.sh" 1
+        memory: "128GB" # "$ODEV_PATH/src/cmdb_get_memory.sh" 1
+        storage: "1.9TB" # Available: "$ODEV_PATH/src/cmdb_get_storage.sh" TB 1
         enoob: null
         enmgmt: null
         endata: null
@@ -136,19 +138,19 @@ devices:
       access:
         - id: 0
           name: "eno1"
-          bdf: "0000:02:00.0"
-          mac: "02:00:00:02:00:10"
-          ip_address: "10.0.2.10"
-          ip_mask: 24
+          bdf: "0000:02:00.0" # ethtool -i eno1 | awk '/bus-info:/ {print $2}'
+          mac: "02:00:00:02:00:10" # cat /sys/class/net/eno1/address
+          ip_address: "10.0.2.10" # ip -4 -o addr show dev eno1 | awk '{split($4, a, "/"); print a[1]}'
+          ip_mask: 24 # ip -4 -o addr show dev eno1 | awk '{split($4, a, "/"); print a[2]}'
           peer:
             device: "mgmt-01"
             port: "Ethernet4"
         - id: 1
           name: "eno2"
-          bdf: "0000:02:00.1"
-          mac: "02:00:00:02:00:11"
-          ip_address: null
-          ip_mask: null
+          bdf: "0000:02:00.1" # ethtool -i eno2 | awk '/bus-info:/ {print $2}'
+          mac: "02:00:00:02:00:11" # cat /sys/class/net/eno2/address
+          ip_address: null # ip -4 -o addr show dev eno2 | awk '{split($4, a, "/"); print a[1]}'
+          ip_mask: null # ip -4 -o addr show dev eno2 | awk '{split($4, a, "/"); print a[2]}'
   endata:
     - id: 0
       vendor: "Mellanox"
@@ -158,19 +160,19 @@ devices:
       uplinks:
         - id: 0
           name: "enp1s0f0np0"
-          bdf: "0000:01:00.0"
-          mac: "02:00:00:03:00:0a"
-          ip_address: "10.0.4.10"
-          ip_mask: 24
+          bdf: "0000:01:00.0" # ethtool -i enp1s0f0np0 | awk '/bus-info:/ {print $2}'
+          mac: "02:00:00:03:00:0a" # cat /sys/class/net/enp1s0f0np0/address
+          ip_address: "10.0.4.10" # ip -4 -o addr show dev enp1s0f0np0 | awk '{split($4, a, "/"); print a[1]}'
+          ip_mask: 24 # ip -4 -o addr show dev enp1s0f0np0 | awk '{split($4, a, "/"); print a[2]}'
           peer:
             device: "leaf-01"
             port: "Ethernet1"
         - id: 1
           name: "enp1s0f1np1"
-          bdf: "0000:01:00.1"
-          mac: "02:00:00:03:00:0b"
-          ip_address: "10.0.4.11"
-          ip_mask: 24
+          bdf: "0000:01:00.1" # ethtool -i enp1s0f1np1 | awk '/bus-info:/ {print $2}'
+          mac: "02:00:00:03:00:0b" # cat /sys/class/net/enp1s0f1np1/address
+          ip_address: "10.0.4.11" # ip -4 -o addr show dev enp1s0f1np1 | awk '{split($4, a, "/"); print a[1]}'
+          ip_mask: 24 # ip -4 -o addr show dev enp1s0f1np1 | awk '{split($4, a, "/"); print a[2]}'
           peer:
             device: "leaf-02"
             port: "Ethernet1"
