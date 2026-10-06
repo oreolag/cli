@@ -1,4 +1,4 @@
-# SYNTHETIC EXAMPLE: companion topology for server.yml (server-01).
+# SYNTHETIC EXAMPLE: companion topology for a_remote_server.yml (server-01).
 # Switch vendor/models describe fictional capabilities, not product SKUs.
 # peer.port is the exact remote interface name; all listed links are reciprocal.
 # Top-level ports counts front-panel ports, excluding dedicated Management1.
@@ -8,7 +8,12 @@
 # breakout: 1 means no breakout. Leaves use native 200G NIC / 100G FPGA links.
 # The OOB switch uses front-panel ports for management traffic; other switches
 # have a separate 1G Management1 port. IPs shown are management endpoint IPs.
-# VLANs and routing for server.yml data subnets are deployment-specific and
+# The leaf/spine fabric carries one shared high-speed Layer-2 network/VLAN:
+# 10.0.4.0/24, with server NIC ports at .10-.11 and FPGA ports at .20-.23.
+# Leaf Ethernet1-3 and the leaf/spine interconnects carry that shared network.
+# These switched data ports do not need their own IP addresses.
+# OOB uses 10.0.1.0/24; switch/server management uses 10.0.2.0/24.
+# VLAN configuration and host routing/ARP policy are deployment-specific and
 # intentionally not modeled here. One spine is illustrative, not redundant.
 
 oob:

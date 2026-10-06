@@ -5,8 +5,11 @@
 # NUMA device lists reference category IDs. BMC is outside host NUMA topology.
 # speed is configured per-port link rate; ports is physical port count.
 # peer.port matches the remote interface name in switches.yml exactly.
-# Locally administered MACs and private IPs are synthetic. Data links use
-# separate subnets; switching/VLAN/routing configuration is outside this CMDB.
+# Locally administered MACs and private IPs are synthetic. Address plan:
+# OOB: 10.0.1.0/24; management: 10.0.2.0/24; high-speed: 10.0.4.0/24.
+# NIC ports use 10.0.4.10-11; FPGA ports use 10.0.4.20-23.
+# All high-speed ports share a Layer-2 network/VLAN across the leaf/spine fabric.
+# Switch configuration and host routing/ARP policy are outside this CMDB.
 # eno2 is an unused management port. BMC name is an inventory label.
 # FPGA interface names assume a suitable network design/driver; they are not
 # supplied by every FPGA image. Their bdf is null: no separate PCI function
@@ -37,7 +40,7 @@ devices:
           name: "enaccel0f0np0"
           bdf: null
           mac: "02:00:00:04:00:00"
-          ip_address: "10.0.4.10"
+          ip_address: "10.0.4.20"
           ip_mask: 24
           peer:
             device: "leaf-01"
@@ -46,7 +49,7 @@ devices:
           name: "enaccel0f1np1"
           bdf: null
           mac: "02:00:00:04:00:01"
-          ip_address: "10.0.5.10"
+          ip_address: "10.0.4.21"
           ip_mask: 24
           peer:
             device: "leaf-02"
@@ -70,7 +73,7 @@ devices:
           name: "enaccel1f0np0"
           bdf: null
           mac: "02:00:00:04:01:00"
-          ip_address: "10.0.4.11"
+          ip_address: "10.0.4.22"
           ip_mask: 24
           peer:
             device: "leaf-01"
@@ -79,7 +82,7 @@ devices:
           name: "enaccel1f1np1"
           bdf: null
           mac: "02:00:00:04:01:01"
-          ip_address: "10.0.5.11"
+          ip_address: "10.0.4.23"
           ip_mask: 24
           peer:
             device: "leaf-02"
@@ -157,7 +160,7 @@ devices:
           name: "enp1s0f0np0"
           bdf: "0000:01:00.0"
           mac: "02:00:00:03:00:0a"
-          ip_address: "10.0.6.10"
+          ip_address: "10.0.4.10"
           ip_mask: 24
           peer:
             device: "leaf-01"
@@ -166,7 +169,7 @@ devices:
           name: "enp1s0f1np1"
           bdf: "0000:01:00.1"
           mac: "02:00:00:03:00:0b"
-          ip_address: "10.0.7.10"
+          ip_address: "10.0.4.11"
           ip_mask: 24
           peer:
             device: "leaf-02"
