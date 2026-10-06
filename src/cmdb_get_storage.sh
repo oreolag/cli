@@ -4,41 +4,65 @@ set -euo pipefail
 unit="${1:-GB}"
 numa_index="${2:-}"
 
-total_bytes=0
+# Count available space once per mounted local disk filesystem.
+# Follow partitions/LVM back to their disks to determine NUMA locality.
+total_bytes=$(python3 - "$numa_index" <<'PYTHON'
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
 
-if [ -z "$numa_index" ]; then
-    # total storage
-    for d in /sys/block/nvme*n1; do
-        [[ -f "$d/size" ]] || continue
-        sectors=$(<"$d/size")
-        total_bytes=$(( total_bytes + sectors*512 ))
-    done
+requested_node = sys.argv[1]
+topology = json.loads(subprocess.check_output(
+    ["lsblk", "--json", "--tree", "--output", "NAME,TYPE,MAJ:MIN,MOUNTPOINTS"],
+    text=True,
+))["blockdevices"]
+filesystems = {}
 
-else
-    if command -v lstopo-no-graphics >/dev/null 2>&1; then
-        lstopo_cmd="lstopo-no-graphics 2>/dev/null"
-    elif command -v lstopo >/dev/null 2>&1; then
-        lstopo_cmd="lstopo --no-graphics 2>/dev/null"
-    else
-        total_bytes=0
-    fi
+def visit(device, disks=()):
+    if device["type"] == "disk":
+        disks = (device["name"],)
+    if disks:
+        entry = filesystems.setdefault(device["maj:min"], {"mounts": [], "disks": set()})
+        entry["disks"].update(disks)
+        entry["mounts"].extend(m for m in device.get("mountpoints", []) if m and m != "[SWAP]")
+    for child in device.get("children", []):
+        visit(child, disks)
 
-    devs=$(
-        eval "$lstopo_cmd" | awk -v i="$numa_index" '
-          $0 ~ ("NUMANode L#" i) {f=1; next}
-          f && $0 ~ /^NUMANode L#/ {exit}
-          f { print }
-        ' 2>/dev/null | sed -nE 's/.*Block\(Disk\)[[:space:]]+"([^"]+)".*/\1/p'
-    )
+for device in topology:
+    visit(device)
 
-    for dev in $devs; do
-        dev_name="${dev##*/}"
-        sys_path="/sys/block/$dev_name/size"
-        [[ -f "$sys_path" ]] || continue
-        sectors=$(<"$sys_path")
-        total_bytes=$(( total_bytes + sectors * 512 ))
-    done
-fi
+node_paths = list(Path("/sys/devices/system/node").glob("node[0-9]*"))
+
+def disk_node(disk):
+    path = (Path("/sys/class/block") / disk).resolve()
+    # SATA disks may expose NUMA locality on their parent PCI controller.
+    for parent in (path, *path.parents):
+        node_file = parent / "numa_node"
+        if node_file.is_file():
+            node = int(node_file.read_text().strip())
+            if node >= 0:
+                return str(node)
+    if len(node_paths) == 1:
+        return node_paths[0].name[4:]
+    raise RuntimeError(f"Cannot determine NUMA node for {disk}")
+
+total = 0
+for entry in filesystems.values():
+    if not entry["mounts"]:
+        continue
+    if requested_node:
+        nodes = {disk_node(disk) for disk in entry["disks"]}
+        if len(nodes) != 1:
+            raise RuntimeError("Filesystem spans multiple NUMA nodes")
+        if requested_node not in nodes:
+            continue
+    stats = os.statvfs(entry["mounts"][0])
+    total += max(0, stats.f_bavail) * stats.f_frsize
+print(total)
+PYTHON
+)
 
 # ---- single output block ----
 case "$unit" in

@@ -267,10 +267,7 @@ total_memory_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu
 total_memory=$(cmdb_print "$total_memory_system" "$total_memory_cmdb")
 
 # total storage
-#total_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT")
-total_storage_system=$($ODEV_PATH/src/cmdb_get_storage.sh "$STORAGE_UNIT")
-total_storage_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
-total_storage=$(cmdb_print "$total_storage_system" "$total_storage_cmdb")
+total_storage=$("$ODEV_PATH/src/cmdb_get_storage.sh" "$STORAGE_UNIT") || exit 1
 
 # print CPU information
 echo ""
@@ -300,10 +297,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     numa_memory_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i memory)
     numa_memory=$(cmdb_print "$numa_memory_system" "$numa_memory_cmdb")
     # storage
-    #numa_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT" "$i")
-    numa_storage_system=$($ODEV_PATH/src/cmdb_get_storage.sh "$STORAGE_UNIT" "$i")
-    numa_storage_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i storage)
-    numa_storage=$(cmdb_print "$numa_storage_system" "$numa_storage_cmdb")
+    numa_storage=$("$ODEV_PATH/src/cmdb_get_storage.sh" "$STORAGE_UNIT" "$i") || exit 1
     # endata NICs
     endata_idx_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu numa $i endata)
     endata_num_cmdb=$(wc -w <<< "$endata_idx_cmdb")

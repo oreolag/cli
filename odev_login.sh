@@ -87,10 +87,7 @@ cpu_print() {
   total_memory=$(cmdb_print "$total_memory_system" "$total_memory_cmdb")
 
   # total storage
-  #total_storage_system=$($CMDB_PATH/cmdb_get_storage.sh "$STORAGE_UNIT")
-  total_storage_system=$($ODEV_PATH/src/cmdb_get_storage.sh "$STORAGE_UNIT")
-  total_storage_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu storage)
-  total_storage=$(cmdb_print "$total_storage_system" "$total_storage_cmdb")
+  total_storage=$("$ODEV_PATH/src/cmdb_get_storage.sh" "$STORAGE_UNIT") || exit 1
 
   # print CPU information
   echo "  CPU model       : ${bold}$model_name${normal}"
