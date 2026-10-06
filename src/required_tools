@@ -2,3 +2,4 @@ ansible
 gh
 nvidia-smi
 python3
+tailscale

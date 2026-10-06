@@ -44,6 +44,25 @@ else
   gh_status="Please install the GitHub CLI"
 fi
 
+# check on tailscale
+installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "tailscale")"
+ts_status=""
+if [[ "$installed" == "1" ]]; then
+  logged_in="$("$ODEV_PATH/src/tailscale_auth_status.sh")"
+  if [[ "$logged_in" == "1" ]]; then
+    ts_user="$(tailscale whoami 2>/dev/null | awk '/^User:/ {user=1; next} user && $1 == "Name:" {print $2; exit}')" || ts_user=""
+    if [[ -n "$ts_user" ]]; then
+      ts_status="Tailscale is connected as ${bold}$ts_user${normal}"
+    #else
+    #  ts_status="Tailscale is connected"
+    fi
+  else
+    ts_status="Tailscale is not connected. Log in to start using ${bold}sudo tailscale up --ssh${normal}"
+  fi
+else
+  ts_status="Please install the Tailscale CLI"
+fi
+
 # check on build
 is_build=$($ODEV_PATH/src/is_server.sh "$ODEV_PATH" "build")
 
@@ -81,9 +100,17 @@ print_help() {
   else
     echo "  This is a ${bold}development${normal} server"
   fi
+
+  # print gh_status
   if [ ! "$gh_status" = "" ]; then
     echo "  $gh_status"
   fi
+
+  # print ts_status
+  if [ ! "$ts_status" = "" ]; then
+    echo "  $ts_status"
+  fi
+
   echo ""
   echo "${bold}LEARN MORE${normal}"
   echo "  Use ${bold}odev <command> <subcommand> --help${normal} for more information about a command."
