@@ -232,15 +232,15 @@ get_connection_name() {
 
 # print operating system information
 . /etc/os-release
-echo "Operating system: ${bold}${NAME} ${VERSION}${normal}"
+echo "Operating system   : ${bold}${NAME} ${VERSION}${normal}"
 description=$(lsb_release -d | awk -F'\t' '{print $2}' | sed 's/^[^0-9]*//')
 codename=$(lsb_release -c | awk -F':' '{print $2}' | xargs)
 linux_kernel=$(uname -r)
 uptime_info=$(uptime -p)
-echo "Description     : ${bold}$description${normal}"
-echo "Codename        : ${bold}$codename${normal}"
-echo "Linux kernel    : ${bold}$linux_kernel${normal}"
-echo "Uptime          : ${bold}$uptime_info${normal}"
+echo "Description        : ${bold}$description${normal}"
+echo "Codename           : ${bold}$codename${normal}"
+echo "Linux kernel       : ${bold}$linux_kernel${normal}"
+echo "Uptime             : ${bold}$uptime_info${normal}"
 
 # lstopo
 #rm -rf $TMP_PATH/lstopo_output
@@ -271,11 +271,43 @@ total_storage=$("$ODEV_PATH/src/cmdb_get_storage.sh" "$STORAGE_UNIT") || exit 1
 
 # print CPU information
 echo ""
-echo "CPU model       : ${bold}$model_name${normal}"
-echo "CPU(s)          : ${bold}$cpu_count${normal}"
-echo "Total memory    : ${bold}$total_memory${normal}"
-echo "Total storage   : ${bold}$total_storage${normal}"
+echo "CPU model          : ${bold}$model_name${normal}"
+echo "CPU(s)             : ${bold}$cpu_count${normal}"
+echo "Total memory       : ${bold}$total_memory${normal}"
+echo "Total storage      : ${bold}$total_storage${normal}"
 echo ""
+
+# print tailscale information
+installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "tailscale")"
+if [[ "$installed" == "1" ]]; then
+    logged_in="$("$ODEV_PATH/src/tailscale_auth_status.sh")"
+    if [[ "$logged_in" == "1" ]]; then
+        tailnet_info="$(tailscale status --json 2>/dev/null | python3 -c '
+import json
+import sys
+
+try:
+    status = json.load(sys.stdin)
+    address = next(ip for ip in status.get("TailscaleIPs", []) if ":" not in ip)
+    name = (status.get("CurrentTailnet") or {}).get("MagicDNSSuffix", "")
+    if status.get("BackendState") == "Running" and name:
+        print(address, name.rstrip("."))
+except (ValueError, AttributeError, StopIteration):
+    pass
+' 2>/dev/null)" || tailnet_info=""
+        if [[ -n "$tailnet_info" ]]; then
+            read -r tailnet_ip tailnet_name <<< "$tailnet_info"
+            tailnet_interface="$(ip -4 -o addr show | awk -v address="$tailnet_ip" '
+                { split($4, ip, "/"); if (ip[1] == address) { sub(/@.*/, "", $2); print $2 } }
+            ')"
+            #echo ""
+            echo "Tailnet interface  : ${bold}${tailnet_interface:-n/a}${normal}"
+            echo "Tailnet IP         : ${bold}$tailnet_ip${normal}"
+            echo "Tailnet name       : ${bold}$tailnet_name${normal}"
+            echo ""
+        fi
+    fi
+fi
 
 # remove examine files
 for f in "$TMP_PATH"/examine_*; do
