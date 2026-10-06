@@ -83,8 +83,6 @@ CHECKOUT_PATH="$TMP_PATH/odev"
 sudo rm -rf -- "$CHECKOUT_PATH"
 #sudo $ODEV_PATH/src/rm.sh "$ODEV_PATH" "$CHECKOUT_PATH"
 
-echo "hola"
-
 # repository checkout
 msg=""
 ver=""
