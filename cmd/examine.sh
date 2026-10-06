@@ -219,6 +219,7 @@ get_connection_name() {
 
     ip -o link | while read -r num name rest; do
         name="${name%:}"                        # remove trailing :
+        name="${name%%@*}"                      # remove peer suffix (e.g. @if7)
         curmac=$(ip link show "$name" | awk '/link\/ether/ {print $2}')
         curip=$(ip -4 -o addr show "$name" | awk '{print $4}' | cut -d/ -f1)
 
