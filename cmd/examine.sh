@@ -78,72 +78,84 @@ if [[ ! -f "$CMDB_PATH/$hostname.yml" ]]; then
 fi
 
 # helper functions
-print_numa_header() {
-  local id="$1"
-  local cpus="$2"
-  local mem="$3"
-  local nvme="$4"
-  local nics="$5"
-  local gpus="$6"
-  local ads="$7"
+print_numa_table() {
+    local id="$1" cpus="$2" mem="$3" nvme="$4"
+    local nics="$5" gpus="$6" ads="$7"
 
-  separator_length="130"
-  
-  # legend
-  legend=""
-  if [ "$ads" -gt 0 ]; then
-    legend="$STRING_ACCEL"
-  fi
-  if [ "$gpus" -gt 0 ]; then
-    legend="$legend $STRING_GPUS"
-  fi
-  if [ "$nics" -gt 0 ]; then
-    legend="$legend $STRING_NICS"
-  fi
-  len=$(printf '%s' "$legend" | sed -E 's/\x1B\[[0-9;]*m//g' | wc -m)
-  filling_legend=$(printf '%*s' $((separator_length - len - 1)) '')
-  # add color
-  legend=""
-  if [ "$ads" -gt 0 ]; then
-    legend="${COLOR_XILINX}$STRING_ACCEL${normal}"
-  fi
-  if [ "$gpus" -gt 0 ]; then
-    legend="$legend ${COLOR_NVIDIA}$STRING_GPUS${normal}"
-  fi
-  if [ "$nics" -gt 0 ]; then
-    legend="$legend ${COLOR_NIC}$STRING_NICS${normal}"
-  fi
-
-  # top ruler
-  top_ruler="${bold}NUMA $id${normal} | CPUs: $cpus | Memory: $mem | Storage: $nvme"
-  len=$(printf '%s' "$top_ruler" | sed -E 's/\x1B\[[0-9;]*m//g' | wc -m)
-  filling=$(printf '%*s' $((separator_length - len - 1)) '')
-
-  echo -e " $filling_legend$legend"
-  echo    "+--------------------------------------------------------------------------------------------------------------------------------+"
-  echo -e "| $top_ruler$filling |"
-  echo    "+--------------------------------------------------------------------------------------------------------------------------------+"
-  echo    "| Device Index : Port Index : Model      : Serial Number : BDF          : IP Address         : MAC Address       : Interface     |"
-  echo    "|--------------------------------------------------------------------------------------------------------------------------------|"
-  #echo   "| 1            : 1          : ConnectX-7 : b5a5df7df3c0  : 000f:01:00.0 : 255.255.255.255/24 : 00:0A:35:0B:25:28 : enaccel0f0np0 |"
-  #echo   "+--------------------------------------------------------------------------------------------------------------------------------+"
-}
-
-print_numa() {
-    local file="$1"
-    local color="${2:-}"
-    [[ -f "$file" ]] || return
-
-    awk -v color="$color" -v reset="$normal" '{
-        for(i=1;i<=NF;i++) if($i=="-") $i=" ";
-
-        dev=$1; port=$2; model=$3; serial=$4; bdf=$5; ip=$6; mac=$7; ifc=$8;
-
-        printf("|%s %-12s : %-10s : %-10s : %-13s : %-12s : %-18s : %-17s : %-13s %s|\n",
-               color, dev, port, model, serial, bdf, ip, mac, ifc, reset);
-    }' "$file"
-
-    echo "+--------------------------------------------------------------------------------------------------------------------------------+"
+    awk -F '\t' -v id="$id" -v cpus="$cpus" -v mem="$mem" -v nvme="$nvme" \
+        -v nics="$nics" -v gpus="$gpus" -v ads="$ads" \
+        -v bold="$bold" -v reset="$normal" \
+        -v nic_color="$COLOR_NIC" -v gpu_color="$COLOR_NVIDIA" -v accel_color="$COLOR_XILINX" \
+        -v nic_label="$STRING_NICS" -v gpu_label="$STRING_GPUS" -v accel_label="$STRING_ACCEL" '
+        function visible_length(value) {
+            # Strip CSI formatting and charset selection (tput sgr0 includes ESC(B).
+            gsub(/\033\[[0-?]*[ -\/]*[@-~]/, "", value)
+            gsub(/\033[()][0-2A-Z]/, "", value)
+            return length(value)
+        }
+        function rule(left, right,    i) {
+            printf "%s", left
+            for (i = 0; i < inner_width; i++) printf "-"
+            printf "%s\n", right
+        }
+        function add_legend(label, color) {
+            if (legend_plain != "") {
+                legend_plain = legend_plain " "
+                legend = legend " "
+            }
+            legend_plain = legend_plain label
+            legend = legend color label reset
+        }
+        BEGIN {
+            split("Device Index|Port Index|Model|Serial Number|BDF|IP Address|MAC Address|Interface", headers, "[|]")
+            split("12 10 10 13 12 18 17 13", widths, " ")
+            for (i = 1; i <= 8; i++)
+                if (length(headers[i]) > widths[i]) widths[i] = length(headers[i])
+            colors[ARGV[1]] = nic_color
+            colors[ARGV[2]] = accel_color
+            colors[ARGV[3]] = gpu_color
+            enabled[ARGV[1]] = nics > 0
+            enabled[ARGV[2]] = ads > 0
+            enabled[ARGV[3]] = gpus > 0
+        }
+        enabled[FILENAME] {
+            count++
+            groups[count] = FILENAME
+            for (i = 1; i <= 8; i++) {
+                value = ($i == "-" ? "" : $i)
+                cells[count, i] = value
+                if (visible_length(value) > widths[i]) widths[i] = visible_length(value)
+            }
+        }
+        END {
+            top = bold "NUMA " id reset " | CPUs: " cpus " | Memory: " mem " | Storage: " nvme
+            inner_width = 2 + 7 * 3
+            for (i = 1; i <= 8; i++) inner_width += widths[i]
+            if (visible_length(top) + 2 > inner_width) {
+                widths[8] += visible_length(top) + 2 - inner_width
+                inner_width = visible_length(top) + 2
+            }
+            if (ads > 0) add_legend(accel_label, accel_color)
+            if (gpus > 0) add_legend(gpu_label, gpu_color)
+            if (nics > 0) add_legend(nic_label, nic_color)
+            printf "%*s%s\n", inner_width + 1 - length(legend_plain), "", legend
+            rule("+", "+")
+            printf "| %s%*s |\n", top, inner_width - visible_length(top) - 2, ""
+            rule("+", "+")
+            printf "| "
+            for (i = 1; i <= 8; i++)
+                printf "%s%*s%s", headers[i], widths[i] - length(headers[i]), "", (i < 8 ? " : " : " |\n")
+            rule("|", "|")
+            for (row = 1; row <= count; row++) {
+                printf "|%s ", colors[groups[row]]
+                for (i = 1; i <= 8; i++)
+                    printf "%s%*s%s", cells[row, i], widths[i] - visible_length(cells[row, i]), "", (i < 8 ? " : " : " ")
+                printf "%s|\n", reset
+                if (row == count || groups[row] != groups[row + 1]) rule("+", "+")
+            }
+            if (count == 0) rule("+", "+")
+        }
+    ' "$TMP_PATH/examine_endata_$id" "$TMP_PATH/examine_accel_$id" "$TMP_PATH/examine_gpu_$id"
 }
 
 cmdb_print() {
@@ -328,7 +340,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
                 # read previous line
                 last_line=$(tail -n 1 "$TMP_PATH/examine_endata_$i" 2>/dev/null || true)
                 if [[ -n "$last_line" ]]; then
-                    bdf_0=$(awk 'END{print $5}' "$TMP_PATH/examine_endata_$i")
+                    bdf_0=$(awk -F '\t' 'END{print $5}' "$TMP_PATH/examine_endata_$i")
                     is_consecutive=$(is_consecutive_bdf "$bdf_0" "$bdf")
                     if [ "$is_consecutive" = "1" ]; then
                         device_index="-"
@@ -336,7 +348,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
                     fi
                 fi
                 # add to file
-                echo "$device_index $port_index $model $serial_number $bdf $ip_address $mac_address $connection_name" >> "$TMP_PATH/examine_endata_$i"
+                printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$device_index" "$port_index" "$model" "$serial_number" "$bdf" "$ip_address" "$mac_address" "$connection_name" >> "$TMP_PATH/examine_endata_$i"
             fi
         done
     done
@@ -364,7 +376,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
             ip_address="-"
             mac_address="-"
             connection_name="-"
-            echo "$device_index $port_index $model $serial_number $bdf $ip_address $mac_address $connection_name" >> "$TMP_PATH/examine_gpu_$i"
+            printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$device_index" "$port_index" "$model" "$serial_number" "$bdf" "$ip_address" "$mac_address" "$connection_name" >> "$TMP_PATH/examine_gpu_$i"
         fi
     done
     
@@ -378,7 +390,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
         vendor_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j vendor)
         bdf_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j bdf)
         bdf_i_lspci=$(lspci -D | grep -i "^$bdf_i_cmdb.*$vendor_i_cmdb")
-        bdf_i_lspci="0000:c4:00.0 Processing accelerators: Xilinx Corporation Alveo U55C" # remove for final version!!!!!!!
+        #bdf_i_lspci="0000:c4:00.0 Processing accelerators: Xilinx Corporation Alveo U55C" # remove for final version!!!!!!!
         if [ ! "$bdf_i_lspci" = "" ]; then
             # increase counter
             ((accel_num_lspci++))
@@ -412,25 +424,14 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
                     connection_name="$connection_name_ifconfig"
                 fi
                 # add to file
-                echo "$device_index $port_index $model $serial_number $bdf $ip_address_cmdb $mac_address_cmdb $connection_name" >> "$TMP_PATH/examine_accel_$i"
+                printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$device_index" "$port_index" "$model" "$serial_number" "$bdf" "$ip_address_cmdb" "$mac_address_cmdb" "$connection_name" >> "$TMP_PATH/examine_accel_$i"
             done
         fi
     done
 
-    # print numa header
-    print_numa_header "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$accel_num_lspci"
-    # NICs
-    if [ "$endata_num_ifconfig" -gt 0 ]; then
-        print_numa "$TMP_PATH/examine_endata_$i" "$COLOR_NIC"
-    fi
-    # accelerators
-    if [ "$accel_num_lspci" -gt 0 ]; then
-        print_numa "$TMP_PATH/examine_accel_$i" "$COLOR_XILINX"
-    fi
-    # gpus
-    if [ "$gpu_num_lspci" -gt 0 ]; then
-        print_numa "$TMP_PATH/examine_gpu_$i" "$COLOR_NVIDIA"
-    fi
+    # Size all columns together before printing this NUMA table.
+    print_numa_table "$i" "$numa_cpus" "$numa_memory" "$numa_storage" "$endata_num_ifconfig" "$gpu_num_lspci" "$accel_num_lspci"
+
 done
 
 # author: https://github.com/jmoya82
