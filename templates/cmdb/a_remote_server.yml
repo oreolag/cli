@@ -89,6 +89,7 @@ devices:
           peer:
             device: "leaf-02"
             port: "Ethernet3"
+
   cpu:
     model: "Example dual-socket x86_64 server" # "$ODEV_PATH/src/cmdb_get_model.sh"
     count: 32 # "$ODEV_PATH/src/cmdb_get_cpu.sh"
@@ -114,6 +115,7 @@ devices:
         endata: null
         gpu: [1]
         accel: [1]
+
   enoob:
     - id: 0
       vendor: "ASPEED"
@@ -129,6 +131,7 @@ devices:
           peer:
             device: "oob-01"
             port: "Ethernet2"
+
   enmgmt:
     - id: 0
       vendor: "Intel"
@@ -151,6 +154,7 @@ devices:
           mac: "02:00:00:02:00:11" # cat /sys/class/net/eno2/address
           ip_address: null # ip -4 -o addr show dev eno2 | awk '{split($4, a, "/"); print a[1]}'
           ip_mask: null # ip -4 -o addr show dev eno2 | awk '{split($4, a, "/"); print a[2]}'
+  
   endata:
     - id: 0
       vendor: "Mellanox"
@@ -176,6 +180,7 @@ devices:
           peer:
             device: "leaf-02"
             port: "Ethernet1"
+  
   gpu:
     - id: 0
       name: "NVIDIA A100 80GB PCIe"
