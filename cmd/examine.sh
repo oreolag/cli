@@ -389,6 +389,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     for ((j=0; j<gpu_num_cmdb; j++)); do
         vendor_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j vendor)
         bdf_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml gpu $j bdf)
+        [[ -n "$vendor_i_cmdb" && -n "$bdf_i_cmdb" ]] || continue
         bdf_i_lspci=$(lspci -D | grep -i "^$bdf_i_cmdb.*$vendor_i_cmdb")
         if [ ! "$bdf_i_lspci" = "" ]; then
             # increase counter
@@ -416,6 +417,7 @@ for ((i=0; i<numa_nodes_lscpu; i++)); do
     for ((j=0; j<accel_num_cmdb; j++)); do
         vendor_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j vendor)
         bdf_i_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml accel $j bdf)
+        [[ -n "$vendor_i_cmdb" && -n "$bdf_i_cmdb" ]] || continue
         bdf_i_lspci=$(lspci -D | grep -i "^$bdf_i_cmdb.*$vendor_i_cmdb")
         #bdf_i_lspci="0000:c4:00.0 Processing accelerators: Xilinx Corporation Alveo U55C" # remove for final version!!!!!!!
         if [ ! "$bdf_i_lspci" = "" ]; then
