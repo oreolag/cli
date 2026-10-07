@@ -100,7 +100,7 @@ devices:
       - id: 0
         list: "0-15" # "$ODEV_PATH/src/cmdb_get_cpu.sh" 0
         memory: "128GB" # "$ODEV_PATH/src/cmdb_get_memory.sh" 0
-        storage: "1.9TB" # Available: "$ODEV_PATH/src/cmdb_get_storage.sh" TB 0
+        storage: "1.9TB" # "$ODEV_PATH/src/cmdb_get_storage.sh" TB 0
         enoob: null
         enmgmt: [0]
         endata: [0]
