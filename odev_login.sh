@@ -70,7 +70,8 @@ cmdb_print() {
 cpu_print() {
   # CPU model
 #  model_name_system=$($CMDB_PATH/cmdb_get_model.sh)
-  model_name_system=$($ODEV_PATH/src/cmdb_get_model.sh)
+  #model_name_system=$($ODEV_PATH/src/cmdb_get_model.sh)
+  model_name_system="$(sudo -u "$username" -- "$ODEV_PATH/src/cmdb_get_model.sh")"
   model_name_cmdb=$($ODEV_PATH/src/cmdb_get.py --db $CMDB_PATH/$hostname.yml cpu model)
   model_name=$(cmdb_print "$model_name_system" "$model_name_cmdb")
 
