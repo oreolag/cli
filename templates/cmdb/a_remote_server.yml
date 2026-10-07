@@ -24,9 +24,9 @@
 devices:
   accel:
     - id: 0
-      vendor: "Xilinx"
-      model: "u55c"
-      bdf: "0000:41:00.0"
+      vendor: "Xilinx" # lspci -Dnn -s 0000:41:00.0
+      model: "u55c" # lspci -Dnn -s 0000:41:00.0
+      bdf: "0000:41:00.0" # lspci -Dnn -s 0000:41:00.0
       upstream_port: "41:00.0"
       root_port: "40:01.1"
       LinkCtl: null
@@ -35,31 +35,31 @@ devices:
       serial: "EXAMPLE-FPGA-001"
       platform: null
       part: "xcu55c-fsvh2892-2L-e"
-      speed: "100Gbps"
+      speed: "100Gbps" # sudo ethtool enaccel0f0np0 (if supported by the FPGA driver)
       ports: 2
       uplinks:
         - id: 0
-          name: "enaccel0f0np0"
+          name: "enaccel0f0np0" # ip -br link
           bdf: null
           mac: "02:00:00:04:00:00" # cat /sys/class/net/enaccel0f0np0/address
-          ip_address: "10.0.4.20" 
+          ip_address: "10.0.4.20"
           ip_mask: 24
           peer:
             device: "leaf-01"
             port: "Ethernet2"
         - id: 1
-          name: "enaccel0f1np1"
+          name: "enaccel0f1np1" # ip -br link
           bdf: null
           mac: "02:00:00:04:00:01" # cat /sys/class/net/enaccel0f1np1/address
-          ip_address: "10.0.4.21" 
-          ip_mask: 24 
+          ip_address: "10.0.4.21"
+          ip_mask: 24
           peer:
             device: "leaf-02"
             port: "Ethernet2"
     - id: 1
-      vendor: "Xilinx"
-      model: "u55c"
-      bdf: "0000:c1:00.0"
+      vendor: "Xilinx" # lspci -Dnn -s 0000:c1:00.0
+      model: "u55c" # lspci -Dnn -s 0000:c1:00.0
+      bdf: "0000:c1:00.0" # lspci -Dnn -s 0000:c1:00.0
       upstream_port: "c1:00.0"
       root_port: "c0:01.1"
       LinkCtl: null
@@ -68,20 +68,20 @@ devices:
       serial: "EXAMPLE-FPGA-002"
       platform: null
       part: "xcu55c-fsvh2892-2L-e"
-      speed: "100Gbps"
+      speed: "100Gbps" # sudo ethtool enaccel1f0np0 (if supported by the FPGA driver)
       ports: 2
       uplinks:
         - id: 0
-          name: "enaccel1f0np0"
+          name: "enaccel1f0np0" # ip -br link
           bdf: null
           mac: "02:00:00:04:01:00" # cat /sys/class/net/enaccel1f0np0/address
           ip_address: "10.0.4.22"
-          ip_mask: 24 
+          ip_mask: 24
           peer:
             device: "leaf-01"
             port: "Ethernet3"
         - id: 1
-          name: "enaccel1f1np1"
+          name: "enaccel1f1np1" # ip -br link
           bdf: null
           mac: "02:00:00:04:01:01" # cat /sys/class/net/enaccel1f1np1/address
           ip_address: "10.0.4.23"
@@ -118,14 +118,14 @@ devices:
 
   enoob:
     - id: 0
-      vendor: "ASPEED"
-      model: "AST2600 BMC"
-      speed: "1Gbps"
-      ports: 1
+      vendor: "ASPEED" # Check server/BMC hardware specifications
+      model: "AST2600 BMC" # Check server/BMC hardware specifications
+      speed: "1Gbps" # Check server/BMC hardware specifications
+      ports: 1 # Check server/BMC hardware specifications
       access:
         - id: 0
-          name: "bmc1"
-          mac: "02:00:00:01:00:10"
+          name: "bmc1" # Inventory label; not a host Linux interface
+          mac: "02:00:00:01:00:10" # sudo ipmitool lan print 1 (use the actual BMC channel)
           ip_address: "10.0.1.10"
           ip_mask: 24
           peer:
@@ -143,44 +143,44 @@ devices:
           name: "eno1" # ip -br link
           bdf: "0000:02:00.0" # ethtool -i eno1 | awk '/bus-info:/ {print $2}'
           mac: "02:00:00:02:00:10" # cat /sys/class/net/eno1/address
-          ip_address: "10.0.2.10" 
+          ip_address: "10.0.2.10"
           ip_mask: 24
           peer:
             device: "mgmt-01"
             port: "Ethernet4"
         - id: 1
-          name: "eno2"
+          name: "eno2" # ip -br link
           bdf: "0000:02:00.1" # ethtool -i eno2 | awk '/bus-info:/ {print $2}'
           mac: "02:00:00:02:00:11" # cat /sys/class/net/eno2/address
-          ip_address: null 
-          ip_mask: null 
-  
+          ip_address: null
+          ip_mask: null
+
   endata:
     - id: 0
-      vendor: "Mellanox"
-      model: "ConnectX-7"
-      speed: "200Gbps"
+      vendor: "Mellanox" # lspci -Dnn -s "$(ethtool -i enp1s0f0np0 | awk '/bus-info:/ {print $2}')"
+      model: "ConnectX-7" # lspci -Dnn -s "$(ethtool -i enp1s0f0np0 | awk '/bus-info:/ {print $2}')"
+      speed: "200Gbps" # sudo ethtool enp1s0f0np0
       ports: 2
       uplinks:
         - id: 0
-          name: "enp1s0f0np0"
+          name: "enp1s0f0np0" # ip -br link
           bdf: "0000:01:00.0" # ethtool -i enp1s0f0np0 | awk '/bus-info:/ {print $2}'
           mac: "02:00:00:03:00:0a" # cat /sys/class/net/enp1s0f0np0/address
-          ip_address: "10.0.4.10" 
-          ip_mask: 24 
+          ip_address: "10.0.4.10"
+          ip_mask: 24
           peer:
             device: "leaf-01"
             port: "Ethernet1"
         - id: 1
-          name: "enp1s0f1np1"
+          name: "enp1s0f1np1" # ip -br link
           bdf: "0000:01:00.1" # ethtool -i enp1s0f1np1 | awk '/bus-info:/ {print $2}'
           mac: "02:00:00:03:00:0b" # cat /sys/class/net/enp1s0f1np1/address
-          ip_address: "10.0.4.11" 
-          ip_mask: 24 
+          ip_address: "10.0.4.11"
+          ip_mask: 24
           peer:
             device: "leaf-02"
             port: "Ethernet1"
-  
+
   gpu:
     - id: 0
       name: "NVIDIA A100 80GB PCIe"
