@@ -42,8 +42,8 @@ devices:
           name: "enaccel0f0np0"
           bdf: null
           mac: "02:00:00:04:00:00" # cat /sys/class/net/enaccel0f0np0/address
-          ip_address: "10.0.4.20" # ip -4 -o addr show dev enaccel0f0np0 | awk '{split($4, a, "/"); print a[1]}'
-          ip_mask: 24 # ip -4 -o addr show dev enaccel0f0np0 | awk '{split($4, a, "/"); print a[2]}'
+          ip_address: "10.0.4.20" 
+          ip_mask: 24
           peer:
             device: "leaf-01"
             port: "Ethernet2"
@@ -51,8 +51,8 @@ devices:
           name: "enaccel0f1np1"
           bdf: null
           mac: "02:00:00:04:00:01" # cat /sys/class/net/enaccel0f1np1/address
-          ip_address: "10.0.4.21" # ip -4 -o addr show dev enaccel0f1np1 | awk '{split($4, a, "/"); print a[1]}'
-          ip_mask: 24 # ip -4 -o addr show dev enaccel0f1np1 | awk '{split($4, a, "/"); print a[2]}'
+          ip_address: "10.0.4.21" 
+          ip_mask: 24 
           peer:
             device: "leaf-02"
             port: "Ethernet2"
@@ -75,8 +75,8 @@ devices:
           name: "enaccel1f0np0"
           bdf: null
           mac: "02:00:00:04:01:00" # cat /sys/class/net/enaccel1f0np0/address
-          ip_address: "10.0.4.22" # ip -4 -o addr show dev enaccel1f0np0 | awk '{split($4, a, "/"); print a[1]}'
-          ip_mask: 24 # ip -4 -o addr show dev enaccel1f0np0 | awk '{split($4, a, "/"); print a[2]}'
+          ip_address: "10.0.4.22"
+          ip_mask: 24 
           peer:
             device: "leaf-01"
             port: "Ethernet3"
@@ -84,8 +84,8 @@ devices:
           name: "enaccel1f1np1"
           bdf: null
           mac: "02:00:00:04:01:01" # cat /sys/class/net/enaccel1f1np1/address
-          ip_address: "10.0.4.23" # ip -4 -o addr show dev enaccel1f1np1 | awk '{split($4, a, "/"); print a[1]}'
-          ip_mask: 24 # ip -4 -o addr show dev enaccel1f1np1 | awk '{split($4, a, "/"); print a[2]}'
+          ip_address: "10.0.4.23"
+          ip_mask: 24
           peer:
             device: "leaf-02"
             port: "Ethernet3"
@@ -134,17 +134,17 @@ devices:
 
   enmgmt:
     - id: 0
-      vendor: "Intel"
-      model: "I350-AM2"
-      speed: "1Gbps"
+      vendor: "Intel" # lspci -Dnn -s "$(ethtool -i eno1 | awk '/bus-info:/ {print $2}')"
+      model: "I350-AM2" # lspci -Dnn -s "$(ethtool -i eno1 | awk '/bus-info:/ {print $2}')"
+      speed: "1Gbps" # sudo ethtool eno1
       ports: 2
       access:
         - id: 0
-          name: "eno1"
+          name: "eno1" # ip -br link
           bdf: "0000:02:00.0" # ethtool -i eno1 | awk '/bus-info:/ {print $2}'
           mac: "02:00:00:02:00:10" # cat /sys/class/net/eno1/address
-          ip_address: "10.0.2.10" # ip -4 -o addr show dev eno1 | awk '{split($4, a, "/"); print a[1]}'
-          ip_mask: 24 # ip -4 -o addr show dev eno1 | awk '{split($4, a, "/"); print a[2]}'
+          ip_address: "10.0.2.10" 
+          ip_mask: 24
           peer:
             device: "mgmt-01"
             port: "Ethernet4"
@@ -152,8 +152,8 @@ devices:
           name: "eno2"
           bdf: "0000:02:00.1" # ethtool -i eno2 | awk '/bus-info:/ {print $2}'
           mac: "02:00:00:02:00:11" # cat /sys/class/net/eno2/address
-          ip_address: null # ip -4 -o addr show dev eno2 | awk '{split($4, a, "/"); print a[1]}'
-          ip_mask: null # ip -4 -o addr show dev eno2 | awk '{split($4, a, "/"); print a[2]}'
+          ip_address: null 
+          ip_mask: null 
   
   endata:
     - id: 0
@@ -166,8 +166,8 @@ devices:
           name: "enp1s0f0np0"
           bdf: "0000:01:00.0" # ethtool -i enp1s0f0np0 | awk '/bus-info:/ {print $2}'
           mac: "02:00:00:03:00:0a" # cat /sys/class/net/enp1s0f0np0/address
-          ip_address: "10.0.4.10" # ip -4 -o addr show dev enp1s0f0np0 | awk '{split($4, a, "/"); print a[1]}'
-          ip_mask: 24 # ip -4 -o addr show dev enp1s0f0np0 | awk '{split($4, a, "/"); print a[2]}'
+          ip_address: "10.0.4.10" 
+          ip_mask: 24 
           peer:
             device: "leaf-01"
             port: "Ethernet1"
@@ -175,8 +175,8 @@ devices:
           name: "enp1s0f1np1"
           bdf: "0000:01:00.1" # ethtool -i enp1s0f1np1 | awk '/bus-info:/ {print $2}'
           mac: "02:00:00:03:00:0b" # cat /sys/class/net/enp1s0f1np1/address
-          ip_address: "10.0.4.11" # ip -4 -o addr show dev enp1s0f1np1 | awk '{split($4, a, "/"); print a[1]}'
-          ip_mask: 24 # ip -4 -o addr show dev enp1s0f1np1 | awk '{split($4, a, "/"); print a[2]}'
+          ip_address: "10.0.4.11" 
+          ip_mask: 24 
           peer:
             device: "leaf-02"
             port: "Ethernet1"
