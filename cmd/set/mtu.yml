@@ -1,14 +1,25 @@
 ---
-- name: Test Ansible connectivity and show server information
+- name: Set network interface MTU
   hosts: "{{ oreol_target }}"
   become: false
-  gather_facts: true
+  gather_facts: false
 
   tasks:
-    - name: Show server information
-      ansible.builtin.debug:
-        msg:
-          - "Ansible is working!"
-          - "Server: {{ ansible_facts['hostname'] }}"
-          - "Operating system: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
-          - "Connection: {{ ansible_connection | default('ssh') }}"
+    - name: Validate interface and MTU parameters
+      ansible.builtin.assert:
+        that:
+          - interface_name | default('') is match('^[a-zA-Z0-9_][a-zA-Z0-9_.:-]*$')
+          - mtu_value | default('') | string is match('^[0-9]+$')
+          - mtu_value | default(0) | int > 0
+        fail_msg: "Provide a valid interface_name and a positive mtu_value."
+
+    - name: Set MTU and bring the interface up
+      ansible.builtin.command:
+        argv:
+          - sudo
+          - -n
+          - ifconfig
+          - "{{ interface_name }}"
+          - mtu
+          - "{{ mtu_value | string }}"
+          - up

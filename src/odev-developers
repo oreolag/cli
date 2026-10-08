@@ -1,2 +1,3 @@
 %odev-developers ALL=(ALL) NOPASSWD: \
-  /opt/odev/src/ln_s.sh
+  /opt/odev/src/ln_s.sh, \
+  /sbin/ifconfig * mtu * up

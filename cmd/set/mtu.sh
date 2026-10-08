@@ -123,7 +123,9 @@ else
 fi
 
 # call the playbook
-"$MGMT_PATH/ansible-play.sh" "$ODEV_PATH/cmd/set/mtu.yml" "$target" -i "$inventory_file"
+mtu_vars="$(python3 -c 'import json, sys; print(json.dumps({"interface_name": sys.argv[1], "mtu_value": sys.argv[2]}))' "$interface_name_cmdb" "$mtu")" || exit 1
+"$MGMT_PATH/ansible-play.sh" "$ODEV_PATH/cmd/set/mtu.yml" "$target" \
+  -i "$inventory_file" --extra-vars "$mtu_vars"
 
 #echo "remote: $remote"
 #echo "inventory: $inventory"
