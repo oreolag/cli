@@ -33,6 +33,7 @@
     vars_yml: false
     #submodules (all does not apply)
     hdev: false
+    playbooks: false
     workflows: false
     # templates (all does not apply)
     templates: false 
@@ -62,6 +63,7 @@
           - "repo={{ repo }}"
           # submodules
           - "hdev={{ hdev }}"
+          - "playbooks={{ playbooks }}"
           - "workflows={{ workflows }}"
           # templates
           - "templates={{ templates }}"
@@ -611,6 +613,22 @@
             mode: "0755"
       when:
         - hdev | bool
+        - cli.local_path is defined
+    - block:
+        - name: Delete remote playbooks submodule content
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/submodules/playbooks"
+            state: absent
+
+        - name: Copy playbooks submodule from local path
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/submodules/playbooks/"
+            dest: "{{ cli_remote_path }}/odev/submodules/playbooks/"
+            owner: root
+            group: root
+            mode: "0755"
+      when:
+        - playbooks | bool
         - cli.local_path is defined
     - block:
         - name: Delete remote workflows submodule content
