@@ -8,6 +8,7 @@ ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 WORKFLOWS_PATH="$SCRIPT_DIR/../submodules/workflows"
 
 # constants
+PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
 
 # format
@@ -68,17 +69,17 @@ IFCONFIG_FLAGS=(
 )
 
 # new
-NEW_DESCRIPTION="Create a new playbook or workflow (based on the selected template)"
+NEW_DESCRIPTION="Create a new playbook, project or workflow (based on the selected template)"
 NEW_FLAGS=(
 )
 # playbook
-NEW_PLAYBOOK_DESCRIPTION="Create a new playbook"
+NEW_PLAYBOOK_DESCRIPTION="Adds a new playbook to ${bold}$PLAYBOOKS_USER_PATH${normal}"
 NEW_PLAYBOOK_FLAGS=(
   "name,n,Playbook name,-,-"
 )
 NEW_PLAYBOOK_FLAGS_MANDATORY="name"
 # workflow
-NEW_WORKFLOW_DESCRIPTION="Create a new accelerated workflow"
+NEW_WORKFLOW_DESCRIPTION="Creates a new accelerated workflow in ${bold}$WORKFLOWS_USER_PATH${normal}"
 NEW_WORKFLOW_FLAGS=(
   #"fork,f,Create GitHub fork of oreolag/workflows,-,-"
   "name,n,Workflow name,-,-"
