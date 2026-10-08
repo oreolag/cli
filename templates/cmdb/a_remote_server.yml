@@ -6,7 +6,7 @@
 # count is logical CPUs; NUMA memory/storage are disjoint allocations of totals.
 # NUMA device lists reference category IDs. BMC is outside host NUMA topology.
 # speed is configured per-port link rate; ports is physical port count.
-# peer.port matches the remote interface name in switches.yml exactly.
+# peer.port matches the remote interface name in my_switches.yml exactly.
 # Locally administered MACs and private IPs are synthetic. Address plan:
 # OOB: 10.0.1.0/24; management: 10.0.2.0/24; high-speed: 10.0.4.0/24.
 # NIC ports use 10.0.4.10-11; FPGA ports use 10.0.4.20-23.

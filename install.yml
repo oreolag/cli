@@ -493,7 +493,7 @@
               Created {{ cli_remote_path }}/{{ short_hostname }}.yml from the
               synthetic example. Edit this file to match this server before
               using commands that depend on CMDB device data. Switch examples
-              are available in {{ cli_remote_path }}/cmdb/switches.yml.
+              are available in {{ cli_remote_path }}/cmdb/my_switches.yml.
           when: cmdb_server_copy.changed
 
         # groups
