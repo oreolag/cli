@@ -6,3 +6,7 @@
 	path = submodules/workflows
 	url = https://github.com/oreolag/workflows.git
 	branch = main
+[submodule "submodules/playbooks"]
+	path = submodules/playbooks
+	url = https://github.com/oreolag/playbooks.git
+	branch = main
