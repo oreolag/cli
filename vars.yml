@@ -2,8 +2,8 @@
 
 #github
 github:
-  push_branch: my_workflows
-  #odev_repo: "https://github.com/oreolag/cli"
+  push_branch_workflows: my_workflows
+  push_branch_playbooks: my_playbooks
 
 #mpi
 mpi:
@@ -18,3 +18,4 @@ paths:
   projects: "${HOME}/odev/projects"
   tmp: /tmp
   workflows: "${HOME}/odev/workflows"
+  playbooks: "${HOME}/odev/playbooks"
