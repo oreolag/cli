@@ -85,31 +85,22 @@ if [[ ! -d "$WORKFLOWS_USER_PATH/$name" ]]; then
   exit 1
 fi
 
-# read push (if applies)
-if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_FORK" ]]; then
-  push=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
-fi
-
-# login to GitHub
-#github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
-#if [ "$github_auth_status" = "0" ]; then
-#  eval "gh auth login"
-#fi
-
-# get GitHub branch
-#if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
-#  github_branch=$(cat $WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH)
-#fi
-
 # delete 
 target="$(readlink -f "$ODEV_PATH/cmd/new/$name.sh")"
 if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
   if [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
     # delete workflow and push
-    cd "$WORKFLOWS_USER_PATH"
+    cd "$WORKFLOWS_USER_PATH" || exit 1
+
+    github_branch="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")" || exit 1
+    current_branch="$(git branch --show-current)" || exit 1
+    if [[ -z "$github_branch" || "$current_branch" != "$github_branch" ]]; then
+      echo "Switch to the workflow branch before deleting: $github_branch" >&2
+      exit 1
+    fi
 
     # delete locally
-    rm -rf -- "$WORKFLOWS_USER_PATH/$name"
+    rm -rf -- "$WORKFLOWS_USER_PATH/$name" || exit 1
 
     # delete symlinks
     sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/new/$name.sh"
@@ -119,41 +110,32 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
     sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$name.sh"
     sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/delete/$name.sh"
 
-    if [[ "$push" == "1" ]]; then
-      # login to GitHub
-      github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
-      if [ "$github_auth_status" = "0" ]; then
-        eval "gh auth login"
-      fi
-
-      # get GitHub user
-      github_user="$(gh api user --jq .login)"
-
-      # configure git identity if missing
-      if ! git config user.name >/dev/null; then
-        git config user.name "$github_user"
-      fi
-
-      if ! git config user.email >/dev/null; then
-        git config user.email "${github_user}@users.noreply.github.com"
-      fi
-
-      # get GitHub branch
-      if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
-        github_branch="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")"
-      fi
-
-      # delete remotely (stage deletion!)
-      if git ls-tree -r --name-only "$github_branch" -- "$name" | grep -q .; then
-        git add -A "$name"
-        git commit -m "Delete workflow $name"
-        git push origin "$github_branch"
-      fi
-    else
-      echo "Workflow deleted: $name"
+    # login to GitHub
+    github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)
+    if [ "$github_auth_status" = "0" ]; then
+      gh auth login || exit 1
     fi
+
+    # get GitHub user
+    github_user="$(gh api user --jq .login)" || exit 1
+
+    # configure git identity if missing
+    if ! git config user.name >/dev/null; then
+      git config user.name "$github_user" || exit 1
+    fi
+
+    if ! git config user.email >/dev/null; then
+      git config user.email "${github_user}@users.noreply.github.com" || exit 1
+    fi
+
+    # Commit only this workflow deletion, then push the checked branch.
+    git add -A -- "$name" || exit 1
+    git commit --only -m "Delete workflow $name" -- "$name" || exit 1
+    git push origin "$github_branch" || exit 1
+    echo "Workflow deleted: $name"
   fi
-  exit 1
+  exit 0
 else
   echo "Workflow cannot be deleted: $name"
+  exit 1
 fi

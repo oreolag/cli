@@ -103,19 +103,19 @@ if [[ ! -d "$odev_path" ]]; then
   mkdir -p "$odev_path"
 fi
 
+# get GitHub user
+github_user="$(gh api user --jq .login)" || exit 1
+
+# check if workflow name exists (oreolag/workflows default branch)
+folders="$(gh api repos/oreolag/workflows/contents --jq '.[] | select(.type == "dir") | .name')" || exit 1
+
+if grep -Fxq -- "$name" <<< "$folders"; then
+  echo "Workflow already exists: $name"
+  exit 1
+fi
+
 # create a fork
 if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
-  # early exit (name already exists in oreolag/workflows)
-  folders="$(gh api repos/oreolag/workflows/contents --jq '.[] | select(.type == "dir") | .name')" || exit 1
-
-  if grep -Fxq -- "$name" <<< "$folders"; then
-    echo "Workflow already exists: $name"
-    exit 1
-  fi
-
-  # get GitHub user
-  github_user="$(gh api user --jq .login)"
-
   # change directory
   cd "$odev_path"
 
@@ -127,7 +127,6 @@ if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
       :  # valid fork → continue
     else
       echo "Repository already exists: $github_user/workflows"
-      rm -rf "$odev_path"
       exit 1
     fi
   else
@@ -174,7 +173,16 @@ if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
   done
 fi
 
-# check if workflow name exists
+# check if workflow name exists (fork configured branch)
+folders="$(gh api "repos/$github_user/workflows/contents?ref=$GITHUB_PUSH_BRANCH" \
+  --jq '.[] | select(.type == "dir") | .name')" || exit 1
+
+if grep -Fxq -- "$name" <<< "$folders"; then
+  echo "Workflow already exists: $name"
+  exit 1
+fi
+
+# check if workflow name exists (local)
 if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
    [[ -d "$WORKFLOWS_USER_PATH/$name" ]] || \
    [[ -e "$ODEV_PATH/cmd/new/$name.sh" ]] || \
@@ -270,7 +278,14 @@ sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" 
 #fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
 cd "$WORKFLOWS_USER_PATH"
 #if [ "$fork" = "1" ]; then
+  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "build.sh" --comment "First commit"
   "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
+  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "delete.sh" --comment "First commit"
+  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "new.sh" --comment "First commit"
+  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "program.sh" --comment "First commit"
+  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "program.yml" --comment "First commit"
+  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "run.sh" --comment "First commit"
+  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "validate.sh" --comment "First commit"
 #fi
 
 # print
