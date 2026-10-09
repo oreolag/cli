@@ -28,14 +28,38 @@ WORKFLOWS_USER_PATH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" p
 WORKFLOWS_USER_PATH="${WORKFLOWS_USER_PATH//\$\{HOME\}/$HOME}"
 WORKFLOWS_USER_PATH="${WORKFLOWS_USER_PATH//\$HOME/$HOME}"
 WORKFLOWS_USER_PATH="${WORKFLOWS_USER_PATH/#\~/$HOME}"
+GITHUB_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)"
+
+# get the existing fork when this user has no local checkout
+if [[ ! -e "$WORKFLOWS_USER_PATH" && ! -L "$WORKFLOWS_USER_PATH" ]]; then
+  github_user="$(timeout 20s gh api user --jq .login)" || exit 0
+  is_fork="$(timeout 20s gh api "repos/$github_user/workflows" \
+    --jq '.fork and .parent.full_name == "oreolag/workflows"')" || exit 0
+  if [ "$is_fork" != "true" ]; then
+    exit 0
+  fi
+
+  mkdir -p -- "$(dirname "$WORKFLOWS_USER_PATH")"
+  timeout 30s env GIT_TERMINAL_PROMPT=0 git clone --quiet \
+    --branch "$GITHUB_PUSH_BRANCH" \
+    "https://github.com/$github_user/workflows.git" "$WORKFLOWS_USER_PATH" || exit 0
+  git -C "$WORKFLOWS_USER_PATH" remote add upstream https://github.com/oreolag/workflows.git
+  echo "$GITHUB_PUSH_BRANCH" > "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH"
+fi
+
+# check on local checkout and branch
 [[ -d "$WORKFLOWS_USER_PATH/.git" ]] || exit 0
 cd "$WORKFLOWS_USER_PATH"
-GITHUB_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)"
 [[ "$(git branch --show-current)" == "$GITHUB_PUSH_BRANCH" ]] || exit 0
 
-# Creation writes this local marker; all other uncommitted files block syncing.
+# Creation installs these local files; other uncommitted files block syncing.
 changes="$(git status --porcelain --untracked-files=all)"
-changes="$(printf '%s\n' "$changes" | sed '/^?? GITHUB_PUSH_BRANCH$/d')"
+changes="$(printf '%s\n' "$changes" | sed \
+  -e '/^?? GITHUB_PUSH_BRANCH$/d' \
+  -e '/^?? git_diff\.sh$/d' \
+  -e '/^?? github_pr\.sh$/d' \
+  -e '/^?? github_push\.sh$/d' \
+  -e '/^?? github_sync\.sh$/d')"
 [[ -z "$changes" ]] || exit 0
 
 # Bound network waits at login. Never reset, stash, commit or push user work.
