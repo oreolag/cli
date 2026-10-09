@@ -158,6 +158,13 @@ if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
 
 fi
 
+# copy missing helper scripts
+for script in git_diff.sh github_pr.sh github_push.sh github_sync.sh; do
+  if [[ ! -e "$WORKFLOWS_USER_PATH/$script" && ! -L "$WORKFLOWS_USER_PATH/$script" ]]; then
+    cp "$WORKFLOWS_TEMPLATE_PATH/$script" "$WORKFLOWS_USER_PATH/" || exit 1
+  fi
+done
+
 # recreate symlinks when possible
 scripts=(new build program run validate delete)
 for d in "$WORKFLOWS_USER_PATH"/*; do
@@ -197,16 +204,6 @@ if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
    [[ -L "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]]; then
   echo "Workflow already exists: $name"
   exit 1
-fi
-
-# copy helper scripts
-if [[ ! -e "$WORKFLOWS_USER_PATH/git_diff.sh" ]]; then
-  cp "$WORKFLOWS_TEMPLATE_PATH"/git_diff.sh "$WORKFLOWS_USER_PATH"
-  #if [ "$fork" = "1" ]; then
-    cp "$WORKFLOWS_TEMPLATE_PATH"/github_pr.sh "$WORKFLOWS_USER_PATH"
-    cp "$WORKFLOWS_TEMPLATE_PATH"/github_push.sh "$WORKFLOWS_USER_PATH"
-    cp "$WORKFLOWS_TEMPLATE_PATH"/github_sync.sh "$WORKFLOWS_USER_PATH"
-  #fi
 fi
 
 # check on template

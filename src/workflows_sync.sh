@@ -23,6 +23,7 @@ if [ "$logged_in" != "1" ]; then
 fi
 
 # constants
+WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
 WORKFLOW_COMMAND_PATH="$ODEV_PATH/users/$username/workflows"
 WORKFLOWS_USER_PATH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)"
 WORKFLOWS_USER_PATH="${WORKFLOWS_USER_PATH//\$\{HOME\}/$HOME}"
@@ -49,6 +50,13 @@ fi
 
 # check on local checkout and branch
 [[ -d "$WORKFLOWS_USER_PATH/.git" ]] || exit 0
+# copy missing helper scripts
+for script in git_diff.sh github_pr.sh github_push.sh github_sync.sh; do
+  if [[ ! -e "$WORKFLOWS_USER_PATH/$script" && ! -L "$WORKFLOWS_USER_PATH/$script" ]]; then
+    cp "$WORKFLOWS_TEMPLATE_PATH/$script" "$WORKFLOWS_USER_PATH/" || exit 1
+  fi
+done
+
 cd "$WORKFLOWS_USER_PATH"
 [[ "$(git branch --show-current)" == "$GITHUB_PUSH_BRANCH" ]] || exit 0
 
