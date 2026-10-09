@@ -23,6 +23,8 @@ normal=$(tput sgr0)
 # constants
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
 
+WORKFLOW_COMMAND_PATH="$ODEV_PATH/users/$(id -un)/workflows"
+
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developer" = "0" ]; then
@@ -86,7 +88,8 @@ if [[ ! -d "$WORKFLOWS_USER_PATH/$name" ]]; then
 fi
 
 # delete 
-target="$(readlink -f "$ODEV_PATH/cmd/new/$name.sh")"
+workflow_link="$("$ODEV_PATH/src/workflow_command_path.sh" "$ODEV_PATH" new "$name")" || exit 1
+target="$(readlink -f "$workflow_link")"
 if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
   if [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
     # delete workflow and push
@@ -99,16 +102,24 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
       exit 1
     fi
 
+    # Collect only this user's links, including links from older installations.
+    workflow_links=()
+    for command in new build program run validate delete; do
+      for link in "$WORKFLOW_COMMAND_PATH/$command/$name.sh" "$ODEV_PATH/cmd/$command/$name.sh"; do
+        [[ -L "$link" ]] || continue
+        target="$(readlink -f "$link")" || continue
+        [[ "$target" == "$(readlink -f "$WORKFLOWS_USER_PATH/$name")/"* ]] || continue
+        workflow_links+=("$link")
+      done
+    done
+
     # delete locally
     rm -rf -- "$WORKFLOWS_USER_PATH/$name" || exit 1
 
     # delete symlinks
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/new/$name.sh"
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/build/$name.sh"
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/program/$name.sh"
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/run/$name.sh"
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/validate/$name.sh"
-    sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$ODEV_PATH/cmd/delete/$name.sh"
+    for link in "${workflow_links[@]}"; do
+      sudo "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$link" || exit 1
+    done
 
     # login to GitHub
     github_auth_status=$($ODEV_PATH/src/gh_auth_status.sh)

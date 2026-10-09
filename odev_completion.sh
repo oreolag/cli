@@ -34,11 +34,14 @@ _odev_list_commands() {
 _odev_list_subcommands() {
   local root="$1"
   local cmd="$2"
-  find "$root/$cmd" -mindepth 1 -maxdepth 1 \
-    \( -type f -o \( -type l -exec test -e {} \; \) \) \
-    -name '*.sh' -printf '%f\n' 2>/dev/null \
-    | sed 's/\.sh$//' \
-    | sort
+  local candidate name resolved
+  for candidate in "$root/$cmd/"*.sh "$root/../users/$(id -un)/workflows/$cmd/"*.sh; do
+    [[ -f "$candidate" ]] || continue
+    name="${candidate##*/}"
+    name="${name%.sh}"
+    resolved="$("$root/../src/workflow_command_path.sh" "$root/.." "$cmd" "$name")" || continue
+    [[ -f "$resolved" ]] && printf '%s\n' "$name"
+  done | sort -u
 }
 
 # ------------------------------------------------------------

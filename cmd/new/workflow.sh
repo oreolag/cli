@@ -27,6 +27,8 @@ WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
 
+WORKFLOW_COMMAND_PATH="$ODEV_PATH/users/$(id -un)/workflows"
+
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developer" = "0" ]; then
@@ -154,24 +156,29 @@ if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
   echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
   #echo "$fork" > "GITHUB_FORK"
 
-  # recreate symlinks when possible
-  scripts=(new build program run validate delete)
-  for d in "$WORKFLOWS_USER_PATH"/*; do
-    [[ -d "$d" ]] || continue
-    name_i="$(basename "$d")"
-
-    for script in "${scripts[@]}"; do
-      src="$WORKFLOWS_USER_PATH/$name_i/$script.sh"
-      dst="$ODEV_PATH/cmd/$script/$name_i.sh"
-
-      [[ -e "$src" ]] || continue
-
-      if [[ ! -e "$dst" && ! -L "$dst" ]]; then
-        sudo "$ODEV_PATH/src/ln_s.sh" "$ODEV_PATH" "$src" "$dst"
-      fi
-    done
-  done
 fi
+
+# recreate symlinks when possible
+scripts=(new build program run validate delete)
+for d in "$WORKFLOWS_USER_PATH"/*; do
+  [[ -d "$d" ]] || continue
+  name_i="$(basename "$d")"
+  [[ -d "$WORKFLOWS_PATH/$name_i" ]] && continue
+
+  for script in "${scripts[@]}"; do
+    src="$WORKFLOWS_USER_PATH/$name_i/$script.sh"
+    dst="$WORKFLOW_COMMAND_PATH/$script/$name_i.sh"
+
+    [[ -e "$src" ]] || continue
+
+    if [[ ! -e "$dst" && ! -L "$dst" ]]; then
+      sudo -n "$ODEV_PATH/src/ln_s.sh" "$ODEV_PATH" "$src" "$dst" || {
+        echo "Could not create workflow link: $dst" >&2
+        exit 1
+      }
+    fi
+  done
+done
 
 # check if workflow name exists (fork configured branch)
 folders="$(gh api "repos/$github_user/workflows/contents?ref=$GITHUB_PUSH_BRANCH" \
@@ -184,9 +191,10 @@ fi
 
 # check if workflow name exists (local)
 if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
+   [[ -f "$ODEV_PATH/cmd/new/$name.sh" && ! -L "$ODEV_PATH/cmd/new/$name.sh" ]] || \
    [[ -d "$WORKFLOWS_USER_PATH/$name" ]] || \
-   [[ -e "$ODEV_PATH/cmd/new/$name.sh" ]] || \
-   [[ -L "$ODEV_PATH/cmd/new/$name.sh" ]]; then
+   [[ -e "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]] || \
+   [[ -L "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]]; then
   echo "Workflow already exists: $name"
   exit 1
 fi
@@ -239,6 +247,12 @@ else
   cp "$WORKFLOWS_TEMPLATE_PATH"/delete.sh .
 fi
 
+# Older workflow templates locate their specification through the shared link.
+for script in new build program run validate delete; do
+  sed -i 's|^CLI_NAME=.*|CLI_NAME="odev"|' "$WORKFLOWS_USER_PATH/$name/$script.sh"
+  sed -i 's|readlink -f "$ODEV_PATH/cmd/$COMMAND/$SUBCOMMAND.sh"|readlink -f "${BASH_SOURCE[0]}"|g' "$WORKFLOWS_USER_PATH/$name/$script.sh"
+done
+
 # replace WFNAME (and _COMMAND_)
 sed -i "s/WFNAME/${name^^}/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
@@ -257,12 +271,12 @@ sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/delete.sh"
 sed -i "s/_COMMAND_/delete/g" "$WORKFLOWS_USER_PATH/$name/delete.sh"
 
 # create symlinks
-sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/new.sh" "$ODEV_PATH/cmd/new/$name.sh"
-sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/build.sh" "$ODEV_PATH/cmd/build/$name.sh"
-sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/program.sh" "$ODEV_PATH/cmd/program/$name.sh"
-sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/run.sh" "$ODEV_PATH/cmd/run/$name.sh"
-sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh" "$ODEV_PATH/cmd/validate/$name.sh"
-sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" "$ODEV_PATH/cmd/delete/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOW_COMMAND_PATH/new/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/build.sh" "$WORKFLOW_COMMAND_PATH/build/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/program.sh" "$WORKFLOW_COMMAND_PATH/program/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/run.sh" "$WORKFLOW_COMMAND_PATH/run/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh" "$WORKFLOW_COMMAND_PATH/validate/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" "$WORKFLOW_COMMAND_PATH/delete/$name.sh"
 
 # copy helper scripts
 #cd "$WORKFLOWS_USER_PATH"

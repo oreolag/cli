@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ODEV_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export ODEV_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # early exit
 is_odev_user=$($ODEV_PATH/src/is_member.sh $USER odev-users)
@@ -174,7 +174,7 @@ if [[ -z "$subcmd" || "$subcmd" == -* ]]; then
   script="${ODEV_PATH}/cmd/${cmd}.sh"
   shift 1
 else
-  script="${ODEV_PATH}/cmd/${cmd}/${subcmd}.sh"
+  script="$("$ODEV_PATH/src/workflow_command_path.sh" "$ODEV_PATH" "$cmd" "$subcmd")" || script=""
   shift 2
 fi
 

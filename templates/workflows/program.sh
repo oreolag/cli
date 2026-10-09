@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SUBCOMMAND="$(basename "${BASH_SOURCE[0]}" .sh)"
 
 # derive from SCRIPT_DIR
-CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
+CLI_NAME="odev"
 COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
@@ -38,7 +38,7 @@ WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PAT
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 
 # get cmd_spec.sh path
-target="$(readlink -f "$ODEV_PATH/cmd/$COMMAND/$SUBCOMMAND.sh")"
+target="$(readlink -f "${BASH_SOURCE[0]}")"
 CMD_SPEC_PATH="$(dirname "$target")"
 
 # read command description, command flags, and mandatory flags
