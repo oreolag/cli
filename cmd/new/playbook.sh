@@ -69,9 +69,6 @@ print_both="0"
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
 
-echo "I am here!"
-exit 1
-
 # check on GitHub CLI
 logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
 if [[ "$logged_in" == "0" ]]; then
@@ -95,7 +92,7 @@ fi
 
 # assign flags
 name=${V[name]}
-template=${V[template]}
+#template=${V[template]}
 
 # replace spaces with "_"
 name="${name// /_}"
@@ -179,9 +176,7 @@ if [[ ! -d "$PLAYBOOKS_USER_PATH" ]]; then
 
 # check if workflow name exists
 if [[ -d "$PLAYBOOKS_PATH/$name" ]] || \
-   [[ -d "$PLAYBOOKS_USER_PATH/$name" ]] || \
-   [[ -e "$ODEV_PATH/cmd/new/$name.sh" ]] || \
-   [[ -L "$ODEV_PATH/cmd/new/$name.sh" ]]; then
+   [[ -d "$PLAYBOOKS_USER_PATH/$name" ]]; then
   echo "Playbook already exists: $name"
   exit 1
 fi
@@ -241,20 +236,20 @@ cp "$ODEV_PATH/templates/playbook.yml" "$PLAYBOOKS_USER_PATH/$name.yml"
 sed -i "s/PBNAME/${name^^}/g" "$PLAYBOOKS_USER_PATH/$name.yml"
 
 # copy helper scripts
-#cd "$PLAYBOOKS_USER_PATH"
-#if [[ ! -e "./git_diff.sh" ]]; then
-#  cp "$PLAYBOOKS_TEMPLATE_PATH"/git_diff.sh .
-#  if [ "$fork" = "1" ]; then
-#    cp "$PLAYBOOKS_TEMPLATE_PATH"/github_pr.sh .
-#    cp "$PLAYBOOKS_TEMPLATE_PATH"/github_push.sh .
-#  fi
-#fi
+cd "$PLAYBOOKS_USER_PATH"
+if [[ ! -e "./git_diff.sh" ]]; then
+  cp "$PLAYBOOKS_TEMPLATE_PATH"/git_diff.sh .
+  if [ "$fork" = "1" ]; then
+    cp "$PLAYBOOKS_TEMPLATE_PATH"/github_pr.sh .
+    cp "$PLAYBOOKS_TEMPLATE_PATH"/github_push.sh .
+  fi
+fi
 
 # commit cmd_spec.sh
 #fork=$(cat $PLAYBOOKS_USER_PATH/GITHUB_FORK)
 cd "$PLAYBOOKS_USER_PATH"
 #if [ "$fork" = "1" ]; then
-  "$PLAYBOOKS_USER_PATH/github_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
+  "$PLAYBOOKS_USER_PATH/github_push.sh" --workflow "$name" --file "$PLAYBOOKS_USER_PATH/$name.yml" --comment "First commit"
 #fi
 
 # print
