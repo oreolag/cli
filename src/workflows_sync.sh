@@ -24,7 +24,6 @@ fi
 
 # constants
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
-WORKFLOW_COMMAND_PATH="$ODEV_PATH/users/$username/workflows"
 WORKFLOWS_USER_PATH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)"
 WORKFLOWS_USER_PATH="${WORKFLOWS_USER_PATH//\$\{HOME\}/$HOME}"
 WORKFLOWS_USER_PATH="${WORKFLOWS_USER_PATH//\$HOME/$HOME}"
@@ -51,7 +50,7 @@ fi
 # check on local checkout and branch
 [[ -d "$WORKFLOWS_USER_PATH/.git" ]] || exit 0
 # copy missing helper scripts
-for script in git_diff.sh github_pr.sh github_push.sh github_sync.sh; do
+for script in git_diff.sh github_pr.sh github_push.sh github_pull.sh; do
   if [[ ! -e "$WORKFLOWS_USER_PATH/$script" && ! -L "$WORKFLOWS_USER_PATH/$script" ]]; then
     cp "$WORKFLOWS_TEMPLATE_PATH/$script" "$WORKFLOWS_USER_PATH/" || exit 1
   fi
@@ -67,7 +66,8 @@ changes="$(printf '%s\n' "$changes" | sed \
   -e '/^?? git_diff\.sh$/d' \
   -e '/^?? github_pr\.sh$/d' \
   -e '/^?? github_push\.sh$/d' \
-  -e '/^?? github_sync\.sh$/d')"
+  -e '/^?? github_sync\.sh$/d' \
+  -e '/^?? github_pull\.sh$/d')"
 [[ -z "$changes" ]] || exit 0
 
 # Bound network waits at login. Never reset, stash, commit or push user work.
@@ -75,27 +75,4 @@ timeout 20s env GIT_TERMINAL_PROMPT=0 git fetch --quiet origin "refs/heads/$GITH
 git merge-base --is-ancestor HEAD FETCH_HEAD || exit 0
 git merge --ff-only --quiet FETCH_HEAD || exit 0
 
-# create symlinks for workflows commands
-for command in new build program run validate delete; do
-  # Remove obsolete links, but never regular files or another user's links.
-  for link in "$WORKFLOW_COMMAND_PATH/$command/"*.sh; do
-    [[ -L "$link" ]] || continue
-    name="$(basename "$link" .sh)"
-    source="$WORKFLOWS_USER_PATH/$name/$command.sh"
-    if [[ -d "$ODEV_PATH/submodules/workflows/$name" || ! -f "$source" ||
-        "$(readlink -f "$link")" != "$(readlink -f "$source")" ]]; then
-      sudo -n "$ODEV_PATH/src/rm.sh" "$ODEV_PATH" "$link" || exit 1
-    fi
-  done
-
-  for directory in "$WORKFLOWS_USER_PATH/"*/; do
-    [[ -d "$directory" ]] || continue
-    name="$(basename "$directory")"
-    [[ -d "$ODEV_PATH/submodules/workflows/$name" ]] && continue
-    source="$WORKFLOWS_USER_PATH/$name/$command.sh"
-    link="$WORKFLOW_COMMAND_PATH/$command/$name.sh"
-    [[ -f "$source" ]] || continue
-    [[ -e "$link" || -L "$link" ]] && continue
-    sudo -n "$ODEV_PATH/src/ln_s.sh" "$ODEV_PATH" "$source" "$link" || exit 1
-  done
-done
+"$ODEV_PATH/src/workflows_links.sh" "$WORKFLOWS_USER_PATH"

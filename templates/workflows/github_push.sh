@@ -14,10 +14,10 @@ print_help() {
   echo "Commit and push git changes for a workflow."
   echo
   echo "${bold}USAGE:${normal}"
-  echo "  git_push.sh [flags]"
+  echo "  github_push.sh [flags]"
   echo
   echo "${bold}FLAGS:${normal}"
-  echo "    --workflow   Workflow name"
+  echo "    --workflow   Workflow to commit (omit to push existing commits only)"
   echo "    --file       Workflow file name (optional; if omitted, the whole workflow is staged)"
   echo "    --comment    Commit subject"
   echo
@@ -67,21 +67,21 @@ fi
 # get GITHUB_PUSH_BRANCH
 github_branch="$(cat "./GITHUB_PUSH_BRANCH")"
 
-# interactive prompts
+# select the configured workflow branch
+if [[ "$(git branch --show-current)" != "$github_branch" ]]; then
+  if git show-ref --verify --quiet "refs/heads/$github_branch"; then
+    git checkout "$github_branch"
+  elif git show-ref --verify --quiet "refs/remotes/origin/$github_branch"; then
+    git checkout -b "$github_branch" --track "origin/$github_branch"
+  else
+    git checkout -b "$github_branch"
+  fi
+fi
+
+# without a workflow selection, upload existing commits only
 if [[ -z "$workflow" ]]; then
-  printf "workflow: " > /dev/tty
-  read -r workflow < /dev/tty
-fi
-
-# optional file prompt (press Enter to skip → whole workflow)
-if [[ -z "$file" ]]; then
-  printf "file (optional): " > /dev/tty
-  read -r file < /dev/tty
-fi
-
-if [[ "$msg" == "Update" ]]; then
-  printf "comment: " > /dev/tty
-  read -r msg < /dev/tty
+  git push -u origin "$github_branch"
+  exit 0
 fi
 
 # validate workflow
@@ -112,20 +112,15 @@ if ! git config user.email >/dev/null; then
   git config user.email "$(gh api user --jq .login)@users.noreply.github.com"
 fi
 
-# create branch if needed
-branch="$(git rev-parse --abbrev-ref HEAD)"
-if [[ "$branch" == "main" ]]; then
-  git checkout -b "$github_branch"
-  branch="$github_branch"
-fi
-
-# stage file change (including deletion)
+# stage and commit only the selected changes
 git add -A -- "$target"
-
-if git diff --cached --quiet; then
-  echo "Nothing to commit: $target"
-  exit 0
+if ! git diff --cached --quiet -- "$target"; then
+  if [[ "$msg" == "Update" ]]; then
+    printf "comment: " > /dev/tty
+    read -r msg < /dev/tty
+  fi
+  git commit --only -m "$msg" -- "$target"
 fi
 
-git commit -m "$msg"
-git push -u origin "$branch"
+# also push commits created by github_pull.sh when no new commit is needed
+git push -u origin "$github_branch"
