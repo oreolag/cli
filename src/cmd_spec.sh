@@ -8,7 +8,7 @@ ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 WORKFLOWS_PATH="$SCRIPT_DIR/../submodules/workflows"
 
 # constants
-WORKFLOWS_REPOSITORY="oreolag/workflows"
+WORKFLOWS_REPOSITORY="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github workflows_repo)")"
 PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
 if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
@@ -118,7 +118,7 @@ SET_MTU_FLAGS=(
 SET_MTU_FLAGS_MANDATORY="interface,mtu"
 
 # update
-UPDATE_DESCRIPTION="Update odev to latest release (github.com/oreolag/cli/releases)"
+UPDATE_DESCRIPTION="Update odev to the latest release/main version"
 UPDATE_FLAGS=(
   "main,m,Use main branch instead of release,-,-"
 )
@@ -164,7 +164,7 @@ WORKFLOW_PUSH_FLAGS=(
 )
 WORKFLOW_PUSH_FLAGS_MANDATORY="name"
 # pull
-WORKFLOW_PULL_DESCRIPTION="Pulls $WORKFLOWS_REPOSITORY updates into your local checkout"
+WORKFLOW_PULL_DESCRIPTION="Pulls ${bold}$WORKFLOWS_REPOSITORY${normal} updates into your local checkout"
 WORKFLOW_PULL_FLAGS=(
 )
 WORKFLOW_PULL_FLAGS_MANDATORY=""

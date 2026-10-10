@@ -3,7 +3,9 @@
 #github
 github:
   push_branch_workflows: my_workflows
+  workflows_repo: "oreolag/workflows"
   push_branch_playbooks: my_playbooks
+  playbooks_repo: "oreolag/playbooks"
 
 #mpi
 mpi:
