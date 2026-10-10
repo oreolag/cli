@@ -23,11 +23,10 @@ normal=$(tput sgr0)
 # constants
 #COLOR_PASSED=$($ODEV_PATH/src/constant_get.sh $ODEV_PATH COLOR_PASSED)
 GITHUB_PUSH_BRANCH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)")"
+WORKFLOW_COMMAND_PATH="$ODEV_PATH/users/$(id -un)/workflows"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
-
-WORKFLOW_COMMAND_PATH="$ODEV_PATH/users/$(id -un)/workflows"
 
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)

@@ -8,8 +8,14 @@ ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 WORKFLOWS_PATH="$SCRIPT_DIR/../submodules/workflows"
 
 # constants
+WORKFLOWS_REPOSITORY="oreolag/workflows"
 PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
+if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
+  WORKFLOWS_PUSH_BRANCH="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")"
+else
+  WORKFLOWS_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)"
+fi
 
 # format
 bold=$(tput bold)
@@ -152,12 +158,29 @@ WORKFLOWS_DELETE_FLAGS=(
 )
 WORKFLOWS_DELETE_FLAGS_MANDATORY="name"
 # push
-#WORKFLOWS_PUSH_DESCRIPTION="Pushes your workflow changes to GitHub"
-#WORKFLOWS_PUSH_FLAGS=(
-#  "name,n,Workflow name,-,-"
-#)
-#WORKFLOWS_PUSH_FLAGS_MANDATORY="name"
-
+WORKFLOWS_PUSH_DESCRIPTION="Pushes your workflow changes to your GitHub fork ($WORKFLOWS_PUSH_BRANCH branch)"
+WORKFLOWS_PUSH_FLAGS=(
+  "name,n,Workflow name,-,-"
+)
+WORKFLOWS_PUSH_FLAGS_MANDATORY="name"
+# pull
+WORKFLOWS_PULL_DESCRIPTION="Pulls $WORKFLOWS_REPOSITORY updates into your local checkout"
+WORKFLOWS_PULL_FLAGS=(
+)
+WORKFLOWS_PULL_FLAGS_MANDATORY=""
+# pr
+WORKFLOWS_PR_DESCRIPTION="Opens a pull request for your workflow"
+WORKFLOWS_PR_FLAGS=(
+  "name,n,Workflow name,-,-"
+)
+WORKFLOWS_PR_FLAGS_MANDATORY="name"
+# diff
+WORKFLOWS_DIFF_DESCRIPTION="Shows local changes to your workflow"
+WORKFLOWS_DIFF_FLAGS=(
+  "name,n,Workflow name,-,-"
+  "file,f,Workflow file name (optional),-,-"
+)
+WORKFLOWS_DIFF_FLAGS_MANDATORY="name"
 
 # workflows
 workflows=()

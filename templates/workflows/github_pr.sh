@@ -56,6 +56,10 @@ cd "$(git rev-parse --show-toplevel)"
 
 source_branch="$(cat ./GITHUB_PUSH_BRANCH)"
 
+# preserve tracked local work before changing branches
+git diff --exit-code --
+git diff --cached --exit-code --
+
 cleanup() {
   git checkout "$source_branch" >/dev/null 2>&1 || true
 }
@@ -96,6 +100,13 @@ if [[ -z "$workflow" ]]; then
   workflow="$my_workflow"
 fi
 
+# workflow names identify one top-level folder
+if [[ ! "$my_workflow" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ||
+      ! "$workflow" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
+  echo "Invalid workflow name"
+  exit 1
+fi
+
 pr_branch="pr-$workflow"
 git fetch upstream main
 git fetch origin "$pr_branch:refs/remotes/origin/$pr_branch" >/dev/null 2>&1 || true
@@ -114,20 +125,9 @@ fi
 
 git checkout -B "$pr_branch" upstream/main
 
-# copy/replace tracked files from source branch into PR branch
-while IFS= read -r src; do
-  rel="${src#$my_workflow/}"
-  dst="$workflow/$rel"
-
-  mkdir -p "$(dirname "$dst")"
-  git show "$source_branch:$src" > "$dst"
-  git add -A -- "$dst"
-done < <(git ls-tree -r --name-only "$source_branch" -- "$my_workflow")
-
-if git diff --cached --quiet; then
-  echo "Nothing to commit: $workflow"
-  exit 0
-fi
+# replace the selected tracked tree, including deleted files and file modes
+git rm -r --ignore-unmatch -- "$workflow"
+git read-tree --prefix="$workflow/" -u "$source_branch:$my_workflow"
 
 # replace workflow name
 if [[ -n "$my_workflow" && -f "$workflow/cmd_spec.sh" ]]; then
@@ -141,8 +141,12 @@ if [[ -n "$my_workflow" && -f "$workflow/cmd_spec.sh" ]]; then
   git add "$workflow/cmd_spec.sh"
 fi
 
-# commit
-git commit -m "Files changed with github_pr"
+# commit only the selected workflow
+if git diff --cached --quiet -- "$workflow"; then
+  echo "Nothing to commit: $workflow"
+  exit 0
+fi
+git commit --only -m "Files changed with github_pr" -- "$workflow"
 git fetch --prune origin
 git push --force-with-lease -u origin "$pr_branch"
 
