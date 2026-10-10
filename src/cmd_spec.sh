@@ -145,6 +145,12 @@ WORKFLOWS_NEW_FLAGS=(
   "template,t,Use existing workflow as template,-,-"
 )
 WORKFLOWS_NEW_FLAGS_MANDATORY="name"
+# delete
+WORKFLOWS_DELETE_DESCRIPTION="Deletes an existing user workflow"
+WORKFLOWS_DELETE_FLAGS=(
+  "name,n,Workflow name,-,-"
+)
+WORKFLOWS_DELETE_FLAGS_MANDATORY="name"
 # push
 #WORKFLOWS_PUSH_DESCRIPTION="Pushes your workflow changes to GitHub"
 #WORKFLOWS_PUSH_FLAGS=(
