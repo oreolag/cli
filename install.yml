@@ -31,6 +31,7 @@
     update: false
     validate: false
     vars_yml: false
+    workflows: false
     #submodules (all does not apply)
     submodules: false
     #hdev: false
@@ -60,6 +61,7 @@
           - "update={{ update }}"
           - "validate={{ validate }}"
           - "vars_yml={{ vars_yml }}"
+          - "workflows={{ workflows }}"
           # repo
           - "repo={{ repo }}"
           # submodules
@@ -743,6 +745,33 @@
         mode: "0644"
       when:
         - (vars_yml or all) | bool
+        - cli.local_path is defined
+
+    # workflows
+    - block:
+        - name: Copy workflows.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/workflows.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/workflows.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        - name: Copy cmd/workflows directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/workflows/"
+            dest: "{{ cli_remote_path }}/odev/cmd/workflows/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on workflows folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/workflows/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (workflows or all) | bool
         - cli.local_path is defined
 
     # cleanup

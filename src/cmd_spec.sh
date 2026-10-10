@@ -135,6 +135,25 @@ VALIDATE_FLAGS=(
 #VALIDATE_NCCL_FLAGS_MANDATORY="ngpus,minbytes,maxbytes"
 
 # workflows
+WORKFLOWS_DESCRIPTION="Create and manage your workflows"
+WORKFLOWS_FLAGS=(
+)
+# new
+WORKFLOWS_NEW_DESCRIPTION="Creates a new accelerated workflow in ${bold}$WORKFLOWS_USER_PATH${normal}"
+WORKFLOWS_NEW_FLAGS=(
+  "name,n,Workflow name,-,-"
+  "template,t,Use existing workflow as template,-,-"
+)
+WORKFLOWS_NEW_FLAGS_MANDATORY="name"
+# push
+#WORKFLOWS_PUSH_DESCRIPTION="Pushes your workflow changes to GitHub"
+#WORKFLOWS_PUSH_FLAGS=(
+#  "name,n,Workflow name,-,-"
+#)
+#WORKFLOWS_PUSH_FLAGS_MANDATORY="name"
+
+
+# workflows
 workflows=()
 for d in "$WORKFLOWS_PATH"/*/; do
   workflows+=("$(basename "$d")")

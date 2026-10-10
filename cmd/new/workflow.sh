@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# example: odev validate nccl --ngpus 1 --nthreads 1 --minbytes 8M --maxbytes 1G --iters 20 --datatype float --stepfactor 2
+# example: odev new workflow --name fft
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SUBCOMMAND="$(basename "${BASH_SOURCE[0]}" .sh)"
+SUBCOMMAND="${SUBCOMMAND:-$(basename "${BASH_SOURCE[0]}" .sh)}"
 
 # derive from SCRIPT_DIR
 CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
-COMMAND="$(basename "$SCRIPT_DIR")"
+COMMAND="${COMMAND:-$(basename "$SCRIPT_DIR")}"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
 # get hostname
