@@ -32,9 +32,10 @@
     validate: false
     vars_yml: false
     #submodules (all does not apply)
-    hdev: false
-    playbooks: false
-    workflows: false
+    submodules: false
+    #hdev: false
+    #playbooks: false
+    #workflows: false
     # templates (all does not apply)
     templates: false 
   vars_files: vars.yml
@@ -62,9 +63,10 @@
           # repo
           - "repo={{ repo }}"
           # submodules
-          - "hdev={{ hdev }}"
-          - "playbooks={{ playbooks }}"
-          - "workflows={{ workflows }}"
+          - "submodules={{ submodules }}"
+          #- "hdev={{ hdev }}"
+          #- "playbooks={{ playbooks }}"
+          #- "workflows={{ workflows }}"
           # templates
           - "templates={{ templates }}"
       run_once: true
@@ -599,6 +601,7 @@
 
     # submodules (all does not apply)
     - block:
+        # hdev
         - name: Delete remote hdev submodule content
           ansible.builtin.file:
             path: "{{ cli_remote_path }}/odev/submodules/hdev"
@@ -611,10 +614,8 @@
             owner: root
             group: root
             mode: "0755"
-      when:
-        - hdev | bool
-        - cli.local_path is defined
-    - block:
+
+        # playbooks
         - name: Delete remote playbooks submodule content
           ansible.builtin.file:
             path: "{{ cli_remote_path }}/odev/submodules/playbooks"
@@ -627,10 +628,8 @@
             owner: root
             group: root
             mode: "0755"
-      when:
-        - playbooks | bool
-        - cli.local_path is defined
-    - block:
+
+        # workflows
         - name: Delete remote workflows submodule content
           ansible.builtin.file:
             path: "{{ cli_remote_path }}/odev/submodules/workflows"
@@ -644,7 +643,7 @@
             group: root
             mode: "0755"
       when:
-        - workflows | bool
+        - submodules | bool
         - cli.local_path is defined
 
     # sudoers_d
