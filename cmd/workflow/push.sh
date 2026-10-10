@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev workflows pr --name fft
+# example: odev workflow push --name fft
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -67,8 +67,8 @@ fi
 # assign flags
 name=${V[name]}
 
-# create pull request
+# push workflow
 cd "$WORKFLOWS_USER_PATH" || exit 1
-exec "$WORKFLOWS_USER_PATH/github_pr.sh" --my_workflow "$name"
+exec "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name"
 
 # author: https://github.com/jmoya82

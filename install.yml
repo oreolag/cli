@@ -32,7 +32,7 @@
     update: false
     validate: false
     vars_yml: false
-    workflows: false
+    workflow: false
     #submodules (all does not apply)
     submodules: false
     #hdev: false
@@ -63,7 +63,7 @@
           - "update={{ update }}"
           - "validate={{ validate }}"
           - "vars_yml={{ vars_yml }}"
-          - "workflows={{ workflows }}"
+          - "workflow={{ workflow }}"
           # repo
           - "repo={{ repo }}"
           # submodules
@@ -776,31 +776,38 @@
         - (vars_yml or all) | bool
         - cli.local_path is defined
 
-    # workflows
+    # workflow
     - block:
-        - name: Copy workflows.sh script
+        - name: Remove old workflows command paths
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - "{{ cli_remote_path }}/odev/cmd/workflows.sh"
+            - "{{ cli_remote_path }}/odev/cmd/workflows"
+        - name: Copy workflow.sh script
           ansible.builtin.copy:
-            src: "{{ cli.local_path }}/cmd/workflows.sh"
-            dest: "{{ cli_remote_path }}/odev/cmd/workflows.sh"
+            src: "{{ cli.local_path }}/cmd/workflow.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/workflow.sh"
             owner: root
             group: root
             mode: "0755"
-        - name: Copy cmd/workflows directory from local path (preserve symlinks)
+        - name: Copy cmd/workflow directory from local path (preserve symlinks)
           ansible.posix.synchronize:
-            src: "{{ cli.local_path }}/cmd/workflows/"
-            dest: "{{ cli_remote_path }}/odev/cmd/workflows/"
+            src: "{{ cli.local_path }}/cmd/workflow/"
+            dest: "{{ cli_remote_path }}/odev/cmd/workflow/"
             recursive: true
             archive: true
             links: true
             copy_links: false
-        - name: Set ownership on workflows folder
+        - name: Set ownership on workflow folder
           ansible.builtin.file:
-            path: "{{ cli_remote_path }}/odev/cmd/workflows/"
+            path: "{{ cli_remote_path }}/odev/cmd/workflow/"
             owner: root
             group: root
             recurse: true
       when:
-        - (workflows or all) | bool
+        - (workflow or all) | bool
         - cli.local_path is defined
 
     # cleanup

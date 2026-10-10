@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev workflows pull
+# example: odev workflow pr --name fft
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -36,9 +36,10 @@ fi
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 
-# read command description, command flags
+# read command description, command flags, mandatory flags
 command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
+mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
 
 # (maybe) print help
 print_range="0"
@@ -52,8 +53,22 @@ print_both="0"
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
-# pull workflows
+# run interactive prompt
+parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+
+# read flags
+if [[ -n "$parsed_flags" ]]; then
+  declare -A V
+  while IFS='=' read -r k v; do
+    V["$k"]="$v"
+  done <<< "$parsed_flags"
+fi
+
+# assign flags
+name=${V[name]}
+
+# create pull request
 cd "$WORKFLOWS_USER_PATH" || exit 1
-ODEV_PATH="$ODEV_PATH" exec "$WORKFLOWS_USER_PATH/github_pull.sh"
+exec "$WORKFLOWS_USER_PATH/github_pr.sh" --my_workflow "$name"
 
 # author: https://github.com/jmoya82

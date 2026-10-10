@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev workflows push --name fft
+# example: odev workflow diff --name fft --file run.sh
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,13 +23,6 @@ WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PAT
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developer" = "0" ]; then
   echo "Permission denied: $USER"
-  exit 1
-fi
-
-# check on tools
-installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
-if [[ "$installed" == "0" ]]; then
-  echo "Missing tool: gh"
   exit 1
 fi
 
@@ -66,9 +59,14 @@ fi
 
 # assign flags
 name=${V[name]}
+file=${V[file]:--}
 
-# push workflow
+# show workflow changes
 cd "$WORKFLOWS_USER_PATH" || exit 1
-exec "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name"
+if [[ "$file" == "-" || -z "$file" ]]; then
+  exec "$WORKFLOWS_USER_PATH/git_diff.sh" --workflow "$name"
+else
+  exec "$WORKFLOWS_USER_PATH/git_diff.sh" --workflow "$name" --file "$file"
+fi
 
 # author: https://github.com/jmoya82

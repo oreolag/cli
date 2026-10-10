@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# example: odev workflows
+# example: odev workflow
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMAND="workflows"
+COMMAND="workflow"
 
 # derive from SCRIPT_DIR
 CLI_NAME="$(basename "$(dirname "$SCRIPT_DIR")")"

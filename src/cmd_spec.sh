@@ -141,46 +141,46 @@ VALIDATE_FLAGS=(
 #VALIDATE_NCCL_FLAGS_MANDATORY="ngpus,minbytes,maxbytes"
 
 # workflows
-WORKFLOWS_DESCRIPTION="Create and manage your workflows"
-WORKFLOWS_FLAGS=(
+WORKFLOW_DESCRIPTION="Create and manage your workflows"
+WORKFLOW_FLAGS=(
 )
 # new
-WORKFLOWS_NEW_DESCRIPTION="Creates a new accelerated workflow in ${bold}$WORKFLOWS_USER_PATH${normal}"
-WORKFLOWS_NEW_FLAGS=(
+WORKFLOW_NEW_DESCRIPTION="Creates a new accelerated workflow in ${bold}$WORKFLOWS_USER_PATH${normal}"
+WORKFLOW_NEW_FLAGS=(
   "name,n,Workflow name,-,-"
   "template,t,Use existing workflow as template,-,-"
 )
-WORKFLOWS_NEW_FLAGS_MANDATORY="name"
+WORKFLOW_NEW_FLAGS_MANDATORY="name"
 # delete
-WORKFLOWS_DELETE_DESCRIPTION="Deletes an existing user workflow"
-WORKFLOWS_DELETE_FLAGS=(
+WORKFLOW_DELETE_DESCRIPTION="Deletes an existing user workflow"
+WORKFLOW_DELETE_FLAGS=(
   "name,n,Workflow name,-,-"
 )
-WORKFLOWS_DELETE_FLAGS_MANDATORY="name"
+WORKFLOW_DELETE_FLAGS_MANDATORY="name"
 # push
-WORKFLOWS_PUSH_DESCRIPTION="Pushes your workflow changes to your GitHub fork ($WORKFLOWS_PUSH_BRANCH branch)"
-WORKFLOWS_PUSH_FLAGS=(
+WORKFLOW_PUSH_DESCRIPTION="Pushes your workflow changes to your GitHub fork ($WORKFLOWS_PUSH_BRANCH branch)"
+WORKFLOW_PUSH_FLAGS=(
   "name,n,Workflow name,-,-"
 )
-WORKFLOWS_PUSH_FLAGS_MANDATORY="name"
+WORKFLOW_PUSH_FLAGS_MANDATORY="name"
 # pull
-WORKFLOWS_PULL_DESCRIPTION="Pulls $WORKFLOWS_REPOSITORY updates into your local checkout"
-WORKFLOWS_PULL_FLAGS=(
+WORKFLOW_PULL_DESCRIPTION="Pulls $WORKFLOWS_REPOSITORY updates into your local checkout"
+WORKFLOW_PULL_FLAGS=(
 )
-WORKFLOWS_PULL_FLAGS_MANDATORY=""
+WORKFLOW_PULL_FLAGS_MANDATORY=""
 # pr
-WORKFLOWS_PR_DESCRIPTION="Opens a pull request for your workflow"
-WORKFLOWS_PR_FLAGS=(
+WORKFLOW_PR_DESCRIPTION="Opens a pull request for your workflow"
+WORKFLOW_PR_FLAGS=(
   "name,n,Workflow name,-,-"
 )
-WORKFLOWS_PR_FLAGS_MANDATORY="name"
+WORKFLOW_PR_FLAGS_MANDATORY="name"
 # diff
-WORKFLOWS_DIFF_DESCRIPTION="Shows local changes to your workflow"
-WORKFLOWS_DIFF_FLAGS=(
+WORKFLOW_DIFF_DESCRIPTION="Shows local changes to your workflow"
+WORKFLOW_DIFF_FLAGS=(
   "name,n,Workflow name,-,-"
   "file,f,Workflow file name (optional),-,-"
 )
-WORKFLOWS_DIFF_FLAGS_MANDATORY="name"
+WORKFLOW_DIFF_FLAGS_MANDATORY="name"
 
 # workflows
 workflows=()
