@@ -20,6 +20,7 @@
     install: false
     main: false
     new: false
+    playbooks: false
     program: false
     run: false
     set: false
@@ -53,6 +54,7 @@
           - "install={{ install }}"
           - "main={{ main }}"
           - "new={{ new }}"
+          - "playbooks={{ playbooks }}"
           - "program={{ program }}"
           - "run={{ run }}"
           - "set={{ set }}"
@@ -289,6 +291,33 @@
         - (new or all) | bool
         - cli.local_path is defined
 
+    # playbooks
+    - block:
+        - name: Copy playbooks.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/playbooks.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/playbooks.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        - name: Copy cmd/playbooks directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/playbooks/"
+            dest: "{{ cli_remote_path }}/odev/cmd/playbooks/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on playbooks folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/playbooks/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (playbooks or all) | bool
+        - cli.local_path is defined
+    
     # program
     - block:
         - name: Copy program.sh script

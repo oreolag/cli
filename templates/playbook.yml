@@ -2,7 +2,7 @@
 - name: This is your PBNAME playbook
   hosts: "{{ oreol_target }}"
   become: false
-  gather_facts: false
+  gather_facts: true
 
   tasks:
     - name: Show server information
