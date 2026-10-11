@@ -75,7 +75,7 @@ IFCONFIG_FLAGS=(
 )
 
 # new
-NEW_DESCRIPTION="Create a new playbook, project or workflow (based on the selected template)"
+NEW_DESCRIPTION="Create a new playbook, project or workflow"
 NEW_FLAGS=(
 )
 # playbook
