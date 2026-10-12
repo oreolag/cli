@@ -40,6 +40,12 @@ DELETE_WORKFLOW_FLAGS=(
   "name,n,Workflow name,-,-"
 )
 DELETE_WORKFLOW_FLAGS_MANDATORY="name"
+# playbook
+DELETE_PLAYBOOK_DESCRIPTION="Deletes an existing user playbook"
+DELETE_PLAYBOOK_FLAGS=(
+  "name,n,Playbook name,-,-"
+)
+DELETE_PLAYBOOK_FLAGS_MANDATORY="name"
 
 # examine 
 EXAMINE_DESCRIPTION="System and device inspection"
