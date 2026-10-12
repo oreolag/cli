@@ -10,7 +10,10 @@ WORKFLOWS_PATH="$SCRIPT_DIR/../submodules/workflows"
 # constants
 WORKFLOWS_REPOSITORY="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github workflows_repo)")"
 PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
+WORKFLOWS_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)"
+WORKFLOWS_REPO="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github workflows_repo)"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
+
 #if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
 #  WORKFLOWS_PUSH_BRANCH="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")"
 #else
@@ -145,24 +148,24 @@ WORKFLOW_DESCRIPTION="Manage and share your workflows"
 WORKFLOW_FLAGS=(
 )
 # push
-WORKFLOW_PUSH_DESCRIPTION="Pushes your workflow changes to your GitHub fork" #($WORKFLOWS_PUSH_BRANCH branch)
+WORKFLOW_PUSH_DESCRIPTION="Pushes your workflow changes to your fork:${bold}$WORKFLOWS_PUSH_BRANCH${normal}" #($WORKFLOWS_PUSH_BRANCH branch)
 WORKFLOW_PUSH_FLAGS=(
   "name,n,Workflow name,-,-"
 )
 WORKFLOW_PUSH_FLAGS_MANDATORY="name"
 # pull
-WORKFLOW_PULL_DESCRIPTION="Pulls ${bold}$WORKFLOWS_REPOSITORY${normal} updates into your local checkout"
+WORKFLOW_PULL_DESCRIPTION="Fetches and merges ${bold}$WORKFLOWS_REPO${normal}:main and your fork:${bold}$WORKFLOWS_PUSH_BRANCH${normal} locally"
 WORKFLOW_PULL_FLAGS=(
 )
 WORKFLOW_PULL_FLAGS_MANDATORY=""
 # pr
-WORKFLOW_PR_DESCRIPTION="Opens a pull request for your workflow"
+WORKFLOW_PR_DESCRIPTION="Proposes your workflow to ${bold}$WORKFLOWS_REPO${normal}:main"
 WORKFLOW_PR_FLAGS=(
   "name,n,Workflow name,-,-"
 )
 WORKFLOW_PR_FLAGS_MANDATORY="name"
 # diff
-WORKFLOW_DIFF_DESCRIPTION="Shows local changes to your workflow"
+WORKFLOW_DIFF_DESCRIPTION="Shows uncommitted changes to your workflow"
 WORKFLOW_DIFF_FLAGS=(
   "name,n,Workflow name,-,-"
   "file,f,Workflow file name (optional),-,-"
