@@ -23,7 +23,8 @@ normal=$(tput sgr0)
 # constants
 GITHUB_PUSH_BRANCH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_playbooks)")"
 PLAYBOOKS_PATH="$ODEV_PATH/submodules/playbooks"
-PLAYBOOK_TEMPLATE_PATH="$ODEV_PATH/templates/playbook.yml"
+PLAYBOOK_TEMPLATE_PATH="$ODEV_PATH/templates/playbooks/playbook.yml"
+PLAYBOOKS_TEMPLATE_PATH="$ODEV_PATH/templates/playbooks"
 PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
 
 # check on users
@@ -132,6 +133,13 @@ if [[ "$(git branch --show-current)" != "$GITHUB_PUSH_BRANCH" ]]; then
   echo "Switch to the playbook branch before creating: $GITHUB_PUSH_BRANCH"
   exit 1
 fi
+
+# copy missing helper scripts
+for script in git_diff.sh github_pr.sh github_push.sh github_pull.sh; do
+  if [[ ! -e "$PLAYBOOKS_USER_PATH/$script" && ! -L "$PLAYBOOKS_USER_PATH/$script" ]]; then
+    cp "$PLAYBOOKS_TEMPLATE_PATH/$script" "$PLAYBOOKS_USER_PATH/" || exit 1
+  fi
+done
 
 # check if playbook name exists (fork configured branch)
 files="$(gh api "repos/$github_user/playbooks/contents?ref=$GITHUB_PUSH_BRANCH" \
