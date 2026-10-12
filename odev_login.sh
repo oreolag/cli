@@ -112,7 +112,7 @@ wait "$pid"
 echo ""
 
 # fillup hosts
-cp -f "$TEMPLATES_PATH/hosts" "$TMP_PATH/hosts_$username"
+cp -f "$TEMPLATES_PATH/playbooks/hosts" "$TMP_PATH/hosts_$username"
 
 # add local host after [my_hosts]
 echo "$hostname ansible_connection=local" >> "$TMP_PATH/hosts_$username"
@@ -123,6 +123,14 @@ installed="$(sudo -H -u "$username" -- "$ODEV_PATH/src/required_tools_print.sh" 
 logged_in="$(sudo -H -u "$username" -- "$ODEV_PATH/src/gh_auth_status.sh")"
 if [ "$is_odev_developer" = "1" ] && [ "$installed" = "1" ] && [ "$logged_in" = "1" ]; then
   sudo -H -u "$username" -- "$ODEV_PATH/src/workflows_sync.sh" >/dev/null 2>&1 || true
+fi
+
+# check on playbooks
+is_odev_developer=$("$ODEV_PATH/src/is_member.sh" "$username" odev-developers)
+installed="$(sudo -H -u "$username" -- "$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
+logged_in="$(sudo -H -u "$username" -- "$ODEV_PATH/src/gh_auth_status.sh")"
+if [ "$is_odev_developer" = "1" ] && [ "$installed" = "1" ] && [ "$logged_in" = "1" ]; then
+  sudo -H -u "$username" -- "$ODEV_PATH/src/playbooks_sync.sh" >/dev/null 2>&1 || true
 fi
 
 # add remote hosts
