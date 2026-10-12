@@ -4,11 +4,11 @@
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SUBCOMMAND="${SUBCOMMAND:-$(basename "${BASH_SOURCE[0]}" .sh)}"
+SUBCOMMAND="$(basename "${BASH_SOURCE[0]}" .sh)"
 
 # derive from SCRIPT_DIR
 CLI_NAME="$(basename "$(dirname "$(dirname "$SCRIPT_DIR")")")"
-COMMAND="${COMMAND:-$(basename "$SCRIPT_DIR")}"
+COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
 # get hostname

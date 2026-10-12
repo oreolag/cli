@@ -785,6 +785,8 @@
           loop:
             - "{{ cli_remote_path }}/odev/cmd/workflows.sh"
             - "{{ cli_remote_path }}/odev/cmd/workflows"
+            - "{{ cli_remote_path }}/odev/cmd/workflow/new.sh"
+            - "{{ cli_remote_path }}/odev/cmd/workflow/delete.sh"
         - name: Copy workflow.sh script
           ansible.builtin.copy:
             src: "{{ cli.local_path }}/cmd/workflow.sh"

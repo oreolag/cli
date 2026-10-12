@@ -141,22 +141,9 @@ VALIDATE_FLAGS=(
 #VALIDATE_NCCL_FLAGS_MANDATORY="ngpus,minbytes,maxbytes"
 
 # workflows
-WORKFLOW_DESCRIPTION="Create and manage your workflows"
+WORKFLOW_DESCRIPTION="Manage and share your workflows"
 WORKFLOW_FLAGS=(
 )
-# new
-WORKFLOW_NEW_DESCRIPTION="Creates a new accelerated workflow in ${bold}$WORKFLOWS_USER_PATH${normal}"
-WORKFLOW_NEW_FLAGS=(
-  "name,n,Workflow name,-,-"
-  "template,t,Use existing workflow as template,-,-"
-)
-WORKFLOW_NEW_FLAGS_MANDATORY="name"
-# delete
-WORKFLOW_DELETE_DESCRIPTION="Deletes an existing user workflow"
-WORKFLOW_DELETE_FLAGS=(
-  "name,n,Workflow name,-,-"
-)
-WORKFLOW_DELETE_FLAGS_MANDATORY="name"
 # push
 WORKFLOW_PUSH_DESCRIPTION="Pushes your workflow changes to your GitHub fork" #($WORKFLOWS_PUSH_BRANCH branch)
 WORKFLOW_PUSH_FLAGS=(
