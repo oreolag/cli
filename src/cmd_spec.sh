@@ -11,11 +11,11 @@ WORKFLOWS_PATH="$SCRIPT_DIR/../submodules/workflows"
 WORKFLOWS_REPOSITORY="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github workflows_repo)")"
 PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
-if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
-  WORKFLOWS_PUSH_BRANCH="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")"
-else
-  WORKFLOWS_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)"
-fi
+#if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
+#  WORKFLOWS_PUSH_BRANCH="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")"
+#else
+#  WORKFLOWS_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)"
+#fi
 
 # format
 bold=$(tput bold)
@@ -158,7 +158,7 @@ WORKFLOW_DELETE_FLAGS=(
 )
 WORKFLOW_DELETE_FLAGS_MANDATORY="name"
 # push
-WORKFLOW_PUSH_DESCRIPTION="Pushes your workflow changes to your GitHub fork ($WORKFLOWS_PUSH_BRANCH branch)"
+WORKFLOW_PUSH_DESCRIPTION="Pushes your workflow changes to your GitHub fork" #($WORKFLOWS_PUSH_BRANCH branch)
 WORKFLOW_PUSH_FLAGS=(
   "name,n,Workflow name,-,-"
 )
