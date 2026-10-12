@@ -16,6 +16,8 @@ normal=$(tput sgr0)
 
 # constants
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths cmdb)")"
+PLAYBOOKS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
+WORKFLOWS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
 
 # command descriptions
 build="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "BUILD")"
@@ -33,11 +35,27 @@ workflow="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "WORKFLOW")"
 # check on GitHub CLI
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 gh_status=""
+wf_repo_status=""
+pb_repo_status=""
 if [[ "$installed" == "1" ]]; then
   logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
   if [[ "$logged_in" == "1" ]]; then
     github_user="$(gh api user --jq .login)"
     gh_status="You are logged into the GitHub CLI as ${bold}$github_user${normal}"
+
+    # check on workflows
+    if [ ! -d "$WORKFLOWS_PATH" ]; then
+      wf_repo_status="Create a new accelerated workflow with ${bold}odev new workflow${normal}"
+    else
+      wf_repo_status="Continue working on your workflows in ${bold}$WORKFLOWS_PATH${normal}"
+    fi
+
+    # check on playbooks
+    if [ ! -d "$PLAYBOOKS_PATH" ]; then
+      pb_repo_status="Add a new Ansible playbook with ${bold}odev new playbook${normal}"
+    else
+      pb_repo_status="Find your playbooks in ${bold}$PLAYBOOKS_PATH${normal}"
+    fi
   else
     gh_status="Please authenticate with the GitHub CLI using ${bold}gh auth login${normal}"
   fi
@@ -111,6 +129,18 @@ print_help() {
   # print ts_status
   if [ ! "$ts_status" = "" ]; then
     echo "  $ts_status"
+  fi
+
+  # print community repos status
+  if [ ! "$wf_repo_status" = "" ] || [ ! "$pb_repo_status" = "" ]; then
+    echo ""
+    echo "${bold}COMMUNITY REPOSITORIES${normal}"
+    if [ ! "$wf_repo_status" = "" ]; then
+      echo "  $wf_repo_status"
+    fi
+    if [ ! "$pb_repo_status" = "" ]; then
+      echo "  $pb_repo_status"
+    fi
   fi
 
   echo ""
