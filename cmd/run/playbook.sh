@@ -62,6 +62,8 @@ fi
 
 # assign flags
 name=${V[name]}
+hosts=${V[hosts]:-local}
+inventory=${V[inventory]:--}
 
 # check on name
 if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
@@ -76,12 +78,23 @@ if [[ ! -f "$playbook" ]]; then
   exit 1
 fi
 
-# run locally using the user's inventory when available
-inventory_file="$TMP_PATH/hosts_$(id -un)"
-if [[ -f "$inventory_file" ]]; then
-  exec "$MGMT_PATH/ansible-play.sh" "$playbook" local -i "$inventory_file"
+# use an explicit inventory before the user's generated inventory
+if [[ "$inventory" != "-" ]]; then
+  if [[ ! -f "$inventory" && ! -d "$inventory" ]]; then
+    echo "Inventory does not exist: $inventory"
+    exit 1
+  fi
+  inventory_file="$inventory"
+  [[ "$inventory_file" == /* ]] || inventory_file="$PWD/$inventory_file"
 else
-  exec "$MGMT_PATH/ansible-play.sh" "$playbook" local
+  inventory_file="$TMP_PATH/hosts_$(id -un)"
+fi
+
+# run the playbook on the selected hosts
+if [[ -f "$inventory_file" || -d "$inventory_file" ]]; then
+  exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts" -i "$inventory_file"
+else
+  exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts"
 fi
 
 # author: https://github.com/jmoya82

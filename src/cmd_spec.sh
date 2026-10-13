@@ -112,9 +112,11 @@ RUN_DESCRIPTION="Accelerated application execution"
 RUN_FLAGS=(
 )
 # playbook
-RUN_PLAYBOOK_DESCRIPTION="Runs a playbook on the local host"
+RUN_PLAYBOOK_DESCRIPTION="Runs a playbook on the selected hosts"
 RUN_PLAYBOOK_FLAGS=(
   "name,n,Playbook name,-,-"
+  "hosts,H,Target host or group,-,local"
+  "inventory,i,Inventory path (optional),-,-"
 )
 RUN_PLAYBOOK_FLAGS_MANDATORY="name"
 
