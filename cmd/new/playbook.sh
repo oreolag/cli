@@ -168,8 +168,7 @@ fi
 
 # copy playbook template
 cp "$PLAYBOOK_TEMPLATE_PATH" "$PLAYBOOKS_USER_PATH/$name.yml" || exit 1
-playbook_name="$(printf '%s' "$name" | tr '[:lower:]' '[:upper:]')"
-sed -i "s/PBNAME/$playbook_name/g; s/PBFILE/$name/g" "$PLAYBOOKS_USER_PATH/$name.yml" || exit 1
+sed -i "s/PBFILE/$name/g" "$PLAYBOOKS_USER_PATH/$name.yml" || exit 1
 
 cp "$PLAYBOOKS_TEMPLATE_PATH/playbook_vars.yml" "$PLAYBOOKS_USER_PATH/${name}_vars.yml" || exit 1
 
