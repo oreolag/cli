@@ -1,0 +1,11 @@
+# Booking servers and the machines they manage.
+# An empty list means no machines require bookings.
+# Use short hostnames, and assign each managed machine to only one server.
+# Example entry:
+# servers:
+#   - name: odev-booking-01
+#     managed_servers:
+#       - incus-01
+#       - incus-02
+#     maximum_duration_hours: 5
+servers: []
