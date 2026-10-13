@@ -148,6 +148,20 @@ _odev_completions() {
     return 0
   fi
 
+  # Playbook names from the user's configured checkout.
+  if [[ $cword -ge 3 && "${words[1]}" == "run" && "${words[2]}" == "playbook" &&
+        ( "$prev" == "--name" || "$prev" == "-n" ) ]]; then
+    local candidate name
+    COMPREPLY=()
+    for candidate in "$PLAYBOOKS_USER_PATH/"*.yml; do
+      [[ -f "$candidate" ]] || continue
+      name="${candidate##*/}"
+      name="${name%.yml}"
+      [[ "$name" == "$cur"* ]] && COMPREPLY+=("$name")
+    done
+    return 0
+  fi
+
   # -----------------------------
   # Subcommand flags (odev <cmd> <subcmd> --<TAB>)
   # -----------------------------
