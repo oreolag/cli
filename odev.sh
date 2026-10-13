@@ -44,23 +44,38 @@ if [[ "$installed" == "1" ]]; then
     gh_status="You are logged into the GitHub CLI as ${bold}$github_user${normal}"
 
     # check on workflows
-    if [ ! -d "$WORKFLOWS_PATH" ]; then
-      wf_repo_status="Create a new accelerated workflow with ${bold}odev new workflow${normal}"
-    else
-      wf_repo_status="Continue working on your workflows in ${bold}$WORKFLOWS_PATH${normal}"
-    fi
+    #if [ ! -d "$WORKFLOWS_PATH" ]; then
+    #  wf_repo_status="Create a new accelerated workflow with ${bold}odev new workflow${normal}"
+    #else
+    #  wf_repo_status="Continue working on your workflows in ${bold}$WORKFLOWS_PATH${normal}"
+    #fi
 
     # check on playbooks
-    if [ ! -d "$PLAYBOOKS_PATH" ]; then
-      pb_repo_status="Add a new Ansible playbook with ${bold}odev new playbook${normal}"
-    else
-      pb_repo_status="Find your playbooks in ${bold}$PLAYBOOKS_PATH${normal}"
-    fi
+    #if [ ! -d "$PLAYBOOKS_PATH" ]; then
+    #  pb_repo_status="Add a new Ansible playbook with ${bold}odev new playbook${normal}"
+    #else
+    #  pb_repo_status="Find your playbooks in ${bold}$PLAYBOOKS_PATH${normal}"
+    #fi
   else
     gh_status="Please authenticate with the GitHub CLI using ${bold}gh auth login${normal}"
   fi
 else
   gh_status="Please install the GitHub CLI"
+fi
+
+# check on community repositories
+# workflows
+if [ ! -d "$WORKFLOWS_PATH" ]; then
+  wf_repo_status="Create a new accelerated workflow with ${bold}odev new workflow${normal}"
+else
+  wf_repo_status="Continue working on your workflows in ${bold}$WORKFLOWS_PATH${normal}"
+fi
+
+# playbooks
+if [ ! -d "$PLAYBOOKS_PATH" ]; then
+  pb_repo_status="Add a new Ansible playbook with ${bold}odev new playbook${normal}"
+else
+  pb_repo_status="Find your playbooks in ${bold}$PLAYBOOKS_PATH${normal}"
 fi
 
 # check on tailscale
@@ -110,9 +125,20 @@ print_help() {
   echo "  -h, --help       Show help for command"
   echo "  -v, --version    Show odev version"
   echo ""
-  echo "${bold}EXAMPLES${normal}"
-  echo "  $ odev examine"
-  echo "  $ odev set mtu"
+
+  # print community repos status
+  echo "${bold}COMMUNITY REPOSITORIES${normal}"
+  #if [ ! "$wf_repo_status" = "" ] || [ ! "$pb_repo_status" = "" ]; then
+    #echo "${bold}COMMUNITY REPOSITORIES${normal}"
+    if [ ! "$wf_repo_status" = "" ]; then
+      echo "  $wf_repo_status"
+    fi
+    if [ ! "$pb_repo_status" = "" ]; then
+      echo "  $pb_repo_status"
+    fi
+  #fi
+
+  # print server status
   echo ""
   echo "${bold}SERVER STATUS${normal}"
   if [ "$is_build" = "0" ]; then
@@ -131,26 +157,15 @@ print_help() {
     echo "  $ts_status"
   fi
 
-  # print community repos status
-  if [ ! "$wf_repo_status" = "" ] || [ ! "$pb_repo_status" = "" ]; then
-    echo ""
-    echo "${bold}COMMUNITY REPOSITORIES${normal}"
-    if [ ! "$wf_repo_status" = "" ]; then
-      echo "  $wf_repo_status"
-    fi
-    if [ ! "$pb_repo_status" = "" ]; then
-      echo "  $pb_repo_status"
-    fi
-  fi
+  echo ""
+  echo "${bold}EXAMPLES${normal}"
+  echo "  $ odev examine"
+  echo "  $ odev set mtu"
 
   echo ""
   echo "${bold}LEARN MORE${normal}"
   echo "  Use ${bold}odev <command> <subcommand> --help${normal} for more information about a command."
   echo "  Read the manual at books.oreol.ch/6/cli"
-  #if [ ! "$gh_status" = "" ]; then
-  #  echo ""
-  #  echo $gh_status
-  #fi
 }
 
 print_version() {
