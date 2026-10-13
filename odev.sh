@@ -100,6 +100,7 @@ else
 fi
 
 # check on build
+is_booking=$($ODEV_PATH/src/is_server.sh "$ODEV_PATH" "booking")
 is_build=$($ODEV_PATH/src/is_server.sh "$ODEV_PATH" "build")
 
 print_help() {
@@ -142,6 +143,13 @@ print_help() {
 
   # print server status
   echo ""
+  
+  # booking
+  if [ "$is_booking" = "1" ]; then
+    echo "  This is a ${bold}booking${normal} server"
+  fi
+  
+  # development or deployment
   echo "${bold}SERVER STATUS${normal}"
   if [ "$is_build" = "0" ]; then
     echo "  This is a ${bold}deployment${normal} server"
