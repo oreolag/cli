@@ -40,8 +40,10 @@ pb_repo_status=""
 if [[ "$installed" == "1" ]]; then
   logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
   if [[ "$logged_in" == "1" ]]; then
-    github_user="$(gh api user --jq .login)"
-    gh_status="You are logged into the GitHub CLI as ${bold}$github_user${normal}"
+    github_user="$(gh api user --jq .login 2>/dev/null)" || github_user=""
+    if [[ -n "$github_user" ]]; then
+      gh_status="You are logged into the GitHub CLI as ${bold}$github_user${normal}"
+    fi
 
     # check on workflows
     #if [ ! -d "$WORKFLOWS_PATH" ]; then
