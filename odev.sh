@@ -112,7 +112,7 @@ print_help() {
   echo ""
   echo "${bold}EXAMPLES${normal}"
   echo "  $ odev examine"
-  echo "  $ odev validate nccl"
+  echo "  $ odev set mtu"
   echo ""
   echo "${bold}SERVER STATUS${normal}"
   if [ "$is_build" = "0" ]; then
