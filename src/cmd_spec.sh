@@ -12,6 +12,8 @@ WORKFLOWS_REPOSITORY="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PA
 PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
 WORKFLOWS_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)"
 WORKFLOWS_REPO="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github workflows_repo)"
+PLAYBOOKS_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_playbooks)"
+PLAYBOOKS_REPO="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github playbooks_repo)"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
 
 #if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
@@ -172,8 +174,8 @@ GH_PUSH_FLAGS_MANDATORY=""
 # pull
 GH_PULL_DESCRIPTION="Fetches and merges community and fork updates into the local repository"
 GH_PULL_FLAGS=(
-  "workflow,w,Workflows repository (no value),-,-"
-  "playbook,p,Playbooks repository (no value),-,-"
+  "workflows,w,Merge ${bold}$WORKFLOWS_REPO${normal}:main and your fork:${bold}$WORKFLOWS_PUSH_BRANCH${normal} locally,-,-"
+  "playbooks,p,Merge ${bold}$PLAYBOOKS_REPO${normal}:main and your fork:${bold}$PLAYBOOKS_PUSH_BRANCH${normal} locally,-,-"
 )
 GH_PULL_FLAGS_MANDATORY=""
 # pr

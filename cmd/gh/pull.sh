@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev gh pull
+# example: odev gh pull --workflows
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -54,19 +54,19 @@ print_both="0"
 repository=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --workflow|-w) selected="workflow" ;;
-    --playbook|-p) selected="playbook" ;;
+    --workflows|-w) selected="workflow" ;;
+    --playbooks|-p) selected="playbook" ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
   if [[ -n "$repository" ]]; then
-    echo "Specify exactly one of --workflow or --playbook"
+    echo "Specify exactly one of --workflows or --playbooks"
     exit 1
   fi
   repository="$selected"
   shift
 done
 if [[ -z "$repository" ]]; then
-  echo "Specify exactly one of --workflow or --playbook"
+  echo "Specify exactly one of --workflows or --playbooks"
   exit 1
 fi
 
