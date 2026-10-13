@@ -130,8 +130,8 @@ SET_MTU_DESCRIPTION="Set the Maximum Transmission Unit (MTU) for a data network 
 SET_MTU_FLAGS=(
   "interface,i,Interface index (endata),-,-"
   "port,p,Interface port index,-,0"
-  "value,v,MTU value,1500-9000,1500"
   "remote,r,Also configure remote hosts when set to 1,0|1,0"
+  "value,v,MTU value,1500-9000,1500"
 )
 SET_MTU_FLAGS_MANDATORY="interface,value"
 
