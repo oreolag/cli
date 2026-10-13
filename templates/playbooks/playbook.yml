@@ -1,8 +1,11 @@
 ---
-- name: This is your PBNAME playbook
+- name: This is your PBFILE.yml playbook
   hosts: "{{ oreol_target }}"
   become: false
   gather_facts: true
+
+  vars_files:
+    - PBFILE_vars.yml
 
   tasks:
     - name: Show server information
@@ -12,3 +15,8 @@
           - "Server: {{ ansible_facts['hostname'] }}"
           - "Operating system: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
           - "Connection: {{ ansible_connection | default('ssh') }}"
+
+    - name: Show optional settings
+      ansible.builtin.debug:
+        msg: "IP: {{ ip }}; value: {{ value }}"
+      when: src | default(false) | bool

@@ -156,6 +156,7 @@ _odev_completions() {
     for candidate in "$PLAYBOOKS_USER_PATH/"*.yml; do
       [[ -f "$candidate" ]] || continue
       name="${candidate##*/}"
+      [[ "$name" == *_vars.yml ]] && continue
       name="${name%.yml}"
       [[ "$name" == "$cur"* ]] && COMPREPLY+=("$name")
     done

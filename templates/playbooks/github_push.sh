@@ -100,14 +100,20 @@ if ! git config user.email >/dev/null; then
   git config user.email "$(gh api user --jq .login)@users.noreply.github.com"
 fi
 
+# include new, changed, or deleted companion variables
+targets=("$target")
+if [[ -e "${playbook}_vars.yml" ]] || git ls-files --error-unmatch -- "${playbook}_vars.yml" >/dev/null 2>&1; then
+  targets+=("${playbook}_vars.yml")
+fi
+
 # stage and commit only the selected changes
-git add -A -- "$target"
-if ! git diff --cached --quiet -- "$target"; then
+git add -A -- "${targets[@]}"
+if ! git diff --cached --quiet -- "${targets[@]}"; then
   if [[ "$msg" == "Update" ]]; then
     printf "comment: " > /dev/tty
     read -r msg < /dev/tty
   fi
-  git commit --only -m "$msg" -- "$target"
+  git commit --only -m "$msg" -- "${targets[@]}"
 fi
 
 # also push commits created by github_pull.sh when no new commit is needed

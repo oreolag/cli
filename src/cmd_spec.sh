@@ -116,7 +116,8 @@ RUN_PLAYBOOK_DESCRIPTION="Runs a playbook on the selected hosts"
 RUN_PLAYBOOK_FLAGS=(
   "name,n,Playbook name,-,-"
   "hosts,H,Target host or group,-,local"
-  "inventory,i,Inventory path (optional),-,-"
+  "inventory,i,Use a custom inventory path,-,-"
+  "vars,v,Extra variables (example: \"src=true value=10\"),-,-"
 )
 RUN_PLAYBOOK_FLAGS_MANDATORY="name"
 

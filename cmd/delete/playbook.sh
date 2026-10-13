@@ -115,9 +115,15 @@ if ! git config user.email >/dev/null; then
   git config user.email "${github_user}@users.noreply.github.com" || exit 1
 fi
 
+# include the companion variables file when tracked
+targets=("$name.yml")
+if git ls-files --error-unmatch -- "${name}_vars.yml" >/dev/null 2>&1; then
+  targets+=("${name}_vars.yml")
+fi
+
 # delete and commit only this playbook, then push the checked branch
-git rm -- "$name.yml" || exit 1
-git commit --only -m "Delete playbook $name" -- "$name.yml" || exit 1
+git rm -- "${targets[@]}" || exit 1
+git commit --only -m "Delete playbook $name" -- "${targets[@]}" || exit 1
 git push origin "$github_branch" || exit 1
 
 # print

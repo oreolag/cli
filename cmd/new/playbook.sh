@@ -86,7 +86,7 @@ name=${V[name]}
 name="${name// /_}"
 
 # check on name
-if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
+if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ || "$name" == *_vars ]]; then
   echo "Invalid playbook name: $name"
   exit 1
 fi
@@ -96,7 +96,7 @@ github_user="$(gh api user --jq .login)" || exit 1
 
 # check if playbook name exists (oreolag/playbooks default branch)
 files="$(gh api repos/oreolag/playbooks/contents --jq '.[] | select(.type == "file") | .name')" || exit 1
-if grep -Fxq -- "$name.yml" <<< "$files"; then
+if grep -Fxq -e "$name.yml" -e "${name}_vars.yml" <<< "$files"; then
   echo "Playbook already exists: $name"
   exit 1
 fi
@@ -144,13 +144,15 @@ done
 # check if playbook name exists (fork configured branch)
 files="$(gh api "repos/$github_user/playbooks/contents?ref=$GITHUB_PUSH_BRANCH" \
   --jq '.[] | select(.type == "file") | .name')" || exit 1
-if grep -Fxq -- "$name.yml" <<< "$files"; then
+if grep -Fxq -e "$name.yml" -e "${name}_vars.yml" <<< "$files"; then
   echo "Playbook already exists: $name"
   exit 1
 fi
 
 # check if playbook name exists (local)
 if [[ -e "$PLAYBOOKS_PATH/$name.yml" || -L "$PLAYBOOKS_PATH/$name.yml" ||
+      -e "$PLAYBOOKS_PATH/${name}_vars.yml" || -L "$PLAYBOOKS_PATH/${name}_vars.yml" ||
+      -e "$PLAYBOOKS_USER_PATH/${name}_vars.yml" || -L "$PLAYBOOKS_USER_PATH/${name}_vars.yml" ||
       -e "$PLAYBOOKS_USER_PATH/$name.yml" || -L "$PLAYBOOKS_USER_PATH/$name.yml" ]]; then
   echo "Playbook already exists: $name"
   exit 1
@@ -167,11 +169,13 @@ fi
 # copy playbook template
 cp "$PLAYBOOK_TEMPLATE_PATH" "$PLAYBOOKS_USER_PATH/$name.yml" || exit 1
 playbook_name="$(printf '%s' "$name" | tr '[:lower:]' '[:upper:]')"
-sed -i "s/PBNAME/$playbook_name/g" "$PLAYBOOKS_USER_PATH/$name.yml" || exit 1
+sed -i "s/PBNAME/$playbook_name/g; s/PBFILE/$name/g" "$PLAYBOOKS_USER_PATH/$name.yml" || exit 1
+
+cp "$PLAYBOOKS_TEMPLATE_PATH/playbook_vars.yml" "$PLAYBOOKS_USER_PATH/${name}_vars.yml" || exit 1
 
 # commit and push only this playbook
-git add -- "$name.yml" || exit 1
-git commit --only -m "First commit" -- "$name.yml" || exit 1
+git add -- "$name.yml" "${name}_vars.yml" || exit 1
+git commit --only -m "First commit" -- "$name.yml" "${name}_vars.yml" || exit 1
 git push -u origin "$GITHUB_PUSH_BRANCH" || exit 1
 
 # print

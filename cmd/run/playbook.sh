@@ -64,6 +64,7 @@ fi
 name=${V[name]}
 hosts=${V[hosts]:-local}
 inventory=${V[inventory]:--}
+vars=${V[vars]:--}
 
 # check on name
 if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
@@ -90,11 +91,17 @@ else
   inventory_file="$TMP_PATH/hosts_$(id -un)"
 fi
 
+# extra variables override the playbook defaults
+args=()
+if [[ "$vars" != "-" ]]; then
+  args+=(--extra-vars "$vars")
+fi
+
 # run the playbook on the selected hosts
 if [[ -f "$inventory_file" || -d "$inventory_file" ]]; then
-  exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts" -i "$inventory_file"
+  exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts" -i "$inventory_file" "${args[@]}"
 else
-  exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts"
+  exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts" "${args[@]}"
 fi
 
 # author: https://github.com/jmoya82

@@ -74,7 +74,7 @@ if [[ ! -e "$target" && ! -L "$target" ]] &&
 fi
 
 # staged and unstaged changes compared with the last commit
-git --no-pager diff HEAD -- ":(literal)$target"
+git --no-pager diff HEAD -- ":(literal)$target" ":(literal)${playbook}_vars.yml"
 
 # show new files without staging them
 while IFS= read -r -d '' new_file; do
@@ -82,4 +82,4 @@ while IFS= read -r -d '' new_file; do
     status=$?
     [[ "$status" == "1" ]] || exit "$status"
   }
-done < <(git ls-files --others --exclude-standard -z -- ":(literal)$target")
+done < <(git ls-files --others --exclude-standard -z -- ":(literal)$target" ":(literal)${playbook}_vars.yml")

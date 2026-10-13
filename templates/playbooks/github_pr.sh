@@ -126,22 +126,34 @@ fi
 git checkout -B "$pr_branch" upstream/main
 
 # preserve any untracked file at the target path
-if [[ -n "$(git ls-files --others -- "$playbook.yml")" ]]; then
+if [[ -n "$(git ls-files --others -- "$playbook.yml" "${playbook}_vars.yml")" ]]; then
   echo "File already exists: $playbook.yml"
   exit 1
 fi
 
 # copy the selected committed playbook into the PR branch
-git rm --ignore-unmatch -- "$playbook.yml"
+targets=("$playbook.yml")
+if git cat-file -e "$source_branch:${my_playbook}_vars.yml" 2>/dev/null ||
+   git ls-files --error-unmatch -- "${playbook}_vars.yml" >/dev/null 2>&1; then
+  targets+=("${playbook}_vars.yml")
+fi
+git rm --ignore-unmatch -- "${targets[@]}"
 git show "$source_branch:$my_playbook.yml" > "$playbook.yml"
-git add -- "$playbook.yml"
+if git cat-file -e "$source_branch:${my_playbook}_vars.yml" 2>/dev/null; then
+  git show "$source_branch:${my_playbook}_vars.yml" > "${playbook}_vars.yml"
+  if [[ "$my_playbook" != "$playbook" ]]; then
+    git show "$source_branch:$my_playbook.yml" |
+      sed "s/${my_playbook}_vars\.yml/${playbook}_vars.yml/g" > "$playbook.yml"
+  fi
+fi
+git add -A -- "${targets[@]}"
 
 # commit only the selected playbook
-if git diff --cached --quiet -- "$playbook.yml"; then
+if git diff --cached --quiet -- "${targets[@]}"; then
   echo "Nothing to commit: $playbook"
   exit 0
 fi
-git commit --only -m "Files changed with github_pr" -- "$playbook.yml"
+git commit --only -m "Files changed with github_pr" -- "${targets[@]}"
 git fetch --prune origin
 git push --force-with-lease -u origin "$pr_branch"
 
