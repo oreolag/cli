@@ -84,7 +84,7 @@ fi
 # assign flags
 interface=${V[interface]}
 port=${V[port]}
-mtu=${V[mtu]}
+mtu=${V[value]}
 remote=${V[remote]}
 
 # check on interface
