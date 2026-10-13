@@ -30,7 +30,7 @@ set="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "SET")"
 update="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "UPDATE")"
 validate="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "VALIDATE")"
 examine="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "EXAMINE")"
-workflow="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "WORKFLOW")"
+gh_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "GH")"
 
 # check on GitHub CLI
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
@@ -117,7 +117,7 @@ print_help() {
   echo "  set:             $set"
   echo "  update:          $update"
   echo "  validate:        $validate"
-  echo "  workflow:        $workflow"
+  echo "  gh:              $gh_description"
   echo ""
   echo "${bold}ADDITIONAL COMMANDS${normal}"
   echo "  get:             $get"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev workflow push --name fft
+# example: odev gh pull
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,6 +17,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
+PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
 
 # check on users
@@ -36,10 +37,9 @@ fi
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 
-# read command description, command flags, mandatory flags
+# read command description, command flags
 command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
-mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
 
 # (maybe) print help
 print_range="0"
@@ -50,25 +50,33 @@ print_both="0"
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
 
-# parse flags
-parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
-
-# run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
-
-# read flags
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
+# select one repository (these flags take no value)
+repository=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --workflow|-w) selected="workflow" ;;
+    --playbook|-p) selected="playbook" ;;
+    *) echo "Unknown option: $1"; exit 1 ;;
+  esac
+  if [[ -n "$repository" ]]; then
+    echo "Specify exactly one of --workflow or --playbook"
+    exit 1
+  fi
+  repository="$selected"
+  shift
+done
+if [[ -z "$repository" ]]; then
+  echo "Specify exactly one of --workflow or --playbook"
+  exit 1
 fi
 
-# assign flags
-name=${V[name]}
-
-# push workflow
-cd "$WORKFLOWS_USER_PATH" || exit 1
-exec "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name"
+# use the selected repository's helper
+if [[ "$repository" == "workflow" ]]; then
+  repository_path="$WORKFLOWS_USER_PATH"
+else
+  repository_path="$PLAYBOOKS_USER_PATH"
+fi
+cd "$repository_path" || exit 1
+ODEV_PATH="$ODEV_PATH" exec "$repository_path/github_pull.sh"
 
 # author: https://github.com/jmoya82

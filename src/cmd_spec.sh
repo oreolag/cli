@@ -158,34 +158,39 @@ VALIDATE_FLAGS=(
 #)
 #VALIDATE_NCCL_FLAGS_MANDATORY="ngpus,minbytes,maxbytes"
 
-# workflows
-WORKFLOW_DESCRIPTION="Manage and share your workflows"
-WORKFLOW_FLAGS=(
+# GitHub
+GH_DESCRIPTION="Manage and share your workflows and playbooks"
+GH_FLAGS=(
 )
 # push
-WORKFLOW_PUSH_DESCRIPTION="Pushes your workflow changes to your fork:${bold}$WORKFLOWS_PUSH_BRANCH${normal}" #($WORKFLOWS_PUSH_BRANCH branch)
-WORKFLOW_PUSH_FLAGS=(
-  "name,n,Workflow name,-,-"
+GH_PUSH_DESCRIPTION="Pushes your changes to your GitHub fork"
+GH_PUSH_FLAGS=(
+  "workflow,w,Workflow name,-,-"
+  "playbook,p,Playbook name,-,-"
 )
-WORKFLOW_PUSH_FLAGS_MANDATORY="name"
+GH_PUSH_FLAGS_MANDATORY=""
 # pull
-WORKFLOW_PULL_DESCRIPTION="Fetches and merges ${bold}$WORKFLOWS_REPO${normal}:main and your fork:${bold}$WORKFLOWS_PUSH_BRANCH${normal} locally"
-WORKFLOW_PULL_FLAGS=(
+GH_PULL_DESCRIPTION="Fetches and merges community and fork updates into the local repository"
+GH_PULL_FLAGS=(
+  "workflow,w,Workflows repository (no value),-,-"
+  "playbook,p,Playbooks repository (no value),-,-"
 )
-WORKFLOW_PULL_FLAGS_MANDATORY=""
+GH_PULL_FLAGS_MANDATORY=""
 # pr
-WORKFLOW_PR_DESCRIPTION="Proposes your workflow to ${bold}$WORKFLOWS_REPO${normal}:main"
-WORKFLOW_PR_FLAGS=(
-  "name,n,Workflow name,-,-"
+GH_PR_DESCRIPTION="Proposes your changes to the community repository"
+GH_PR_FLAGS=(
+  "workflow,w,Workflow name,-,-"
+  "playbook,p,Playbook name,-,-"
 )
-WORKFLOW_PR_FLAGS_MANDATORY="name"
+GH_PR_FLAGS_MANDATORY=""
 # diff
-WORKFLOW_DIFF_DESCRIPTION="Shows uncommitted changes to your workflow"
-WORKFLOW_DIFF_FLAGS=(
-  "name,n,Workflow name,-,-"
+GH_DIFF_DESCRIPTION="Shows uncommitted changes to your workflow or playbook"
+GH_DIFF_FLAGS=(
+  "workflow,w,Workflow name,-,-"
+  "playbook,p,Playbook name,-,-"
   "file,f,Workflow file name (optional),-,-"
 )
-WORKFLOW_DIFF_FLAGS_MANDATORY="name"
+GH_DIFF_FLAGS_MANDATORY=""
 
 # workflows
 workflows=()

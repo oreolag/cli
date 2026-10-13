@@ -20,7 +20,6 @@
     install: false
     main: false
     new: false
-    playbook: false
     program: false
     run: false
     set: false
@@ -32,7 +31,7 @@
     update: false
     validate: false
     vars_yml: false
-    workflow: false
+    gh: false
     #submodules (all does not apply)
     submodules: false
     #hdev: false
@@ -54,7 +53,6 @@
           - "install={{ install }}"
           - "main={{ main }}"
           - "new={{ new }}"
-          - "playbook={{ playbook }}"
           - "program={{ program }}"
           - "run={{ run }}"
           - "set={{ set }}"
@@ -63,7 +61,7 @@
           - "update={{ update }}"
           - "validate={{ validate }}"
           - "vars_yml={{ vars_yml }}"
-          - "workflow={{ workflow }}"
+          - "gh={{ gh }}"
           # repo
           - "repo={{ repo }}"
           # submodules
@@ -289,33 +287,6 @@
             recurse: true
       when:
         - (new or all) | bool
-        - cli.local_path is defined
-
-    # playbook
-    - block:
-        - name: Copy playbook.sh script
-          ansible.builtin.copy:
-            src: "{{ cli.local_path }}/cmd/playbook.sh"
-            dest: "{{ cli_remote_path }}/odev/cmd/playbook.sh"
-            owner: root
-            group: root
-            mode: "0755"
-        - name: Copy cmd/playbook directory from local path (preserve symlinks)
-          ansible.posix.synchronize:
-            src: "{{ cli.local_path }}/cmd/playbook/"
-            dest: "{{ cli_remote_path }}/odev/cmd/playbook/"
-            recursive: true
-            archive: true
-            links: true
-            copy_links: false
-        - name: Set ownership on playbook folder
-          ansible.builtin.file:
-            path: "{{ cli_remote_path }}/odev/cmd/playbook/"
-            owner: root
-            group: root
-            recurse: true
-      when:
-        - (playbook or all) | bool
         - cli.local_path is defined
     
     # program
@@ -776,7 +747,7 @@
         - (vars_yml or all) | bool
         - cli.local_path is defined
 
-    # workflow
+    # gh
     - block:
         - name: Remove old workflows command paths
           ansible.builtin.file:
@@ -785,31 +756,31 @@
           loop:
             - "{{ cli_remote_path }}/odev/cmd/workflows.sh"
             - "{{ cli_remote_path }}/odev/cmd/workflows"
-            - "{{ cli_remote_path }}/odev/cmd/workflow/new.sh"
-            - "{{ cli_remote_path }}/odev/cmd/workflow/delete.sh"
-        - name: Copy workflow.sh script
+            - "{{ cli_remote_path }}/odev/cmd/workflow.sh"
+            - "{{ cli_remote_path }}/odev/cmd/workflow"
+        - name: Copy gh.sh script
           ansible.builtin.copy:
-            src: "{{ cli.local_path }}/cmd/workflow.sh"
-            dest: "{{ cli_remote_path }}/odev/cmd/workflow.sh"
+            src: "{{ cli.local_path }}/cmd/gh.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/gh.sh"
             owner: root
             group: root
             mode: "0755"
-        - name: Copy cmd/workflow directory from local path (preserve symlinks)
+        - name: Copy cmd/gh directory from local path (preserve symlinks)
           ansible.posix.synchronize:
-            src: "{{ cli.local_path }}/cmd/workflow/"
-            dest: "{{ cli_remote_path }}/odev/cmd/workflow/"
+            src: "{{ cli.local_path }}/cmd/gh/"
+            dest: "{{ cli_remote_path }}/odev/cmd/gh/"
             recursive: true
             archive: true
             links: true
             copy_links: false
-        - name: Set ownership on workflow folder
+        - name: Set ownership on gh folder
           ansible.builtin.file:
-            path: "{{ cli_remote_path }}/odev/cmd/workflow/"
+            path: "{{ cli_remote_path }}/odev/cmd/gh/"
             owner: root
             group: root
             recurse: true
       when:
-        - (workflow or all) | bool
+        - (gh or all) | bool
         - cli.local_path is defined
 
     # cleanup

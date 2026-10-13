@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev workflow diff --name fft --file run.sh
+# example: odev gh push --workflow fft
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,6 +17,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
+PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
 WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
 
 # check on users
@@ -26,13 +27,19 @@ if [ "$is_odev_developer" = "0" ]; then
   exit 1
 fi
 
+# check on tools
+installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
+if [[ "$installed" == "0" ]]; then
+  echo "Missing tool: gh"
+  exit 1
+fi
+
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 
-# read command description, command flags, mandatory flags
+# read command description and command flags
 command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
-mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
 
 # (maybe) print help
 print_range="0"
@@ -46,27 +53,36 @@ print_both="0"
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
-# run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+declare -A V
+while IFS='=' read -r k v; do
+  [[ -n "$k" ]] && V["$k"]="$v"
+done <<< "$parsed_flags"
 
-# read flags
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
-
-# assign flags
-name=${V[name]}
-file=${V[file]:--}
-
-# show workflow changes
-cd "$WORKFLOWS_USER_PATH" || exit 1
-if [[ "$file" == "-" || -z "$file" ]]; then
-  exec "$WORKFLOWS_USER_PATH/git_diff.sh" --workflow "$name"
+# select exactly one workflow or playbook
+workflow=${V[workflow]:-}
+playbook=${V[playbook]:-}
+if [[ -n "$workflow" && -z "${V[playbook]+set}" ]]; then
+  repository="workflow"
+  name="$workflow"
+elif [[ -n "$playbook" && -z "${V[workflow]+set}" ]]; then
+  repository="playbook"
+  name="$playbook"
 else
-  exec "$WORKFLOWS_USER_PATH/git_diff.sh" --workflow "$name" --file "$file"
+  echo "Specify exactly one of --workflow or --playbook with a name"
+  exit 1
 fi
+if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
+  echo "Invalid $repository name: $name"
+  exit 1
+fi
+
+# use the selected repository's helper
+if [[ "$repository" == "workflow" ]]; then
+  repository_path="$WORKFLOWS_USER_PATH"
+else
+  repository_path="$PLAYBOOKS_USER_PATH"
+fi
+cd "$repository_path" || exit 1
+exec "$repository_path/github_push.sh" "--$repository" "$name"
 
 # author: https://github.com/jmoya82

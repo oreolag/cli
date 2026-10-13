@@ -1,21 +1,21 @@
 #!/bin/bash
 
-# example: odev workflow
+# example: odev gh
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMAND="workflow"
+COMMAND="gh"
 
 # derive from SCRIPT_DIR
 CLI_NAME="$(basename "$(dirname "$SCRIPT_DIR")")"
 SUBCOMMAND="-"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
-# read workflow description
+# read gh description
 KEY="$(printf '%s' "$COMMAND" | tr '[:lower:]' '[:upper:]')"
 command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 
-# read workflow commands
+# read gh commands
 mapfile -t commands < <("$ODEV_PATH/src/cmd_subcommands_read.sh" "$ODEV_PATH" "$KEY")
 
 # print help
