@@ -142,15 +142,15 @@ print_help() {
   #fi
 
   # print server status
-  echo ""
-  
+  echo ""  
+  echo "${bold}SERVER STATUS${normal}"
+
   # booking
   if [ "$is_booking" = "1" ]; then
     echo "  This is a ${bold}booking${normal} server"
   fi
-  
+
   # development or deployment
-  echo "${bold}SERVER STATUS${normal}"
   if [ "$is_build" = "0" ]; then
     echo "  This is a ${bold}deployment${normal} server"
   else
