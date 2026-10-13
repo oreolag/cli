@@ -473,6 +473,15 @@
             owner: root
             group: root
             mode: "u=rwX,g=rX,o=rX"
+        - name: Create booking inventory from the template if missing
+          ansible.builtin.copy:
+            src: "{{ cli_remote_path }}/odev/templates/cmdb/booking.yml"
+            dest: "{{ cli_remote_path }}/booking.yml"
+            remote_src: true
+            force: false
+            owner: root
+            group: root
+            mode: "0644"
         - name: Determine the target server short hostname
           ansible.builtin.set_fact:
             short_hostname: "{{ ansible_facts['hostname'].split('.')[0] }}"

@@ -21,10 +21,6 @@
 # https://www.intel.com/content/www/us/en/products/sku/52968/intel-ethernet-controller-i350am2/specifications.html
 # https://www.nvidia.com/en-us/data-center/a100/
 
-booking:
-  is_server: false
-  connects_to: null
-
 devices:
   accel:
     - id: 0

@@ -3,18 +3,14 @@
 ODEV_PATH=$1
 server_type=$2
 
-# Booking is an explicit role, independent of the installed hardware.
+# Booking roles come from the shared inventory, independently of hardware.
 if [ "$server_type" = "booking" ]; then
-    booking_server=$("$ODEV_PATH/src/cmdb_get.py" booking is_server) || exit $?
-    case "$booking_server" in
-        True|true|1) echo "1" ;;
-        False|false|0|"") echo "0" ;;
-        *)
-            echo "ERROR: booking.is_server must be true or false (or 1 or 0)" >&2
-            exit 1
-            ;;
-    esac
-    exit 0
+    booking_db=${BOOKING_DB_FILE:-}
+    if [ -z "$booking_db" ]; then
+        booking_db=$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths booking) || exit $?
+    fi
+    python3 "$ODEV_PATH/src/booking_is_server.py" --db "$booking_db"
+    exit $?
 fi
 
 # get devices from CMDB
