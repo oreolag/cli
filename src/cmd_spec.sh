@@ -161,7 +161,7 @@ VALIDATE_FLAGS=(
 #VALIDATE_NCCL_FLAGS_MANDATORY="ngpus,minbytes,maxbytes"
 
 # GitHub
-GH_DESCRIPTION="Manage and share your workflows and playbooks"
+GH_DESCRIPTION="GitHub support for community repositories" #"Manage and share your workflows and playbooks"
 GH_FLAGS=(
 )
 # push
@@ -172,10 +172,10 @@ GH_PUSH_FLAGS=(
 )
 GH_PUSH_FLAGS_MANDATORY=""
 # pull
-GH_PULL_DESCRIPTION="Fetches and merges community and fork updates into the local repository"
+GH_PULL_DESCRIPTION="Fetches and merges community main and fork branches locally"
 GH_PULL_FLAGS=(
-  "workflows,w,Merge ${bold}$WORKFLOWS_REPO${normal}:main and your fork:${bold}$WORKFLOWS_PUSH_BRANCH${normal} locally,-,-"
-  "playbooks,p,Merge ${bold}$PLAYBOOKS_REPO${normal}:main and your fork:${bold}$PLAYBOOKS_PUSH_BRANCH${normal} locally,-,-"
+  "workflows,w,${bold}$WORKFLOWS_REPO${normal}:${bold}$WORKFLOWS_PUSH_BRANCH${normal},-,-"
+  "playbooks,p,${bold}$PLAYBOOKS_REPO${normal}:${bold}$PLAYBOOKS_PUSH_BRANCH${normal},-,-"
 )
 GH_PULL_FLAGS_MANDATORY=""
 # pr
