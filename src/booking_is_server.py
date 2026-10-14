@@ -9,7 +9,7 @@ from pathlib import Path
 import yaml
 
 
-def is_booking_server(path, hostname):
+def is_booking_server(path, hostname, participant=False):
     with Path(path).open(encoding="utf-8") as stream:
         data = yaml.safe_load(stream)
     if not isinstance(data, dict) or not isinstance(data.get("servers"), list):
@@ -25,6 +25,8 @@ def is_booking_server(path, hostname):
         if name in names:
             raise ValueError(f"duplicate booking server: {name}")
         names.add(name)
+        if not isinstance(entry.get("terminate_jobs", False), bool):
+            raise ValueError(f"terminate_jobs for {name} must be true or false")
         machines = entry.get("managed_servers")
         if not isinstance(machines, list):
             raise ValueError(f"managed_servers for {name} must be a list")
@@ -37,15 +39,17 @@ def is_booking_server(path, hostname):
         duration = entry.get("maximum_duration_hours")
         if isinstance(duration, bool) or not isinstance(duration, (int, float)) or not 0 < duration < float("inf"):
             raise ValueError(f"maximum_duration_hours for {name} must be a positive finite number")
-    return hostname.split(".")[0] in names
+    local = hostname.split(".")[0]
+    return local in names or (participant and local in managed)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", required=True, help="Path to booking.yml")
+    parser.add_argument("--participant", action="store_true", help="Include managed machines")
     args = parser.parse_args()
     try:
-        result = is_booking_server(args.db, socket.gethostname())
+        result = is_booking_server(args.db, socket.gethostname(), args.participant)
     except (OSError, ValueError, yaml.YAMLError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1

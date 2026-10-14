@@ -8,4 +8,5 @@
 #       - incus-01
 #       - incus-02
 #     maximum_duration_hours: 5
+#     terminate_jobs: true
 servers: []

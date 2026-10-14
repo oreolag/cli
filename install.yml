@@ -11,6 +11,7 @@
     cli_repository: "https://github.com/oreolag/cli.git"
     # control variables
     all : false
+    booking: false
     build: false
     #constants: false
     delete: false
@@ -45,6 +46,7 @@
       ansible.builtin.debug:
         msg:
           - "all={{ all }}"
+          - "booking={{ booking }}"
           - "build={{ build }}"
           - "delete={{ delete }}"
           - "examine={{ examine }}"
@@ -74,6 +76,33 @@
       run_once: true
       delegate_to: localhost
     
+    # booking
+    - block:
+        - name: Copy booking.sh script
+          ansible.builtin.copy:
+            src: "{{ cli.local_path }}/cmd/booking.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/booking.sh"
+            owner: root
+            group: root
+            mode: "0755"
+        - name: Copy cmd/booking directory from local path (preserve symlinks)
+          ansible.posix.synchronize:
+            src: "{{ cli.local_path }}/cmd/booking/"
+            dest: "{{ cli_remote_path }}/odev/cmd/booking/"
+            recursive: true
+            archive: true
+            links: true
+            copy_links: false
+        - name: Set ownership on booking folder
+          ansible.builtin.file:
+            path: "{{ cli_remote_path }}/odev/cmd/booking/"
+            owner: root
+            group: root
+            recurse: true
+      when:
+        - (booking or all) | bool
+        - cli.local_path is defined
+
     # build
     - block:
         - name: Copy build.sh script

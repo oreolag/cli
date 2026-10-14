@@ -121,6 +121,7 @@ print_help() {
   echo "  gh:              $gh_description"
   echo ""
   echo "${bold}ADDITIONAL COMMANDS${normal}"
+  echo "  booking:         List, add, share or cancel bookings"
   echo "  get:             $get"
   echo "  ifconfig:        $ifconfig"
   echo ""

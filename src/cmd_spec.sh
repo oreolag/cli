@@ -27,6 +27,38 @@ bold=$(tput bold)
 italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
+# booking (action scripts currently echo parameters only)
+BOOKING_DESCRIPTION="List, add, share or cancel bookings"
+BOOKING_FLAGS=()
+BOOKING_LIST_DESCRIPTION="List bookings"
+BOOKING_LIST_FLAGS=(
+  "all,a,Show all booking services,-,-"
+  "server,s,Filter by managed server,-,-"
+  "date,d,Booking date (YYYY-MM-DD),-,$(date +%F)"
+)
+BOOKING_ADD_DESCRIPTION="Add a booking"
+BOOKING_ADD_FLAGS=(
+  "server,s,Managed server to book,-,-"
+  "date,d,Booking date (YYYY-MM-DD),-,$(date +%F)"
+  "start,t,Start time (HH:MM),-,-"
+  "duration,D,Duration in hours (limited by booking policy),-,-"
+  "shared,u,User to share the booking with,-,-"
+)
+BOOKING_ADD_FLAGS_MANDATORY="server,start,duration"
+BOOKING_SHARE_DESCRIPTION="Share a booking"
+BOOKING_SHARE_FLAGS=(
+  "server,s,Managed server of the active or next booking,-,-"
+  "user,u,User to share the booking with,-,-"
+  "booking-id,b,Select a specific booking instead of the active or next one,-,-"
+)
+BOOKING_SHARE_FLAGS_MANDATORY="server,user"
+BOOKING_CANCEL_DESCRIPTION="Cancel a booking"
+BOOKING_CANCEL_FLAGS=(
+  "server,s,Managed server of the booking,-,-"
+  "booking-id,b,Booking ID to cancel,-,-"
+)
+BOOKING_CANCEL_FLAGS_MANDATORY="server,booking-id"
+
 # build
 BUILD_DESCRIPTION="Project build using the workflow recipe"
 BUILD_FLAGS=(
