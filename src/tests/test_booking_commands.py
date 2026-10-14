@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 import socket
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -102,6 +103,45 @@ class BookingCommandsTest(unittest.TestCase):
                 result = self.run_command(*args, script=f"cmd/booking/{action}.sh")
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(result.stdout, "\n".join(["odev booking " + action, *args]) + "\n")
+
+    def test_startup_survives_missing_booking_configuration(self):
+        checkout = Path(self.temp.name) / "cli"
+        (checkout / "src").mkdir(parents=True)
+        shutil.copy(ROOT / "odev.sh", checkout / "odev.sh")
+        for name in ["is_server.sh", "read_yml.py", "booking_is_server.py", "cmdb_get.py"]:
+            (checkout / "src" / name).symlink_to(ROOT / "src" / name)
+        for name, output in [("is_member.sh", "1"), ("required_tools_print.sh", "0"),
+                             ("cmd_description_read.sh", "Description")]:
+            helper = checkout / "src" / name
+            helper.write_text('#!/bin/bash\nprintf "%s\\n" "' + output + '"\n')
+            helper.chmod(0o755)
+        host = checkout / "host.yml"
+        host.write_text("devices: {}\n")
+        for paths in [{"cmdb": "/opt"}, {"cmdb": "/opt", "booking": str(self.db)}]:
+            (checkout / "vars.yml").write_text(yaml.safe_dump({"paths": paths}))
+            result = subprocess.run(["bash", str(checkout / "odev.sh"), "--help"],
+                env={**self.env, "BOOKING_DB_FILE": "", "CMDB_DB_FILE": str(host),
+                     "TERM": "xterm", "USER": "test-user"}, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("CORE COMMANDS", result.stdout)
+            self.assertNotIn("Is a directory", result.stderr)
+
+    def test_legacy_vars_use_default_inventory_path(self):
+        checkout = Path(self.temp.name) / "legacy"
+        (checkout / "src").mkdir(parents=True)
+        (checkout / "src/read_yml.py").symlink_to(ROOT / "src/read_yml.py")
+        (checkout / "vars.yml").write_text("paths: {}\n")
+        reader = checkout / "src/booking_is_server.py"
+        reader.write_text('import sys\nassert sys.argv[sys.argv.index("--db") + 1] == "/opt/booking.yml"\nprint(1)\n')
+        for script, args in [("src/is_server.sh", [str(checkout), "booking"]),
+                             ("src/booking_available.sh", [str(checkout)])]:
+            result = subprocess.run(["bash", str(ROOT / script), *args],
+                env={**self.env, "BOOKING_DB_FILE": ""}, capture_output=True, text=True)
+            if script.endswith("is_server.sh"):
+                self.assertEqual(result.stdout.strip(), "1")
+            else:
+                self.assertNotIn("Is a directory", result.stderr)
+            self.assertEqual(result.returncode, 0, result.stderr)
 
 
 if __name__ == "__main__":

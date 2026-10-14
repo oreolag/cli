@@ -100,7 +100,10 @@ else
 fi
 
 # check on build
-is_booking=$($ODEV_PATH/src/is_server.sh "$ODEV_PATH" "booking")
+# Booking status is optional; configuration errors must not disable other commands.
+if ! is_booking=$("$ODEV_PATH/src/is_server.sh" "$ODEV_PATH" "booking"); then
+  is_booking=0
+fi
 is_build=$($ODEV_PATH/src/is_server.sh "$ODEV_PATH" "build")
 
 print_help() {

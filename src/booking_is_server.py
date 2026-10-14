@@ -10,6 +10,8 @@ import yaml
 
 
 def is_booking_server(path, hostname, participant=False):
+    if not path or not str(path).strip():
+        raise ValueError("booking inventory path must not be empty")
     with Path(path).open(encoding="utf-8") as stream:
         data = yaml.safe_load(stream)
     if not isinstance(data, dict) or not isinstance(data.get("servers"), list):
