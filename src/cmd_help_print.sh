@@ -146,7 +146,11 @@ for p in "${PARAMS[@]}"; do
   if [ ! "$COMMAND" = "" ] && [ "$SUBCOMMAND" = "-" ]; then
     printf "  %-16s %s\n" "$name" "$desc"
   elif [ ! "$COMMAND" = "" ] && [ ! "$SUBCOMMAND" = "" ]; then
-    printf "  -%-1s, --%-10s %s%s\n" "$short" "$name" "$desc" "$suffix"
+    if [[ -n "$short" ]]; then
+      printf "  -%-1s, --%-10s %s%s\n" "$short" "$name" "$desc" "$suffix"
+    else
+      printf "      --%-10s %s%s\n" "$name" "$desc" "$suffix"
+    fi
   fi
 done
 

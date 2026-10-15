@@ -117,8 +117,11 @@ for name in "${REQUIRED[@]}"; do
     def="${DEF[$name]:-}"
 
     prompt="$name"
-    if [[ "$range" != "-" && "$def" != "-" ]]; then
-      prompt+=" ($range, default $def)"
+    if [[ -n "$range" && "$range" != "-" ]]; then
+      prompt+=" ($range)"
+    fi
+    if [[ -n "$def" && "$def" != "-" ]]; then
+      prompt+=" [$def]"
     fi
     prompt+=": "
 

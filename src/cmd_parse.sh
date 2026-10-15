@@ -73,7 +73,7 @@ while [[ $# -gt 0 ]]; do
   matched=false
   for p in "${PARAMS[@]}"; do
     IFS=',' read -r name short desc range def <<< "$p"
-    if [[ "$1" == "--$name" || "$1" == "-$short" ]]; then
+    if [[ "$1" == "--$name" || ( -n "$short" && "$1" == "-$short" ) ]]; then
       val="${2:-}"
       validate_value "$name" "$val"
       V["$name"]="$val"

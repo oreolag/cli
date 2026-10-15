@@ -33,6 +33,7 @@ source "$CMD_SPEC"
 mandatory_var="${KEY}_FLAGS_MANDATORY"
 mandatory="${!mandatory_var:-}"
 
-[[ -n "$mandatory" ]] || { echo "cmd_mandatory_flags_read: missing $mandatory_var" >&2; exit 1; }
+# An explicitly empty list is valid for commands with no required flags.
+declare -p "$mandatory_var" >/dev/null 2>&1 || { echo "cmd_mandatory_flags_read: missing $mandatory_var" >&2; exit 1; }
 
 echo "$mandatory"

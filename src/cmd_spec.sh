@@ -34,17 +34,22 @@ BOOKING_LIST_DESCRIPTION="List bookings"
 BOOKING_LIST_FLAGS=(
   "all,a,Show all booking services,-,-"
   "server,s,Filter by managed server,-,-"
-  "date,d,Booking date (YYYY-MM-DD),-,$(date +%F)"
+  "date,,Booking date (YYYY-MM-DD),-,$(date +%F)"
 )
+BOOKING_LIST_FLAGS_MANDATORY=""
 BOOKING_ADD_DESCRIPTION="Add a booking"
 BOOKING_ADD_FLAGS=(
-  "server,s,Managed server to book,-,-"
   "date,d,Booking date (YYYY-MM-DD),-,$(date +%F)"
-  "start,t,Start time (HH:MM),-,-"
-  "duration,D,Duration in hours (limited by booking policy),-,-"
-  "shared,u,User to share the booking with,-,-"
+  "duration,,Duration in hours (limited by booking policy),-,1"
+  "server,s,Managed server to book,-,-"
+  "shared,,User to share the booking with,-,-"
+  "start,,Start time (HH:MM),-,$(
+    read -r hour minute < <(date '+%H %M')
+    next_minutes=$(( (10#$hour * 60 + 10#$minute) / 5 * 5 + 5 ))
+    printf '%02d:%02d' "$(( next_minutes / 60 % 24 ))" "$(( next_minutes % 60 ))"
+  )"
 )
-BOOKING_ADD_FLAGS_MANDATORY="server,start,duration"
+BOOKING_ADD_FLAGS_MANDATORY="server,start"
 BOOKING_SHARE_DESCRIPTION="Share a booking"
 BOOKING_SHARE_FLAGS=(
   "server,s,Managed server of the active or next booking,-,-"
@@ -110,7 +115,6 @@ GET_MAC_FLAGS=(
   "type,t,Device type,accel|endata,endata"
 )
 GET_MAC_FLAGS_MANDATORY="numa,device" #"numa,type,device,port"
-
 
 # ifconfig 
 IFCONFIG_DESCRIPTION="Data-plane network interface configuration"

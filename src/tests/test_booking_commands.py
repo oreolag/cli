@@ -10,6 +10,7 @@ import unittest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
+BASH_MAJOR = int(subprocess.check_output(["bash", "-c", "echo ${BASH_VERSINFO[0]}"], text=True))
 
 
 class BookingCommandsTest(unittest.TestCase):
@@ -18,7 +19,7 @@ class BookingCommandsTest(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.db = Path(self.temp.name) / "booking.yml"
         self.local = socket.gethostname().split(".")[0]
-        self.env = {**os.environ, "BOOKING_DB_FILE": str(self.db), "ODEV_PATH": str(ROOT)}
+        self.env = {**os.environ, "BOOKING_DB_FILE": str(self.db), "ODEV_PATH": str(ROOT), "TERM": "xterm"}
 
     def inventory(self, name, machines):
         self.db.write_text(yaml.safe_dump({"servers": [{
@@ -30,16 +31,27 @@ class BookingCommandsTest(unittest.TestCase):
         return subprocess.run(["bash", str(ROOT / script), *args],
                               env=self.env, capture_output=True, text=True)
 
+    @unittest.skipIf(BASH_MAJOR < 4, "Parsing and prompts require Bash 4+ (odev targets Ubuntu)")
     def test_actions_on_booking_and_managed_hosts(self):
+        cases = {
+            "list": (["--all", "1", "--date", "2026-10-15", "--server", "incus-01"],
+                     ["1", "2026-10-15", "incus-01"]),
+            "add": (["--date", "2026-10-15", "--duration", "2", "--server", "incus-01",
+                     "--shared", "javier", "--start", "18:12"],
+                    ["2026-10-15", "2", "incus-01", "javier", "18:12"]),
+            "share": (["--booking-id", "391", "--server", "incus-01", "--user", "javier"],
+                      ["391", "incus-01", "javier"]),
+            "cancel": (["--booking-id", "391", "--server", "incus-01"], ["391", "incus-01"]),
+        }
         for name, machines in [(self.local, ["example-managed"]),
                                ("example-booking", [self.local])]:
             self.inventory(name, machines)
             for action in ["list", "add", "share", "cancel"]:
                 with self.subTest(host=name, action=action):
-                    args = ["--server", "incus-01", "--shared", "a user", "--date", ""]
+                    args, values = cases[action]
                     result = self.run_command(*args, script=f"cmd/booking/{action}.sh")
                     self.assertEqual(result.returncode, 0, result.stderr)
-                    self.assertEqual(result.stdout, "\n".join(["odev booking " + action, *args]) + "\n")
+                    self.assertEqual(result.stdout, "\n".join(values) + "\n")
 
     def test_unlisted_and_empty_inventory(self):
         for data in [{"servers": []}, {"servers": [{"name": "other-booking",
@@ -75,7 +87,7 @@ class BookingCommandsTest(unittest.TestCase):
             env=self.env, capture_output=True, text=True)
         self.assertNotEqual(unknown.returncode, 0)
 
-    def test_flag_specs_and_placeholder_arguments(self):
+    def test_flag_specs_and_mandatory_flags(self):
         self.inventory(self.local, [])
         expected = {
             "list": ["all", "server", "date"],
@@ -94,15 +106,15 @@ class BookingCommandsTest(unittest.TestCase):
                      "BOOKING_" + action.upper(), "--db", str(spec)],
                     env={**self.env, "TERM": "xterm"}, capture_output=True, text=True)
                 self.assertEqual(flags.returncode, 0, flags.stderr)
-                self.assertEqual([line.split(",")[0] for line in flags.stdout.splitlines()], names)
-                args = []
-                for name in names:
-                    args.append("--" + name)
-                    if name != "all":
-                        args.append("test-value")
-                result = self.run_command(*args, script=f"cmd/booking/{action}.sh")
-                self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertEqual(result.stdout, "\n".join(["odev booking " + action, *args]) + "\n")
+                self.assertCountEqual([line.split(",")[0] for line in flags.stdout.splitlines()], names)
+                mandatory = subprocess.run(
+                    ["bash", str(ROOT / "src/cmd_mandatory_flags_read.sh"), str(ROOT),
+                     "BOOKING_" + action.upper(), "--db", str(spec)],
+                    env=self.env, capture_output=True, text=True)
+                self.assertEqual(mandatory.returncode, 0, mandatory.stderr)
+                expected_mandatory = {"list": "", "add": "server,start,duration",
+                                      "share": "server,user", "cancel": "server,booking-id"}
+                self.assertEqual(mandatory.stdout.strip(), expected_mandatory[action])
 
     def test_startup_survives_missing_booking_configuration(self):
         checkout = Path(self.temp.name) / "cli"
