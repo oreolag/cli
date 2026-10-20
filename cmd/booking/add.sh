@@ -56,6 +56,17 @@ if [[ ! "$start" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
   exit 1
 fi
 
+# validate the combined date and time in the local timezone (odev targets Ubuntu)
+if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
+   ! start_timestamp=$(date -d "$date $start" +%s 2>/dev/null); then
+  echo "Invalid start time: $date $start" >&2
+  exit 1
+fi
+if (( start_timestamp <= $(date +%s) )); then
+  echo "Invalid start time: $date $start" >&2
+  exit 1
+fi
+
 # Placeholder: echo parsed parameter values.
 echo "$date"
 echo "$duration"
