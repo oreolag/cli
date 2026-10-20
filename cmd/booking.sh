@@ -19,6 +19,11 @@ KEY="$(printf '%s' "$COMMAND" | tr '[:lower:]' '[:upper:]')"
 command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 mapfile -t commands < <("$ODEV_PATH/src/cmd_subcommands_read.sh" "$ODEV_PATH" "$KEY")
 
+# The timezone is already shown in the heading.
+for i in "${!commands[@]}"; do
+  commands[$i]="${commands[$i]%%" (timezone: "*}"
+done
+
 # print help (subcommands are resolved by odev.sh)
 print_range="-"
 print_default="-"

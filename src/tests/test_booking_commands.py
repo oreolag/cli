@@ -49,8 +49,8 @@ print(now.astimezone(ZoneInfo(os.environ.get('TZ', 'UTC'))).strftime(sys.argv[1]
                  "PATH": self.temp.name + os.pathsep + os.environ["PATH"]},
             capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("start,,Start time (HH:MM; Europe/Madrid),-,13:45", result.stdout)
-        self.assertIn("date,d,Booking date (YYYY-MM-DD; Europe/Madrid),-,2026-10-20", result.stdout)
+        self.assertIn("start,,Start time (HH:MM),-,13:45", result.stdout)
+        self.assertIn("date,d,Booking date (YYYY-MM-DD),-,2026-10-20", result.stdout)
 
     def test_booking_add_validates_supplied_start_before_prompt(self):
         # Exercise the command's actual validation blocks with a fixed clock.

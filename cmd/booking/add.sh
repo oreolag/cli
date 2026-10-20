@@ -70,7 +70,6 @@ if [[ "$has_start" == true ]]; then
 fi
 
 # run interactive prompt
-echo "Booking timezone: $BOOKING_TIMEZONE" >&2
 parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
 # read flags
