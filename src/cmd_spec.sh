@@ -39,12 +39,12 @@ BOOKING_LIST_FLAGS=(
 )
 BOOKING_LIST_FLAGS_MANDATORY=""
 # add
-BOOKING_ADD_DESCRIPTION="Add a booking"
+BOOKING_ADD_DESCRIPTION="Reserve a server for a specific time"
 BOOKING_ADD_FLAGS=(
   "date,d,Booking date (YYYY-MM-DD),-,$(date +%F)"
   "duration,,Duration in hours,-,1"
   "server,s,Server inventory name,-,-"
-  "shared,,User to share the booking with,-,-"
+  "shared,,Users to share the booking with (comma-separated),-,-"
   "start,,Start time (HH:MM),-,$(
     read -r hour minute < <(date '+%H %M')
     next_minutes=$(( (10#$hour * 60 + 10#$minute) / 5 * 5 + 5 ))
@@ -53,21 +53,20 @@ BOOKING_ADD_FLAGS=(
 )
 BOOKING_ADD_FLAGS_MANDATORY="server,start"
 # cancel
-BOOKING_CANCEL_DESCRIPTION="Cancel an active booking"
+BOOKING_CANCEL_DESCRIPTION="Cancel an active or future booking"
 BOOKING_CANCEL_FLAGS=(
-  "server,s,Server inventory name,-,-"
-  "booking-id,b,Booking ID to cancel,-,-"
+  "booking,b,Booking ID to cancel (defaults to your next upcoming booking),-,-"
 )
-BOOKING_CANCEL_FLAGS_MANDATORY="server,booking-id"
+# Without flags select your next upcoming booking on the current booking service.
+# Cancellation requires confirmation and follows the existing session handover rule.
+BOOKING_CANCEL_FLAGS_MANDATORY=""
 # share
-BOOKING_SHARE_DESCRIPTION="Share an active booking with another user"
+BOOKING_SHARE_DESCRIPTION="Share your active or next booking"
 BOOKING_SHARE_FLAGS=(
   "server,s,Server inventory name,-,-"
-  "user,u,User to share the booking with,-,-"
-  "booking-id,b,Select a specific booking instead of the active or next one,-,-"
+  "users,u,Users to add to the booking (comma-separated),-,-"
 )
-BOOKING_SHARE_FLAGS_MANDATORY="server,user"
-
+BOOKING_SHARE_FLAGS_MANDATORY="server,users"
 
 # build
 BUILD_DESCRIPTION="Project build using the workflow recipe"
