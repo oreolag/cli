@@ -159,8 +159,8 @@ else:
     @unittest.skipIf(BASH_MAJOR < 4, "Parsing and prompts require Bash 4+ (odev targets Ubuntu)")
     def test_actions_on_booking_and_managed_hosts(self):
         cases = {
-            "list": (["--all", "1", "--date", "2026-10-15", "--server", "incus-01"],
-                     ["1", "2026-10-15", "incus-01"]),
+            "list": (["--all", "1", "--date", "2026-10-15"],
+                     ["1", "2026-10-15"]),
             "add": (["--date", "2026-10-15", "--duration", "2", "--server", "incus-01",
                      "--shared", "javier", "--start", "18:12"],
                     ["2026-10-15", "2", "incus-01", "javier", "18:12"]),
@@ -215,7 +215,7 @@ else:
     def test_flag_specs_and_mandatory_flags(self):
         self.inventory(self.local, [])
         expected = {
-            "list": ["all", "server", "date"],
+            "list": ["all", "date"],
             "add": ["server", "date", "start", "duration", "shared"],
             "share": ["booking", "users"],
             "cancel": ["booking"],

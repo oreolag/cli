@@ -46,9 +46,7 @@ fi
 # assign flags
 all=${V[all]}
 date=${V[date]}
-server=${V[server]}
 
 # Placeholder: echo parsed parameter values.
 echo "$all"
 echo "$date"
-echo "$server"

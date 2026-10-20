@@ -40,7 +40,6 @@ if [[ "${KEY:-BOOKING}" == BOOKING* ]]; then
   BOOKING_LIST_FLAGS=(
     "all,a,Show all booking services,-,-"
     "date,d,Booking date (YYYY-MM-DD),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
-    "server,s,Server inventory name,-,-"
   )
   BOOKING_LIST_FLAGS_MANDATORY=""
   # add
