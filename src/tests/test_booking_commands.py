@@ -164,9 +164,9 @@ else:
             "add": (["--date", "2026-10-15", "--duration", "2", "--server", "incus-01",
                      "--shared", "javier", "--start", "18:12"],
                     ["2026-10-15", "2", "incus-01", "javier", "18:12"]),
-            "share": (["--booking-id", "391", "--server", "incus-01", "--user", "javier"],
-                      ["391", "incus-01", "javier"]),
-            "cancel": (["--booking-id", "391", "--server", "incus-01"], ["391", "incus-01"]),
+            "share": (["--booking", "391", "--users", "javier,quico"],
+                      ["391", "javier,quico"]),
+            "cancel": (["--booking", "391"], ["391"]),
         }
         for name, machines in [(self.local, ["example-managed"]),
                                ("example-booking", [self.local])]:

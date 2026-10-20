@@ -44,11 +44,9 @@ if [[ -n "$parsed_flags" ]]; then
 fi
 
 # assign flags
-booking_id=${V[booking-id]}
-server=${V[server]}
-user=${V[user]}
+booking=${V[booking]}
+users=${V[users]}
 
 # Placeholder: echo parsed parameter values.
-echo "$booking_id"
-echo "$server"
-echo "$user"
+echo "$booking"
+echo "$users"
