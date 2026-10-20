@@ -30,18 +30,20 @@ normal=$(tput sgr0)
 # booking (action scripts currently echo parameters only)
 BOOKING_DESCRIPTION="List, add, share or cancel bookings"
 BOOKING_FLAGS=()
-BOOKING_LIST_DESCRIPTION="List bookings"
+# list
+BOOKING_LIST_DESCRIPTION="List active bookings"
 BOOKING_LIST_FLAGS=(
   "all,a,Show all booking services,-,-"
-  "server,s,Filter by managed server,-,-"
-  "date,,Booking date (YYYY-MM-DD),-,$(date +%F)"
+  "date,d,Booking date (YYYY-MM-DD),-,$(date +%F)"
+  "server,s,Server inventory name,-,-"
 )
 BOOKING_LIST_FLAGS_MANDATORY=""
+# add
 BOOKING_ADD_DESCRIPTION="Add a booking"
 BOOKING_ADD_FLAGS=(
   "date,d,Booking date (YYYY-MM-DD),-,$(date +%F)"
-  "duration,,Duration in hours (limited by booking policy),-,1"
-  "server,s,Managed server to book,-,-"
+  "duration,,Duration in hours,-,1"
+  "server,s,Server inventory name,-,-"
   "shared,,User to share the booking with,-,-"
   "start,,Start time (HH:MM),-,$(
     read -r hour minute < <(date '+%H %M')
@@ -50,19 +52,22 @@ BOOKING_ADD_FLAGS=(
   )"
 )
 BOOKING_ADD_FLAGS_MANDATORY="server,start"
-BOOKING_SHARE_DESCRIPTION="Share a booking"
+# cancel
+BOOKING_CANCEL_DESCRIPTION="Cancel an active booking"
+BOOKING_CANCEL_FLAGS=(
+  "server,s,Server inventory name,-,-"
+  "booking-id,b,Booking ID to cancel,-,-"
+)
+BOOKING_CANCEL_FLAGS_MANDATORY="server,booking-id"
+# share
+BOOKING_SHARE_DESCRIPTION="Share an active booking with another user"
 BOOKING_SHARE_FLAGS=(
-  "server,s,Managed server of the active or next booking,-,-"
+  "server,s,Server inventory name,-,-"
   "user,u,User to share the booking with,-,-"
   "booking-id,b,Select a specific booking instead of the active or next one,-,-"
 )
 BOOKING_SHARE_FLAGS_MANDATORY="server,user"
-BOOKING_CANCEL_DESCRIPTION="Cancel a booking"
-BOOKING_CANCEL_FLAGS=(
-  "server,s,Managed server of the booking,-,-"
-  "booking-id,b,Booking ID to cancel,-,-"
-)
-BOOKING_CANCEL_FLAGS_MANDATORY="server,booking-id"
+
 
 # build
 BUILD_DESCRIPTION="Project build using the workflow recipe"
