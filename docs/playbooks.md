@@ -9,7 +9,7 @@ Authenticate with GitHub CLI and use an account in `odev-developers`:
 
 ```bash
 gh auth login
-odev new playbook --name server_info
+odev new playbook --name my_playbook
 ```
 
 On first use, `odev` creates or reuses your fork of `oreolag/playbooks`, clones it
@@ -21,8 +21,8 @@ The command creates two files and commits/pushes them to your fork:
 
 ```text
 ~/odev/playbooks/
-  server_info.yml
-  server_info_vars.yml
+  my_playbook.yml
+  my_playbook_vars.yml
 ```
 
 Later playbooks reuse the checkout. Choose a name that does not already exist in
@@ -30,7 +30,7 @@ your checkout, fork or community playbooks. Names cannot end in `_vars`.
 
 ## Implement
 
-Edit `~/odev/playbooks/server_info.yml`. Keep `oreol_target` so `--hosts` selects
+Edit `~/odev/playbooks/my_playbook.yml`. Keep `oreol_target` so `--hosts` selects
 the target, and load the companion variables file:
 
 ```yaml
@@ -41,7 +41,7 @@ the target, and load the companion variables file:
   gather_facts: true
 
   vars_files:
-    - server_info_vars.yml
+    - my_playbook_vars.yml
 
   tasks:
     - name: Show hostname
@@ -53,7 +53,7 @@ the target, and load the companion variables file:
         msg: "Value: {{ value }}"
 ```
 
-Set defaults in `~/odev/playbooks/server_info_vars.yml`:
+Set defaults in `~/odev/playbooks/my_playbook_vars.yml`:
 
 ```yaml
 ---
@@ -67,10 +67,10 @@ permissions, with the appropriate access configured for the target servers.
 
 ```bash
 odev run playbook --help
-odev run playbook --name server_info
-odev run playbook --name server_info --hosts incus-01
-odev run playbook --name server_info --hosts incus_hosts --inventory ~/my_oreol_mgmt/hosts
-odev run playbook --name server_info --vars "value=10"
+odev run playbook --name my_playbook
+odev run playbook --name my_playbook --hosts incus-01
+odev run playbook --name my_playbook --hosts incus_hosts --inventory ~/my_oreol_mgmt/hosts
+odev run playbook --name my_playbook --vars "value=10"
 ```
 
 The default target is `local`. `--hosts` accepts an inventory host or group;
@@ -97,9 +97,9 @@ files. `odev new playbook --name` takes a new name rather than an existing one.
 ## Share
 
 ```bash
-odev gh diff --playbook server_info
-odev gh push --playbook server_info
-odev gh pr --playbook server_info
+odev gh diff --playbook my_playbook
+odev gh push --playbook my_playbook
+odev gh pr --playbook my_playbook
 ```
 
 Review your changes, commit/push the playbook and its companion variables file to
@@ -114,7 +114,7 @@ odev gh pull --playbooks
 ## Delete
 
 ```bash
-odev delete playbook --name server_info
+odev delete playbook --name my_playbook
 ```
 
 This removes the playbook and its tracked companion variables file, commits the
