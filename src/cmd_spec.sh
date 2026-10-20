@@ -65,10 +65,11 @@ if [[ "${KEY:-BOOKING}" == BOOKING* ]]; then
   # share
   BOOKING_SHARE_DESCRIPTION="Share your booking with other users"
   BOOKING_SHARE_FLAGS=(
+    "add,a,User to add to the booking,-,-"
     "booking,b,Booking ID to share,-,-"
-    "users,u,Users to add to the booking (comma-separated),-,-"
+    "remove,r,User to remove from the booking,-,-"
   )
-  BOOKING_SHARE_FLAGS_MANDATORY="booking,users"
+  BOOKING_SHARE_FLAGS_MANDATORY="booking"
 fi
 
 # build

@@ -16,6 +16,42 @@ BASH_MAJOR = int(subprocess.check_output(["bash", "-c", "echo ${BASH_VERSINFO[0]
 
 
 class BookingCommandsTest(unittest.TestCase):
+    def test_share_user_validation_before_prompt(self):
+        source = (ROOT / "cmd/booking/share.sh").read_text()
+        checks = source.split("# validate supplied users before asking for missing fields\n", 1)[1].split("# run interactive prompt", 1)[0]
+        identity = Path(self.temp.name) / "id"
+        identity.write_text('''#!/bin/bash
+case "$3" in
+  javier|quico) echo "users odev-users" ;;
+  outsider) echo "users" ;;
+  *) exit 1 ;;
+esac
+''')
+        identity.chmod(0o755)
+        cases = [
+            ("add=javier", None, "booking,add"),
+            ("remove=quico", None, "booking,remove"),
+            ("", None, "booking,add"),
+            ("add=javier\nremove=quico", "Invalid flags: --add and --remove", None),
+            ("add=javier,quico", "Invalid user: javier,quico", None),
+            ("remove=outsider", "Invalid user: outsider", None),
+            ("add=missing", "Invalid user: missing", None),
+        ]
+        for flags, error, mandatory in cases:
+            with self.subTest(flags=flags):
+                result = subprocess.run(
+                    ["bash", "-c", 'parsed_flags="$1"; mandatory_flags=booking\n' + checks +
+                     '\necho "DIALOG:$mandatory_flags"\n', "test", flags],
+                    env={**self.env, "PATH": self.temp.name + os.pathsep + os.environ["PATH"]},
+                    capture_output=True, text=True)
+                if error:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(error, result.stderr)
+                    self.assertNotIn("DIALOG", result.stdout)
+                else:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertIn("DIALOG:" + mandatory, result.stdout)
+
     def test_description_batch_and_lazy_booking_metadata(self):
         checkout = Path(self.temp.name) / "metadata"
         (checkout / "src").mkdir(parents=True)
@@ -160,6 +196,10 @@ else:
 
     @unittest.skipIf(BASH_MAJOR < 4, "Parsing and prompts require Bash 4+ (odev targets Ubuntu)")
     def test_actions_on_booking_and_managed_hosts(self):
+        identity = Path(self.temp.name) / "id"
+        identity.write_text('#!/bin/bash\nif [[ "$1" == -nG && "$3" == javier ]]; then echo odev-users; else /usr/bin/id "$@"; fi\n')
+        identity.chmod(0o755)
+        self.env["PATH"] = self.temp.name + os.pathsep + os.environ["PATH"]
         future_date = (datetime.now(timezone.utc) + timedelta(days=1)).date().isoformat()
         cases = {
             "list": (["--all", "1", "--date", "2026-10-15"],
@@ -167,8 +207,8 @@ else:
             "add": (["--date", future_date, "--duration", "2", "--server", "incus-01",
                      "--shared", "javier", "--start", "18:12"],
                     [future_date, "2", "incus-01", "javier", "18:12"]),
-            "share": (["--booking", "391", "--users", "javier,quico"],
-                      ["391", "javier,quico"]),
+            "share": (["--booking", "391", "--add", "javier"],
+                      ["javier", "391", "-"]),
             "cancel": (["--booking", "391"], ["391"]),
         }
         for name, machines in [(self.local, ["example-managed"]),
@@ -220,7 +260,7 @@ else:
         expected = {
             "list": ["all", "date"],
             "add": ["server", "date", "start", "duration", "shared"],
-            "share": ["booking", "users"],
+            "share": ["add", "booking", "remove"],
             "cancel": ["booking"],
         }
         # Isolate booking definitions from unrelated workflow discovery.
@@ -241,7 +281,7 @@ else:
                     env=self.env, capture_output=True, text=True)
                 self.assertEqual(mandatory.returncode, 0, mandatory.stderr)
                 expected_mandatory = {"list": "", "add": "server,start",
-                                      "share": "booking,users", "cancel": "booking"}
+                                      "share": "booking", "cancel": "booking"}
                 self.assertEqual(mandatory.stdout.strip(), expected_mandatory[action])
 
     def test_startup_survives_missing_booking_configuration(self):
