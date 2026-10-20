@@ -1,4 +1,5 @@
 """Run with PyYAML installed: python3 -m unittest discover -s src/tests."""
+from datetime import datetime, timedelta, timezone
 import os
 from pathlib import Path
 import socket
@@ -48,7 +49,8 @@ class BookingCommandsTest(unittest.TestCase):
         for key, name in [("BUILD", "build"), ("NEW", "new"), ("GH", "gh_description")]:
             self.assertEqual(metadata("cmd_description_read.sh", key).strip(), names[name])
         self.assertFalse((checkout / "timezone_reads").exists())
-        self.assertIn("Europe/Madrid", metadata("cmd_description_read.sh", "BOOKING_ADD"))
+        self.assertIn("Reserve a server for a specific time", metadata("cmd_description_read.sh", "BOOKING_ADD"))
+        self.assertEqual((checkout / "timezone_reads").read_text().splitlines(), ["read"])
         self.assertIn("start,,", metadata("cmd_flags_read.sh", "BOOKING_ADD"))
         self.assertEqual(metadata("cmd_mandatory_flags_read.sh", "BOOKING_ADD").strip(), "server,start")
 
@@ -158,12 +160,13 @@ else:
 
     @unittest.skipIf(BASH_MAJOR < 4, "Parsing and prompts require Bash 4+ (odev targets Ubuntu)")
     def test_actions_on_booking_and_managed_hosts(self):
+        future_date = (datetime.now(timezone.utc) + timedelta(days=1)).date().isoformat()
         cases = {
             "list": (["--all", "1", "--date", "2026-10-15"],
                      ["1", "2026-10-15"]),
-            "add": (["--date", "2026-10-15", "--duration", "2", "--server", "incus-01",
+            "add": (["--date", future_date, "--duration", "2", "--server", "incus-01",
                      "--shared", "javier", "--start", "18:12"],
-                    ["2026-10-15", "2", "incus-01", "javier", "18:12"]),
+                    [future_date, "2", "incus-01", "javier", "18:12"]),
             "share": (["--booking", "391", "--users", "javier,quico"],
                       ["391", "javier,quico"]),
             "cancel": (["--booking", "391"], ["391"]),
