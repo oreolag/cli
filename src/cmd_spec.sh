@@ -55,18 +55,16 @@ BOOKING_ADD_FLAGS_MANDATORY="server,start"
 # cancel
 BOOKING_CANCEL_DESCRIPTION="Cancel an active or future booking"
 BOOKING_CANCEL_FLAGS=(
-  "booking,b,Booking ID to cancel (defaults to your next upcoming booking),-,-"
+  "booking,b,Booking ID to cancel,-,-"
 )
-# Without flags select your next upcoming booking on the current booking service.
-# Cancellation requires confirmation and follows the existing session handover rule.
-BOOKING_CANCEL_FLAGS_MANDATORY=""
+BOOKING_CANCEL_FLAGS_MANDATORY="booking"
 # share
 BOOKING_SHARE_DESCRIPTION="Share your active or next booking"
 BOOKING_SHARE_FLAGS=(
-  "server,s,Server inventory name,-,-"
+  "booking,b,Booking ID to share,-,-"
   "users,u,Users to add to the booking (comma-separated),-,-"
 )
-BOOKING_SHARE_FLAGS_MANDATORY="server,users"
+BOOKING_SHARE_FLAGS_MANDATORY="booking,users"
 
 # build
 BUILD_DESCRIPTION="Project build using the workflow recipe"
