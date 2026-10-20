@@ -6,6 +6,7 @@ set -euo pipefail
 #
 # Output:
 #   DESCRIPTION text only
+#   KEY=DESCRIPTION lines when KEY is ALL (main help)
 #
 # Examples:
 #   cmd_description_read.sh /opt/odev NEW
@@ -33,6 +34,17 @@ done
 
 # shellcheck source=/dev/null
 source "$CMD_SPEC"
+
+if [[ "$KEY" == "ALL" ]]; then
+  names=(build get ifconfig new program run set update validate examine gh_description)
+  i=0
+  for key in BUILD GET IFCONFIG NEW PROGRAM RUN SET UPDATE VALIDATE EXAMINE GH; do
+    desc_var="${key}_DESCRIPTION"
+    echo "${names[$i]}=${!desc_var}"
+    i=$((i + 1))
+  done
+  exit 0
+fi
 
 desc_var="${KEY}_DESCRIPTION"
 desc="${!desc_var:-}"

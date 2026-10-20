@@ -20,17 +20,10 @@ PLAYBOOKS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/var
 WORKFLOWS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
 
 # command descriptions
-build="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "BUILD")"
-get="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "GET")"
-ifconfig="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "IFCONFIG")"
-new="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "NEW")"
-program="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "PROGRAM")"
-run="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "RUN")"
-set="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "SET")"
-update="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "UPDATE")"
-validate="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "VALIDATE")"
-examine="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "EXAMINE")"
-gh_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "GH")"
+command_descriptions="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "ALL")"
+while IFS='=' read -r key description; do
+  printf -v "$key" '%s' "$description"
+done <<< "$command_descriptions"
 
 # check on GitHub CLI
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"

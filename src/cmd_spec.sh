@@ -28,46 +28,49 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # booking (action scripts currently echo parameters only)
-if [[ -z "${BOOKING_TIMEZONE:-}" ]]; then
-  BOOKING_TIMEZONE="$(bash "$ODEV_PATH/src/booking_timezone.sh" "$ODEV_PATH" 2>/dev/null)" || BOOKING_TIMEZONE="UTC"
+# Metadata readers set KEY; unrelated commands do not need booking defaults.
+if [[ "${KEY:-BOOKING}" == BOOKING* ]]; then
+  if [[ -z "${BOOKING_TIMEZONE:-}" ]]; then
+    BOOKING_TIMEZONE="$(bash "$ODEV_PATH/src/booking_timezone.sh" "$ODEV_PATH" 2>/dev/null)" || BOOKING_TIMEZONE="UTC"
+  fi
+  BOOKING_DESCRIPTION="Add, cancel, list or share bookings" # (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
+  BOOKING_FLAGS=()
+  # list
+  BOOKING_LIST_DESCRIPTION="List active bookings" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
+  BOOKING_LIST_FLAGS=(
+    "all,a,Show all booking services,-,-"
+    "date,d,Booking date (YYYY-MM-DD),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
+    "server,s,Server inventory name,-,-"
+  )
+  BOOKING_LIST_FLAGS_MANDATORY=""
+  # add
+  BOOKING_ADD_DESCRIPTION="Reserve a server for a specific time" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
+  BOOKING_ADD_FLAGS=(
+    "date,d,Booking date (YYYY-MM-DD),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
+    "duration,,Duration in hours,-,1"
+    "server,s,Server inventory name,-,-"
+    "shared,,Users to share the booking with (comma-separated),-,-"
+    "start,,Start time (HH:MM),-,$(
+      read -r hour minute < <(TZ="$BOOKING_TIMEZONE" date '+%H %M')
+      next_minutes=$(( (10#$hour * 60 + 10#$minute) / 5 * 5 + 5 ))
+      printf '%02d:%02d' "$(( next_minutes / 60 % 24 ))" "$(( next_minutes % 60 ))"
+    )"
+  )
+  BOOKING_ADD_FLAGS_MANDATORY="server,start"
+  # cancel
+  BOOKING_CANCEL_DESCRIPTION="Cancel an active or future booking"
+  BOOKING_CANCEL_FLAGS=(
+    "booking,b,Booking ID to cancel,-,-"
+  )
+  BOOKING_CANCEL_FLAGS_MANDATORY="booking"
+  # share
+  BOOKING_SHARE_DESCRIPTION="Share your booking with other users"
+  BOOKING_SHARE_FLAGS=(
+    "booking,b,Booking ID to share,-,-"
+    "users,u,Users to add to the booking (comma-separated),-,-"
+  )
+  BOOKING_SHARE_FLAGS_MANDATORY="booking,users"
 fi
-BOOKING_DESCRIPTION="List, add, share or cancel bookings (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})"
-BOOKING_FLAGS=()
-# list
-BOOKING_LIST_DESCRIPTION="List active bookings (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})"
-BOOKING_LIST_FLAGS=(
-  "all,a,Show all booking services,-,-"
-  "date,d,Booking date (YYYY-MM-DD),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
-  "server,s,Server inventory name,-,-"
-)
-BOOKING_LIST_FLAGS_MANDATORY=""
-# add
-BOOKING_ADD_DESCRIPTION="Reserve a server for a specific time (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})"
-BOOKING_ADD_FLAGS=(
-  "date,d,Booking date (YYYY-MM-DD),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
-  "duration,,Duration in hours,-,1"
-  "server,s,Server inventory name,-,-"
-  "shared,,Users to share the booking with (comma-separated),-,-"
-  "start,,Start time (HH:MM),-,$(
-    read -r hour minute < <(TZ="$BOOKING_TIMEZONE" date '+%H %M')
-    next_minutes=$(( (10#$hour * 60 + 10#$minute) / 5 * 5 + 5 ))
-    printf '%02d:%02d' "$(( next_minutes / 60 % 24 ))" "$(( next_minutes % 60 ))"
-  )"
-)
-BOOKING_ADD_FLAGS_MANDATORY="server,start"
-# cancel
-BOOKING_CANCEL_DESCRIPTION="Cancel an active or future booking (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})"
-BOOKING_CANCEL_FLAGS=(
-  "booking,b,Booking ID to cancel,-,-"
-)
-BOOKING_CANCEL_FLAGS_MANDATORY="booking"
-# share
-BOOKING_SHARE_DESCRIPTION="Share your active or next booking (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})"
-BOOKING_SHARE_FLAGS=(
-  "booking,b,Booking ID to share,-,-"
-  "users,u,Users to add to the booking (comma-separated),-,-"
-)
-BOOKING_SHARE_FLAGS_MANDATORY="booking,users"
 
 # build
 BUILD_DESCRIPTION="Project build using the workflow recipe"

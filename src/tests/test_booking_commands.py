@@ -15,6 +15,43 @@ BASH_MAJOR = int(subprocess.check_output(["bash", "-c", "echo ${BASH_VERSINFO[0]
 
 
 class BookingCommandsTest(unittest.TestCase):
+    def test_description_batch_and_lazy_booking_metadata(self):
+        checkout = Path(self.temp.name) / "metadata"
+        (checkout / "src").mkdir(parents=True)
+        workflow = checkout / "users/workflows/example"
+        workflow.mkdir(parents=True)
+        (workflow / "cmd_spec.sh").write_text(":\n")
+        source = (ROOT / "src/cmd_spec.sh").read_text()
+        (checkout / "src/cmd_spec.sh").write_text(
+            'echo source >> "$ODEV_PATH/spec_reads"\n' + source)
+        for name in ["cmd_description_read.sh", "cmd_flags_read.sh", "cmd_mandatory_flags_read.sh"]:
+            (checkout / "src" / name).symlink_to(ROOT / "src" / name)
+        scripts = {
+            "read_yml.py": 'echo "$ODEV_PATH/users/workflows"',
+            "booking_timezone.sh": 'echo read >> "$ODEV_PATH/timezone_reads"\necho Europe/Madrid',
+        }
+        for name, body in scripts.items():
+            helper = checkout / "src" / name
+            helper.write_text("#!/bin/bash\n" + body + "\n")
+            helper.chmod(0o755)
+        env = {**self.env, "ODEV_PATH": str(checkout), "BOOKING_TIMEZONE": ""}
+        def metadata(script, key):
+            result = subprocess.run(["bash", str(checkout / "src" / script), str(checkout), key],
+                                    env=env, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            return result.stdout
+        batch = metadata("cmd_description_read.sh", "ALL")
+        self.assertEqual(len(batch.splitlines()), 11)
+        self.assertEqual((checkout / "spec_reads").read_text().splitlines(), ["source"])
+        self.assertFalse((checkout / "timezone_reads").exists())
+        names = dict(line.split("=", 1) for line in batch.splitlines())
+        for key, name in [("BUILD", "build"), ("NEW", "new"), ("GH", "gh_description")]:
+            self.assertEqual(metadata("cmd_description_read.sh", key).strip(), names[name])
+        self.assertFalse((checkout / "timezone_reads").exists())
+        self.assertIn("Europe/Madrid", metadata("cmd_description_read.sh", "BOOKING_ADD"))
+        self.assertIn("start,,", metadata("cmd_flags_read.sh", "BOOKING_ADD"))
+        self.assertEqual(metadata("cmd_mandatory_flags_read.sh", "BOOKING_ADD").strip(), "server,start")
+
     def test_shared_booking_timezone(self):
         self.db.write_text("timezone: Europe/Madrid\nservers: []\n")
         result = subprocess.run(["bash", str(ROOT / "src/booking_timezone.sh"), str(ROOT)],
@@ -210,8 +247,10 @@ else:
         shutil.copy(ROOT / "odev.sh", checkout / "odev.sh")
         for name in ["is_server.sh", "read_yml.py", "booking_is_server.py", "cmdb_get.py"]:
             (checkout / "src" / name).symlink_to(ROOT / "src" / name)
+        descriptions = "\n".join(name + "=Description" for name in
+            ["build", "get", "ifconfig", "new", "program", "run", "set", "update", "validate", "examine", "gh_description"])
         for name, output in [("is_member.sh", "1"), ("required_tools_print.sh", "0"),
-                             ("cmd_description_read.sh", "Description")]:
+                             ("cmd_description_read.sh", descriptions)]:
             helper = checkout / "src" / name
             helper.write_text('#!/bin/bash\nprintf "%s\\n" "' + output + '"\n')
             helper.chmod(0o755)

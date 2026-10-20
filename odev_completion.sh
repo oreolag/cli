@@ -49,6 +49,8 @@ _odev_list_subcommands() {
 # ------------------------------------------------------------
 _odev_source_flags() {
   local base="$1"
+  local KEY
+  KEY="$(printf '%s' "${2:-GENERAL}" | tr '[:lower:]' '[:upper:]')"
 
   #if [[ -f "$base/src/command_flags.sh" ]]; then
   #  # shellcheck source=/dev/null
@@ -83,7 +85,7 @@ _odev_completions() {
   base="$(_odev_script_dir)"
   root="$base/cmd"
 
-  _odev_source_flags "$base"
+  _odev_source_flags "$base" "${words[1]:-GENERAL}"
 
   # -----------------------------
   # Global flags (odev --<TAB>)
