@@ -16,6 +16,27 @@ BASH_MAJOR = int(subprocess.check_output(["bash", "-c", "echo ${BASH_VERSINFO[0]
 
 
 class BookingCommandsTest(unittest.TestCase):
+    def test_booking_service_ids(self):
+        entry = {"name": "example-booking", "id": "01", "managed_servers": [],
+                 "maximum_duration_hours": 5}
+        cases = [([entry], True)]
+        for invalid in [None, 1, True, "", "00", "-1", "A1"]:
+            candidate = {**entry, "id": invalid}
+            if invalid is None:
+                del candidate["id"]
+            cases.append(([candidate], False))
+        for other_id in ["01", "1", "02"]:
+            cases.append(([entry, {**entry, "name": "other-booking", "id": other_id}], other_id == "02"))
+        for servers, valid in cases:
+            with self.subTest(servers=servers):
+                self.db.write_text(yaml.safe_dump({"servers": servers}))
+                result = subprocess.run(
+                    [sys.executable, str(ROOT / "src/booking_is_server.py"), "--db", str(self.db)],
+                    capture_output=True, text=True)
+                self.assertEqual(result.returncode == 0, valid, result.stderr)
+                if not valid:
+                    self.assertIn("ERROR:", result.stderr)
+
     def test_share_user_validation_before_prompt(self):
         source = (ROOT / "cmd/booking/share.sh").read_text()
         checks = source.split("# validate supplied users before asking for missing fields\n", 1)[1].split("# run interactive prompt", 1)[0]
@@ -186,7 +207,7 @@ else:
 
     def inventory(self, name, machines):
         self.db.write_text(yaml.safe_dump({"servers": [{
-            "name": name, "managed_servers": machines,
+            "name": name, "id": "01", "managed_servers": machines,
             "maximum_duration_hours": 5, "terminate_jobs": True,
         }]}))
 
@@ -223,7 +244,7 @@ else:
 
     def test_unlisted_and_empty_inventory(self):
         for data in [{"servers": []}, {"servers": [{"name": "other-booking",
-                      "managed_servers": [], "maximum_duration_hours": 5}]}]:
+                      "id": "01", "managed_servers": [], "maximum_duration_hours": 5}]}]:
             self.db.write_text(yaml.safe_dump(data))
             for script, args in [("cmd/booking.sh", ["list"]),
                                  ("cmd/booking/add.sh", [])]:

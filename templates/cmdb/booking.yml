@@ -4,6 +4,7 @@
 # Example entry:
 # servers:
 #   - name: odev-booking-01
+#     id: "01" # Permanent; never reuse for another booking database.
 #     managed_servers:
 #       - incus-01
 #       - incus-02

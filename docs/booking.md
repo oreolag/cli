@@ -15,6 +15,7 @@ Management copies `cmdb/booking.yml` to `/opt/booking.yml` on every server:
 timezone: Europe/Madrid
 servers:
   - name: odev-booking-01
+    id: "01"
     managed_servers:
       - incus-01
       - incus-02
@@ -25,6 +26,11 @@ servers:
 Each booking service manages its own reservations. Assign each managed server to
 only one service. Booking servers require normal authentication but no reservation.
 Machines listed nowhere return `Command not available: odev booking`.
+
+Service IDs are quoted positive numbers, unique across the inventory. Keep them
+unchanged when reordering entries or renaming hosts; never reuse an ID for another
+booking database. Booking IDs combine this prefix with an expanding local sequence,
+for example `01-0001`, then `01-10000` after `01-9999`.
 
 ## List
 

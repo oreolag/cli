@@ -2,6 +2,7 @@
 """Determine the local booking-server role from the shared inventory."""
 
 import argparse
+import re
 import socket
 import sys
 from pathlib import Path
@@ -35,6 +36,7 @@ def is_booking_server(path, hostname, participant=False):
     if not isinstance(data, dict) or not isinstance(data.get("servers"), list):
         raise ValueError("booking inventory must contain a servers list")
     names = set()
+    service_ids = set()
     managed = set()
     for entry in data["servers"]:
         if not isinstance(entry, dict):
@@ -45,6 +47,12 @@ def is_booking_server(path, hostname, participant=False):
         if name in names:
             raise ValueError(f"duplicate booking server: {name}")
         names.add(name)
+        service_id = entry.get("id")
+        if not isinstance(service_id, str) or not re.fullmatch(r"[0-9]+", service_id) or int(service_id) == 0:
+            raise ValueError(f"booking server id for {name} must be a quoted positive numeric string")
+        if int(service_id) in service_ids:
+            raise ValueError(f"duplicate booking server id: {service_id}")
+        service_ids.add(int(service_id))
         if not isinstance(entry.get("terminate_jobs", False), bool):
             raise ValueError(f"terminate_jobs for {name} must be true or false")
         machines = entry.get("managed_servers")
