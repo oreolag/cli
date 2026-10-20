@@ -9,4 +9,6 @@
 #       - incus-02
 #     maximum_duration_hours: 5
 #     terminate_jobs: true
+# Shared timezone for booking input and display; reservations will be stored in UTC.
+timezone: Europe/Madrid
 servers: []

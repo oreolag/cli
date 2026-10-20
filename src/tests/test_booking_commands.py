@@ -4,6 +4,7 @@ from pathlib import Path
 import socket
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -14,6 +15,93 @@ BASH_MAJOR = int(subprocess.check_output(["bash", "-c", "echo ${BASH_VERSINFO[0]
 
 
 class BookingCommandsTest(unittest.TestCase):
+    def test_shared_booking_timezone(self):
+        self.db.write_text("timezone: Europe/Madrid\nservers: []\n")
+        result = subprocess.run(["bash", str(ROOT / "src/booking_timezone.sh"), str(ROOT)],
+                                env=self.env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "Europe/Madrid")
+        self.db.write_text("timezone: invalid/timezone\nservers: []\n")
+        result = subprocess.run(["bash", str(ROOT / "src/booking_timezone.sh"), str(ROOT)],
+                                env=self.env, capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("invalid booking timezone", result.stderr)
+        self.db.write_text("servers: []\n")
+        result = subprocess.run(["bash", str(ROOT / "src/booking_timezone.sh"), str(ROOT)],
+                                env=self.env, capture_output=True, text=True)
+        self.assertEqual(result.stdout.strip(), "UTC")
+
+    def test_booking_defaults_use_inventory_timezone(self):
+        self.db.write_text("timezone: Europe/Madrid\nservers: []\n")
+        # Fix the instant at 11:42 UTC; Madrid's booking default must be 13:45.
+        clock = Path(self.temp.name) / "date"
+        clock.write_text(f"#!{sys.executable}\n" + '''import datetime, os, sys
+from zoneinfo import ZoneInfo
+now = datetime.datetime(2026, 10, 20, 11, 42, tzinfo=datetime.timezone.utc)
+print(now.astimezone(ZoneInfo(os.environ.get('TZ', 'UTC'))).strftime(sys.argv[1][1:]))
+''')
+        clock.chmod(0o755)
+        source = (ROOT / "src/cmd_spec.sh").read_text()
+        spec = Path(self.temp.name) / "spec.sh"
+        spec.write_text(source.split("# booking (", 1)[1].split("# build", 1)[0].split("\n", 1)[1])
+        result = subprocess.run(["bash", "-c", 'source "$1"; printf "%s\\n" "${BOOKING_ADD_FLAGS[@]}"', "test", str(spec)],
+            env={**self.env, "TZ": "UTC", "BOOKING_TIMEZONE": "",
+                 "PATH": self.temp.name + os.pathsep + os.environ["PATH"]},
+            capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("start,,Start time (HH:MM; Europe/Madrid),-,13:45", result.stdout)
+        self.assertIn("date,d,Booking date (YYYY-MM-DD; Europe/Madrid),-,2026-10-20", result.stdout)
+
+    def test_booking_add_validates_supplied_start_before_prompt(self):
+        # Exercise the command's actual validation blocks with a fixed clock.
+        source = (ROOT / "cmd/booking/add.sh").read_text()
+        validation = source.split("# validate supplied or completed start values\n", 1)[1].split("# parse flags", 1)[0]
+        early = source.split("# validate supplied input before asking for missing fields\n", 1)[1].split("# run interactive prompt", 1)[0]
+        clock = Path(self.temp.name) / "date"
+        clock.write_text(f"#!{sys.executable}\n" + '''import datetime, os, sys
+from zoneinfo import ZoneInfo
+args = sys.argv[1:]
+if args == ['+%F']:
+    print('2026-10-20')
+elif args == ['+%s']:
+    print(int(datetime.datetime(2026, 10, 20, 12, 0, tzinfo=datetime.timezone.utc).timestamp()))
+else:
+    try:
+        value = datetime.datetime.strptime(args[1], '%Y-%m-%d %H:%M')
+        print(int(value.replace(tzinfo=ZoneInfo(os.environ['TZ'])).timestamp()))
+    except ValueError:
+        sys.exit(1)
+''')
+        clock.chmod(0o755)
+        cases = [
+            ("start=11:20", "Invalid start time: 2026-10-20 11:20"),
+            ("start=11.20", "Invalid value for --start:"),
+            ("start=6:55", "Invalid value for --start:"),
+            ("start=12:00", "Invalid start time: 2026-10-20 12:00"),
+            ("start=13:20", None),
+            ("date=2026-10-21\nstart=11:20", None),
+            ("server=incus-01", None),
+        ]
+        timezone_cases = [("UTC", values, error) for values, error in cases]
+        timezone_cases += [
+            ("Europe/Madrid", "start=13:20", "Invalid start time: 2026-10-20 13:20"),
+            ("Europe/Madrid", "start=14:20", None),
+        ]
+        for timezone, values, error in timezone_cases:
+            with self.subTest(values=values):
+                result = subprocess.run(
+                    ["bash", "-c", validation + '\nparsed_flags="$1"\n' + early + '\necho DIALOG\n', "test", values],
+                    env={**self.env, "TZ": "UTC", "BOOKING_TIMEZONE": timezone,
+                         "PATH": self.temp.name + os.pathsep + os.environ["PATH"]},
+                    capture_output=True, text=True)
+                if error:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(error, result.stderr)
+                    self.assertNotIn("DIALOG", result.stdout)
+                else:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertIn("DIALOG", result.stdout)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -92,8 +180,8 @@ class BookingCommandsTest(unittest.TestCase):
         expected = {
             "list": ["all", "server", "date"],
             "add": ["server", "date", "start", "duration", "shared"],
-            "share": ["server", "user", "booking-id"],
-            "cancel": ["server", "booking-id"],
+            "share": ["booking", "users"],
+            "cancel": ["booking"],
         }
         # Isolate booking definitions from unrelated workflow discovery.
         spec = Path(self.temp.name) / "booking_spec.sh"
@@ -112,8 +200,8 @@ class BookingCommandsTest(unittest.TestCase):
                      "BOOKING_" + action.upper(), "--db", str(spec)],
                     env=self.env, capture_output=True, text=True)
                 self.assertEqual(mandatory.returncode, 0, mandatory.stderr)
-                expected_mandatory = {"list": "", "add": "server,start,duration",
-                                      "share": "server,user", "cancel": "server,booking-id"}
+                expected_mandatory = {"list": "", "add": "server,start",
+                                      "share": "booking,users", "cancel": "booking"}
                 self.assertEqual(mandatory.stdout.strip(), expected_mandatory[action])
 
     def test_startup_survives_missing_booking_configuration(self):

@@ -5,8 +5,26 @@ import argparse
 import socket
 import sys
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import yaml
+
+
+def booking_timezone(path):
+    if not Path(path).exists():
+        return "UTC"
+    with Path(path).open(encoding="utf-8") as stream:
+        data = yaml.safe_load(stream)
+    if not isinstance(data, dict):
+        raise ValueError("booking inventory must be a mapping")
+    timezone = data.get("timezone", "UTC")
+    if not isinstance(timezone, str) or not timezone:
+        raise ValueError("booking timezone must be a valid timezone name")
+    try:
+        ZoneInfo(timezone)
+    except (ZoneInfoNotFoundError, ValueError):
+        raise ValueError(f"invalid booking timezone: {timezone}") from None
+    return timezone
 
 
 def is_booking_server(path, hostname, participant=False):
@@ -49,8 +67,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", required=True, help="Path to booking.yml")
     parser.add_argument("--participant", action="store_true", help="Include managed machines")
+    parser.add_argument("--timezone", action="store_true", help="Print the booking timezone (defaults to UTC)")
     args = parser.parse_args()
     try:
+        if args.timezone:
+            print(booking_timezone(args.db))
+            return 0
         result = is_booking_server(args.db, socket.gethostname(), args.participant)
     except (OSError, ValueError, yaml.YAMLError) as error:
         print(f"ERROR: {error}", file=sys.stderr)

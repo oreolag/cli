@@ -28,25 +28,28 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # booking (action scripts currently echo parameters only)
+if [[ -z "${BOOKING_TIMEZONE:-}" ]]; then
+  BOOKING_TIMEZONE="$(bash "$ODEV_PATH/src/booking_timezone.sh" "$ODEV_PATH" 2>/dev/null)" || BOOKING_TIMEZONE="UTC"
+fi
 BOOKING_DESCRIPTION="List, add, share or cancel bookings"
 BOOKING_FLAGS=()
 # list
 BOOKING_LIST_DESCRIPTION="List active bookings"
 BOOKING_LIST_FLAGS=(
   "all,a,Show all booking services,-,-"
-  "date,d,Booking date (YYYY-MM-DD),-,$(date +%F)"
+  "date,d,Booking date (YYYY-MM-DD; $BOOKING_TIMEZONE),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
   "server,s,Server inventory name,-,-"
 )
 BOOKING_LIST_FLAGS_MANDATORY=""
 # add
 BOOKING_ADD_DESCRIPTION="Reserve a server for a specific time"
 BOOKING_ADD_FLAGS=(
-  "date,d,Booking date (YYYY-MM-DD),-,$(date +%F)"
+  "date,d,Booking date (YYYY-MM-DD; $BOOKING_TIMEZONE),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
   "duration,,Duration in hours,-,1"
   "server,s,Server inventory name,-,-"
   "shared,,Users to share the booking with (comma-separated),-,-"
-  "start,,Start time (HH:MM),-,$(
-    read -r hour minute < <(date '+%H %M')
+  "start,,Start time (HH:MM; $BOOKING_TIMEZONE),-,$(
+    read -r hour minute < <(TZ="$BOOKING_TIMEZONE" date '+%H %M')
     next_minutes=$(( (10#$hour * 60 + 10#$minute) / 5 * 5 + 5 ))
     printf '%02d:%02d' "$(( next_minutes / 60 % 24 ))" "$(( next_minutes % 60 ))"
   )"
