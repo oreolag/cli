@@ -100,7 +100,7 @@
             group: root
             recurse: true
         - name: Configure booking service on every server
-          ansible.builtin.include_tasks: booking/install.yml
+          ansible.builtin.include_tasks: "{{ cli.local_path | default(playbook_dir) }}/booking/install.yml"
       when:
         - (booking or all) | bool
         - cli.local_path is defined
@@ -574,7 +574,7 @@
 
         # booking system
         - name: Configure booking service on every server
-          ansible.builtin.include_tasks: booking/install.yml
+          ansible.builtin.include_tasks: "{{ cli.local_path | default(playbook_dir) }}/booking/install.yml"
       become: true
       when: repo | bool
 
