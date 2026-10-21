@@ -15,6 +15,7 @@ mpi:
 paths:
   banner: /opt
   booking: /opt/booking.yml
+  booking_db: /var/lib/odev-booking/booking.db
   cmdb: /opt
   mgmt: /opt/mgmt
   models: "${HOME}/odev/models"

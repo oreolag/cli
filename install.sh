@@ -56,8 +56,10 @@ apt-get install -y \
     ansible \
     python3 \
     python3-pip \
+    python3-yaml \
     gh \
     rsync \
+    sqlite3 \
     net-tools \
     ethtool \
     pciutils \
