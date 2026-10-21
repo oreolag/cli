@@ -32,6 +32,28 @@ unchanged when reordering entries or renaming hosts; never reuse an ID for anoth
 booking database. Booking IDs combine this prefix with an expanding local sequence,
 for example `01-0001`, then `01-10000` after `01-9999`.
 
+## Service
+
+Installation prepares the same account, code, database directory and systemd
+service on every server. The daemon starts at boot and checks the inventory every
+30 seconds. It activates booking storage when listed as a booking server and
+otherwise stays idle. No timer or separate configuration service is needed.
+
+```bash
+systemctl status odev-booking.service
+sudo journalctl -u odev-booking.service -n 30 --no-pager
+```
+
+The daemon creates the database at `paths.booking_db` (by default
+`/var/lib/odev-booking/booking.db`) and records the permanent service ID. Later
+starts verify the schema and ID without resetting reservations or the sequence.
+Removing the booking role returns the daemon to idle and preserves the database.
+Invalid configuration or a mismatched database ID is logged; the daemon stays
+inactive and retries after configuration is corrected.
+
+The daemon currently initializes the database and monitors configuration. It has no
+HTTP API and does not create reservations yet.
+
 ## List
 
 ```bash

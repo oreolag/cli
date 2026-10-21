@@ -1,0 +1,110 @@
+---
+- name: Install booking dependencies on every server
+  ansible.builtin.apt:
+    name: [python3, python3-yaml, sqlite3, tzdata]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Copy booking implementation from local path
+  ansible.builtin.copy:
+    src: "{{ cli.local_path }}/booking/"
+    dest: "{{ cli_remote_path }}/odev/booking/"
+    owner: root
+    group: root
+    mode: "u=rwX,g=rX,o=rX"
+    directory_mode: "0755"
+  when: cli.local_path is defined
+
+- name: Copy shared booking inventory reader
+  ansible.builtin.copy:
+    src: "{{ cli.local_path | default(playbook_dir) }}/src/booking_is_server.py"
+    dest: "{{ cli_remote_path }}/odev/src/booking_is_server.py"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create booking service group
+  ansible.builtin.group:
+    name: odev-booking
+    system: true
+
+- name: Create booking service account
+  ansible.builtin.user:
+    name: odev-booking
+    group: odev-booking
+    system: true
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: Read deployed CLI paths
+  ansible.builtin.slurp:
+    src: "{{ cli_remote_path }}/odev/vars.yml"
+  register: booking_service_vars
+
+- name: Resolve booking service paths
+  ansible.builtin.set_fact:
+    booking_service_paths: "{{ paths | combine((booking_service_vars.content | b64decode | from_yaml).paths | default({})) }}"
+
+- name: Verify booking data uses a dedicated absolute directory
+  ansible.builtin.assert:
+    that:
+      - booking_service_paths.booking_db is match('^/')
+      - (booking_service_paths.booking_db | dirname) not in ['/', '/etc', '/home', '/opt', '/var', '/var/lib']
+    fail_msg: "paths.booking_db must use a dedicated absolute directory"
+
+- name: Create booking database directory on every server
+  ansible.builtin.file:
+    path: "{{ booking_service_paths.booking_db | dirname }}"
+    state: directory
+    owner: odev-booking
+    group: odev-booking
+    mode: "0700"
+
+- name: Create booking inventory if missing
+  ansible.builtin.copy:
+    src: "{{ cli_remote_path }}/odev/templates/cmdb/booking.yml"
+    dest: "{{ booking_service_paths.booking }}"
+    remote_src: true
+    force: false
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Check for previous booking configuration units
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/{{ item }}"
+  loop:
+    - odev-booking-config.timer
+    - odev-booking-config.service
+  register: booking_previous_units
+
+- name: Stop and disable previous booking configuration units
+  ansible.builtin.systemd_service:
+    name: "{{ item.item }}"
+    state: stopped
+    enabled: false
+  loop: "{{ booking_previous_units.results }}"
+  when: item.stat.exists
+
+- name: Remove previous booking configuration units
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item }}"
+    state: absent
+  loop:
+    - odev-booking-config.timer
+    - odev-booking-config.service
+
+- name: Install booking systemd service
+  ansible.builtin.template:
+    src: "{{ cli.local_path | default(playbook_dir) }}/booking/systemd/odev-booking.service"
+    dest: /etc/systemd/system/odev-booking.service
+    owner: root
+    group: root
+    mode: "0644"
+- name: Enable and restart booking daemon on every server
+  ansible.builtin.systemd_service:
+    name: odev-booking.service
+    daemon_reload: true
+    enabled: true
+    state: restarted

@@ -1,0 +1,20 @@
+[Unit]
+Description=odev booking service
+After=local-fs.target
+
+[Service]
+Type=exec
+User=odev-booking
+Group=odev-booking
+ExecStart=/usr/bin/python3 -B "{{ cli_remote_path }}/odev/booking/daemon.py" --odev-path "{{ cli_remote_path }}/odev"
+Restart=on-failure
+RestartSec=5s
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths="{{ booking_service_paths.booking_db | dirname }}"
+
+[Install]
+WantedBy=multi-user.target

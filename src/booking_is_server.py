@@ -28,7 +28,7 @@ def booking_timezone(path):
     return timezone
 
 
-def is_booking_server(path, hostname, participant=False):
+def load_inventory(path):
     if not path or not str(path).strip():
         raise ValueError("booking inventory path must not be empty")
     with Path(path).open(encoding="utf-8") as stream:
@@ -67,8 +67,14 @@ def is_booking_server(path, hostname, participant=False):
         duration = entry.get("maximum_duration_hours")
         if isinstance(duration, bool) or not isinstance(duration, (int, float)) or not 0 < duration < float("inf"):
             raise ValueError(f"maximum_duration_hours for {name} must be a positive finite number")
+    return data
+
+
+def is_booking_server(path, hostname, participant=False):
+    data = load_inventory(path)
     local = hostname.split(".")[0]
-    return local in names or (participant and local in managed)
+    return any(entry["name"] == local or (participant and local in entry["managed_servers"])
+               for entry in data["servers"])
 
 
 def main():
