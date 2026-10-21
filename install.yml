@@ -99,9 +99,12 @@
             owner: root
             group: root
             recurse: true
+        - name: Configure booking service on every server
+          ansible.builtin.include_tasks: booking/install.yml
       when:
         - (booking or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # build
     - block:
@@ -133,6 +136,7 @@
       when:
         - (build or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # delete
     - block:
@@ -171,6 +175,7 @@
       when:
         - (delete or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # examine
     - name: Copy examine.sh with executable mode (0755)
@@ -183,7 +188,7 @@
       when:
         - (examine or all) | bool
         - cli.local_path is defined
-
+        - not (repo | bool)
     # get
     - block:
         - name: Copy get.sh script
@@ -210,6 +215,7 @@
       when:
         - (get or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # ifconfig
     - name: Copy ifconfig.sh with executable mode (0755)
@@ -222,6 +228,7 @@
       when:
         - (ifconfig or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # install
     - name: Copy install.sh with executable mode (0755)
@@ -234,6 +241,7 @@
       when:
         - (install or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # main
     - block:
@@ -279,7 +287,7 @@
       when:
         - (main or all) | bool
         - cli.local_path is defined
-
+        - not (repo | bool)
     # new
     - block:
         - name: Copy new.sh script
@@ -317,6 +325,7 @@
       when:
         - (new or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
     
     # program
     - block:
@@ -348,6 +357,7 @@
       when:
         - (program or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # repo
     - block:
@@ -561,6 +571,10 @@
               - odev-users
             append: true
           when: installation_user not in ['', 'root']
+
+        # booking system
+        - name: Configure booking service on every server
+          ansible.builtin.include_tasks: booking/install.yml
       become: true
       when: repo | bool
 
@@ -590,6 +604,7 @@
       when:
         - (run or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # set
     - block:
@@ -617,6 +632,7 @@
       when:
         - (set or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # src
     - name: Copy src folder
@@ -638,6 +654,7 @@
       when:
         - (src or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # submodules (all does not apply)
     - block:
@@ -685,6 +702,7 @@
       when:
         - submodules | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # sudoers_d
     - block:
@@ -712,6 +730,7 @@
       when:
         - (sudoers_d or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # templates (all does not apply)
     - block:
@@ -729,6 +748,7 @@
       when:
         - templates | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # update
     - name: Copy update.sh with executable mode (0755)
@@ -741,6 +761,7 @@
       when:
         - (update or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # validate
     - block:
@@ -772,6 +793,7 @@
       when:
         - (validate or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # vars
     - name: Copy vars.yml
@@ -784,6 +806,7 @@
       when:
         - (vars_yml or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # gh
     - block:
@@ -820,6 +843,7 @@
       when:
         - (gh or all) | bool
         - cli.local_path is defined
+        - not (repo | bool)
 
     # cleanup
     - name: Delete legacy files or folders
