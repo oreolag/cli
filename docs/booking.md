@@ -54,6 +54,60 @@ inactive and retries after configuration is corrected.
 The daemon currently initializes the database and monitors configuration. It has no
 HTTP API and does not create reservations yet.
 
+## Database
+
+`booking/schema.sql` defines the SQLite database. Each booking service owns its
+local database; managed machines will access it through the API.
+
+### Bookings
+
+Each reservation is one row in `bookings`:
+
+| Column | Meaning |
+|---|---|
+| `booking_id` | Unique ID, for example `01-0001` |
+| `server` | Reserved server inventory name |
+| `owner` | Owner's username |
+| `start_time`, `end_time` | Reservation boundaries |
+| `created_at` | Creation time |
+| `cancelled_at`, `cancelled_by` | Cancellation time and user; both null until cancelled |
+
+All timestamps are UTC Unix seconds. Active, future and expired states are derived
+from the timestamps. The end is exclusive: a booking ending at 16:00 does not
+conflict with one starting at 16:00. Cancelled rows remain as history.
+
+### Collaborators
+
+`booking_shares` contains one row per collaborator:
+
+| Column | Meaning |
+|---|---|
+| `booking_id` | References the same ID in `bookings` |
+| `username` | Collaborator's username |
+| `added_at` | Time added, in UTC Unix seconds |
+
+The pair `(booking_id, username)` is unique. Removing a collaborator deletes that
+row. Cancelling a reservation preserves its collaborator rows.
+
+### Service and sequence
+
+`booking_metadata` contains one row: `singleton = 1`, the permanent `service_id`
+from the inventory, and `last_sequence`, initially zero. Schema version 1 is stored
+in SQLite's `user_version`.
+
+The next storage step will check conflicts, increment the sequence and insert the
+reservation in one write transaction. Service `01` will produce `01-0001`, then
+`01-0002`, and eventually `01-10000`. Cancellation never resets the sequence.
+Indexes support lookups by server, owner and collaborator.
+
+To inspect the actual tables on a booking server without modifying the database:
+
+```bash
+sudo -u odev-booking sqlite3 -readonly /var/lib/odev-booking/booking.db '.schema'
+```
+
+Use the configured `paths.booking_db` if the default path was changed.
+
 ## List
 
 ```bash
@@ -90,8 +144,8 @@ at 16:00 allows another to start at 16:00.
 ## Share
 
 ```bash
-odev booking share --booking 303 --add javier
-odev booking share --booking 303 --remove quico
+odev booking share --booking 01-0001 --add javier
+odev booking share --booking 01-0001 --remove quico
 ```
 
 Only the owner can change sharing. Add or remove one user per invocation; the flags
@@ -105,7 +159,7 @@ They cannot share or cancel the owner's booking.
 ## Cancel
 
 ```bash
-odev booking cancel --booking 303
+odev booking cancel --booking 01-0001
 ```
 
 Owners and administrators can cancel active or future bookings. Show the server,
