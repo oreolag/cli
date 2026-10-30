@@ -1,7 +1,9 @@
 """Database initialization and daemon role changes without a running systemd."""
 from contextlib import redirect_stdout
+import grp
 import importlib.util
 import io
+import os
 from pathlib import Path
 import signal
 import queue
@@ -16,6 +18,7 @@ import unittest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "booking"))
 spec = importlib.util.spec_from_file_location("booking_runtime", ROOT / "booking/runtime.py")
 runtime = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runtime)
@@ -108,7 +111,9 @@ class BookingRuntimeTest(unittest.TestCase):
     def test_running_daemon_detects_role_changes_and_recovers(self):
         self.inventory.write_text("servers: []\n")
         process = subprocess.Popen([sys.executable, "-B", str(ROOT / "booking/daemon.py"),
-                                    "--odev-path", str(self.root), "--interval", "0.05"],
+                                    "--odev-path", str(self.root), "--interval", "0.05",
+                                    "--socket", str(self.root / "api.sock"),
+                                    "--socket-group", grp.getgrgid(os.getgid()).gr_name],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         events = queue.Queue()
         for stream in [process.stdout, process.stderr]:
@@ -154,11 +159,12 @@ class BookingRuntimeTest(unittest.TestCase):
 
     def test_daemon_initializes_and_handles_shutdown(self):
         process = subprocess.Popen([sys.executable, "-B", str(ROOT / "booking/daemon.py"),
-                                    "--odev-path", str(self.root)],
+                                    "--odev-path", str(self.root), "--socket", str(self.root / "api.sock"),
+                                    "--socket-group", grp.getgrgid(os.getgid()).gr_name],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
             self.assertIn("Booking database created:", process.stdout.readline())
-            self.assertIn("API not implemented", process.stdout.readline())
+            self.assertIn("Booking service ready:", process.stdout.readline())
             process.send_signal(signal.SIGTERM)
             out, err = process.communicate(timeout=5)
             self.assertEqual(process.returncode, 0, err)

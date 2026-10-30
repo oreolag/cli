@@ -90,9 +90,7 @@ start=${V[start]}
 # validate completed input
 validate_start_time "$date" "$start" || exit 1
 
-# Placeholder: echo parsed parameter values.
-echo "$date"
-echo "$duration"
-echo "$server"
-echo "$shared"
-echo "$start"
+# create booking
+python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \
+  --server "$server" --date "$date" --start "$start" \
+  --duration "$duration" --shared "$shared" || exit 1

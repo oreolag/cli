@@ -216,38 +216,36 @@ else:
                               env=self.env, capture_output=True, text=True)
 
     @unittest.skipIf(BASH_MAJOR < 4, "Parsing and prompts require Bash 4+ (odev targets Ubuntu)")
-    def test_actions_on_booking_and_managed_hosts(self):
+    def test_actions_on_booking_hosts(self):
         identity = Path(self.temp.name) / "id"
         identity.write_text('#!/bin/bash\nif [[ "$1" == -nG && "$3" == javier ]]; then echo odev-users; else /usr/bin/id "$@"; fi\n')
         identity.chmod(0o755)
         self.env["PATH"] = self.temp.name + os.pathsep + os.environ["PATH"]
         future_date = (datetime.now(timezone.utc) + timedelta(days=1)).date().isoformat()
         cases = {
-            "list": (["--all", "1", "--date", "2026-10-15"],
-                     ["1", "2026-10-15"]),
-            "add": (["--date", future_date, "--duration", "2", "--server", "incus-01",
-                     "--shared", "javier", "--start", "18:12"],
-                    [future_date, "2", "incus-01", "javier", "18:12"]),
+            "list": (["--all", "1", "--date", future_date],
+                     ["1", future_date]),
             "share": (["--booking", "391", "--add", "javier"],
                       ["javier", "391", "-"]),
             "cancel": (["--booking", "391"], ["391"]),
         }
-        for name, machines in [(self.local, ["example-managed"]),
-                               ("example-booking", [self.local])]:
+        for name, machines in [(self.local, ["example-managed"])]:
             self.inventory(name, machines)
-            for action in ["list", "add", "share", "cancel"]:
+            for action in ["list", "share", "cancel"]:
                 with self.subTest(host=name, action=action):
                     args, values = cases[action]
                     result = self.run_command(*args, script=f"cmd/booking/{action}.sh")
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(result.stdout, "\n".join(values) + "\n")
 
-    def test_unlisted_and_empty_inventory(self):
+    def test_managed_unlisted_and_empty_inventory(self):
         for data in [{"servers": []}, {"servers": [{"name": "other-booking",
-                      "id": "01", "managed_servers": [], "maximum_duration_hours": 5}]}]:
+                      "id": "01", "managed_servers": [], "maximum_duration_hours": 5}]},
+                     {"servers": [{"name": "other-booking", "id": "01",
+                      "managed_servers": [self.local], "maximum_duration_hours": 5}]}]:
             self.db.write_text(yaml.safe_dump(data))
-            for script, args in [("cmd/booking.sh", ["list"]),
-                                 ("cmd/booking/add.sh", [])]:
+            for script, args in [("cmd/booking.sh", []),
+                                 *[(f"cmd/booking/{action}.sh", []) for action in ["add", "list", "share", "cancel"]]]:
                 result = self.run_command(*args, script=script)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(result.stdout, "Command not available: odev booking\n")

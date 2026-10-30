@@ -2,8 +2,8 @@
 
 Booking reserves a server for an owner and optional collaborators.
 
-The command interface, prompts and start-time validation are implemented. Actions
-currently print parameter values. Database operations, availability tables,
+The command interface, prompts and booking creation are implemented. Listing,
+sharing and cancellation still print parameter values. Availability tables,
 confirmation and login enforcement are planned. The examples below describe the
 agreed workflow.
 
@@ -25,7 +25,8 @@ servers:
 
 Each booking service manages its own reservations. Assign each managed server to
 only one service. Booking servers require normal authentication but no reservation.
-Machines listed nowhere return `Command not available: odev booking`.
+Booking commands run only on booking servers. Managed machines and machines
+listed nowhere return `Command not available: odev booking` before any dialog.
 
 Service IDs are quoted positive numbers, unique across the inventory. Keep them
 unchanged when reordering entries or renaming hosts; never reuse an ID for another
@@ -51,13 +52,24 @@ Removing the booking role returns the daemon to idle and preserves the database.
 Invalid configuration or a mismatched database ID is logged; the daemon stays
 inactive and retries after configuration is corrected.
 
-The daemon currently initializes the database and monitors configuration. It has no
-HTTP API and does not create reservations yet.
+On a booking server, the daemon serves a local HTTP API at
+`/run/odev-booking/api.sock`. The socket is accessible to `odev-users`; Linux peer
+credentials identify the caller. Commands use this local API; no server-to-server
+SSH connection or network HTTP port is needed. Log into the booking server using
+your normal credentials and an account in `odev-users`:
+
+```bash
+ssh odev-booking-01
+```
+
+The API derives ownership from the local connection rather than accepting a
+username supplied in the request. Managed machines still run an idle daemon;
+reservation checks at login remain a later step.
 
 ## Database
 
 `booking/schema.sql` defines the SQLite database. Each booking service owns its
-local database; managed machines will access it through the API.
+local database. Booking commands access it through that server's local API.
 
 ### Bookings
 
@@ -95,8 +107,8 @@ row. Cancelling a reservation preserves its collaborator rows.
 from the inventory, and `last_sequence`, initially zero. Schema version 1 is stored
 in SQLite's `user_version`.
 
-The next storage step will check conflicts, increment the sequence and insert the
-reservation in one write transaction. Service `01` will produce `01-0001`, then
+Storage checks conflicts, increments the sequence and inserts the reservation
+and collaborators in one write transaction. Service `01` produces `01-0001`, then
 `01-0002`, and eventually `01-10000`. Cancellation never resets the sequence.
 Indexes support lookups by server, owner and collaborator.
 
@@ -117,9 +129,10 @@ odev booking list --all
 odev booking list --all --date 2026-11-01
 ```
 
-The default is today and the local or assigned booking service. `--all` includes
-every booking service in the inventory. Tables follow `odev examine` styling and
-show reservations and availability. An unreachable service has unknown availability.
+The default is today and the local booking service. Listing remains a placeholder.
+`--all` is reserved for a future cluster overview; communication between booking
+services has not been implemented. Planned tables follow `odev examine` styling
+and show reservations and availability.
 
 ## Add
 
@@ -131,11 +144,31 @@ odev booking add --server incus-01 --shared javier,quico
 
 The authenticated user owns the reservation. Missing required values open the
 dialog. Dates use `YYYY-MM-DD`; times require `HH:MM`, including leading zeros.
-Input and display use the configured timezone; database timestamps will use UTC.
+Input and display use the configured timezone; database timestamps use UTC.
 
 The date defaults to today, duration to one hour, and start to the next five-minute
 boundary. Availability-based suggestions will follow once storage is implemented.
 Supplied start values are validated before prompting, then checked again afterward.
+
+`add.sh` calls `booking/client.py`, which requires a local booking-server role and
+a target managed by that service. `booking/api.py` authenticates the caller and validates shared
+users against `odev-users`. `booking/storage.py` performs the SQLite transaction.
+The API repeats validation, including policy and conflict checks.
+
+For example, after deploying `booking=true` on all machines, run this on the
+booking server to create a reservation with a future start time:
+
+```bash
+odev booking add --server incus-01 --date 2026-11-01 --start 14:15 --duration 1
+# Booking created: 01-0001
+```
+
+On the booking server, inspect the saved row:
+
+```bash
+sudo -u odev-booking sqlite3 -readonly -header -column /var/lib/odev-booking/booking.db \
+  'SELECT booking_id, server, owner, start_time, end_time FROM bookings;'
+```
 
 Reservations must start in the future and have a positive duration within
 `maximum_duration_hours`. They cannot overlap on the same server. A booking ending

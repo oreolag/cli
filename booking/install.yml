@@ -29,6 +29,11 @@
     name: odev-booking
     system: true
 
+- name: Ensure booking API access group exists
+  ansible.builtin.group:
+    name: odev-users
+    state: present
+
 - name: Create booking service account
   ansible.builtin.user:
     name: odev-booking

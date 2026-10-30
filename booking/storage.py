@@ -1,0 +1,84 @@
+"""SQLite booking creation; called by the authenticated booking API."""
+from datetime import datetime, timezone
+from decimal import Decimal, DecimalException
+from pathlib import Path
+import re
+import sqlite3
+import time
+from zoneinfo import ZoneInfo
+
+
+class BookingConflict(ValueError):
+    pass
+
+
+def create_booking(config, owner, request):
+    entry = config["server"]
+    server = request.get("server")
+    if entry is None or server not in entry["managed_servers"]:
+        raise ValueError(f"Invalid server: {server}")
+    day, start = request.get("date", ""), request.get("start", "")
+    if not isinstance(day, str) or not isinstance(start, str) or not re.fullmatch(
+            r"[0-9]{4}-[0-9]{2}-[0-9]{2} ([01][0-9]|2[0-3]):[0-5][0-9]", f"{day} {start}"):
+        raise ValueError(f"Invalid start time: {day} {start}")
+    zone = ZoneInfo(config["timezone"])
+    try:
+        local = datetime.strptime(f"{day} {start}", "%Y-%m-%d %H:%M").replace(tzinfo=zone)
+        # Reject nonexistent or ambiguous local times at daylight-saving changes.
+        if (local.astimezone(timezone.utc).astimezone(zone).replace(tzinfo=None) != local.replace(tzinfo=None)
+                or local.utcoffset() != local.replace(fold=1).utcoffset()):
+            raise ValueError()
+        start_time = int(local.timestamp())
+    except (ValueError, OverflowError):
+        raise ValueError(f"Invalid start time: {day} {start}") from None
+    try:
+        duration = str(request.get("duration", ""))
+        if len(duration) > 32:
+            raise ValueError()
+        hours = Decimal(duration)
+        seconds = hours * 3600
+        if (not hours.is_finite() or hours <= 0
+                or hours > Decimal(str(entry["maximum_duration_hours"]))
+                or seconds % 60 != 0):
+            raise ValueError()
+        end_time = start_time + int(seconds)
+    except (DecimalException, ValueError, OverflowError):
+        raise ValueError(f"Invalid duration: {request.get('duration')}") from None
+    shared = request.get("shared", [])
+    if not isinstance(shared, list) or any(not isinstance(user, str) or not user for user in shared):
+        raise ValueError("Invalid shared users")
+    shared = sorted(set(shared) - {owner})
+    path = Path(config["database"])
+    connection = sqlite3.connect(path.as_uri() + "?mode=rw", uri=True, timeout=10)
+    try:
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("BEGIN IMMEDIATE")
+        if connection.execute("PRAGMA user_version").fetchone()[0] != 1:
+            raise ValueError("Unsupported booking database schema version")
+        now = int(time.time())
+        if start_time <= now:
+            raise ValueError(f"Invalid start time: {day} {start}")
+        metadata = connection.execute(
+            "SELECT service_id, last_sequence FROM booking_metadata WHERE singleton = 1").fetchone()
+        if metadata is None or metadata[0] != entry["id"]:
+            raise ValueError("Booking database service ID does not match booking.yml")
+        conflict = connection.execute(
+            "SELECT booking_id FROM bookings WHERE server = ? AND cancelled_at IS NULL "
+            "AND start_time < ? AND end_time > ? LIMIT 1", (server, end_time, start_time)).fetchone()
+        if conflict:
+            raise BookingConflict(f"Server already booked: {server} ({conflict[0]})")
+        sequence = metadata[1] + 1
+        booking_id = f"{entry['id']}-{sequence:04d}"
+        connection.execute("UPDATE booking_metadata SET last_sequence = ? WHERE singleton = 1", (sequence,))
+        connection.execute(
+            "INSERT INTO bookings (booking_id, server, owner, start_time, end_time, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?)", (booking_id, server, owner, start_time, end_time, now))
+        connection.executemany("INSERT INTO booking_shares (booking_id, username, added_at) VALUES (?, ?, ?)",
+                               [(booking_id, user, now) for user in shared])
+        connection.commit()
+        return booking_id
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
