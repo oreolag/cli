@@ -1,6 +1,8 @@
 """Print booking tables using examine's borders and colon-separated columns."""
+import ast
 import curses
 from datetime import datetime
+from pathlib import Path
 import sys
 import time
 from zoneinfo import ZoneInfo
@@ -28,12 +30,13 @@ def print_bookings(result):
               for index, header in enumerate(headers)]
     title = f"{result['service']} ({result['date']} {result['timezone']})"
     inner = sum(widths) + 3 * (len(headers) - 1) + 2
-    bold = reset = ""
+    bold = reset = passed = ""
     if sys.stdout.isatty():
         try:
             curses.setupterm()
             bold = (curses.tigetstr("bold") or b"").decode()
             reset = (curses.tigetstr("sgr0") or b"").decode()
+            passed = ast.literal_eval((Path(__file__).resolve().parents[1] / "src/COLOR_PASSED").read_text().strip())
         except curses.error:
             pass
     def rule(left="+", right="+"):
@@ -42,6 +45,8 @@ def print_bookings(result):
         values = [value.ljust(width) for value, width in zip(cells, widths)]
         if heading:
             values[0] = bold + cells[0] + reset + " " * (widths[0] - len(cells[0]))
+        elif cells[-1] == "Free" and passed:
+            values[-1] = passed + cells[-1] + reset + " " * (widths[-1] - len(cells[-1]))
         print("| " + " : ".join(values) + " |")
     print(title.rjust(inner + 2))
     rule()
