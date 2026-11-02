@@ -3,11 +3,18 @@ set -euo pipefail
 
 # Usage:
 #   cmd_prompt.sh --required "name,type" --params "${FLAGS[@]}" -- "$parsed_flags"
+# Optional: --field NAME asks only for NAME; --field "" only fills optional defaults.
 # Output:
 #   key=value   (one per line)  (updated)
 
 [[ "${1:-}" == "--required" ]] || exit 2
 required_csv="${2:-}"; shift 2
+
+prompt_required="$required_csv"
+if [[ "${1:-}" == "--field" ]]; then
+  prompt_required="$2"
+  shift 2
+fi
 
 [[ "${1:-}" == "--params" ]] || exit 2
 shift
@@ -89,16 +96,12 @@ validate_value() {
   return 0
 }
 
-# Prompt via /dev/tty so this works even inside $(...)
-if [[ ! -r /dev/tty || ! -w /dev/tty ]]; then
-  echo "cmd_prompt: not interactive" >&2
-  exit 1
-fi
-
-IFS=',' read -r -a REQUIRED <<< "$required_csv"
+IFS=',' read -r -a REQUIRED <<< "$prompt_required"
 for name in "${REQUIRED[@]}"; do
   name="${name#"${name%%[![:space:]]*}"}"
   name="${name%"${name##*[![:space:]]}"}"
+
+  [[ -n "$name" ]] || continue
 
   # Treat "name=-" (from cmd_parse default) as missing if RAW default was "-"
   while true; do
@@ -125,8 +128,13 @@ for name in "${REQUIRED[@]}"; do
     fi
     prompt+=": "
 
-    printf '%s' "$prompt" > /dev/tty
-    read -r input < /dev/tty
+    # Require a terminal only when a question is needed.
+    if ! { exec 3<>/dev/tty; } 2>/dev/null; then
+      echo "cmd_prompt: missing required --$name (not interactive)" >&2
+      exit 1
+    fi
+    printf '%s' "$prompt" >&3
+    read -r input <&3 || exit 1
 
     [[ -z "$input" && -n "$def" ]] && input="$def"
     [[ -z "$input" ]] && continue

@@ -70,37 +70,50 @@ fi
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
-# run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+# check supplied values first, then check each answer before the next question
+for field in "" ${mandatory_flags//,/ }; do
+  if [[ -n "$field" && "${V[$field]:--}" != "-" ]]; then
+    continue
+  fi
+  # run interactive prompt
+  parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --field "$field" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
-# read flags
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
+  # read flags
+  if [[ -n "$parsed_flags" ]]; then
+    declare -A V
+    while IFS='=' read -r k v; do
+      V["$k"]="$v"
+    done <<< "$parsed_flags"
+  fi
 
-# assign flags
-interface=${V[interface]}
-port=${V[port]}
-mtu=${V[value]}
-remote=${V[remote]}
+  # assign flags
+  interface=${V[interface]:--}
+  port=${V[port]:--}
+  mtu=${V[value]:--}
+  remote=${V[remote]:--}
 
-# check on interface
-interface_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface)
-interface_name_cmdb=""
-if [[ ! "$interface" =~ ^[0-9]+$ ]] || [ "$interface_cmdb" = "" ]; then
-  echo "Invalid interface: $interface" >&2
-  exit 1
-fi
+  # check on interface and port when the interface is known
+  if [[ ! "$port" =~ ^[0-9]+$ ]]; then
+    echo "Invalid port: $port" >&2
+    exit 1
+  fi
+  if [[ "$interface" != "-" ]]; then
+    # check on interface
+    interface_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface)
+    interface_name_cmdb=""
+    if [[ ! "$interface" =~ ^[0-9]+$ ]] || [ "$interface_cmdb" = "" ]; then
+      echo "Invalid interface: $interface" >&2
+      exit 1
+    fi
 
-# check on port
-port_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface ip_address $port)
-if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$port_cmdb" = "" ]; then
-  echo "Invalid port: $port" >&2
-  exit 1
-fi
+    # check on port
+    port_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface ip_address $port)
+    if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$port_cmdb" = "" ]; then
+      echo "Invalid port: $port" >&2
+      exit 1
+    fi
+  fi
+done
 
 # get interface name
 interface_name_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface name $port)

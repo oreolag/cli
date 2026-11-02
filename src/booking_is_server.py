@@ -2,6 +2,7 @@
 """Determine the local booking-server role from the shared inventory."""
 
 import argparse
+from decimal import Decimal, DecimalException
 import re
 import socket
 import sys
@@ -91,8 +92,30 @@ def main():
     parser.add_argument("--db", required=True, help="Path to booking.yml")
     parser.add_argument("--participant", action="store_true", help="Include managed machines")
     parser.add_argument("--timezone", action="store_true", help="Print the booking timezone (defaults to UTC)")
+    parser.add_argument("--server", help="Check a managed target on this booking host")
+    parser.add_argument("--duration", help="Check duration against this booking host's limit")
     args = parser.parse_args()
     try:
+        if args.server is not None or args.duration is not None:
+            data = load_inventory(args.db)
+            local = socket.gethostname().split(".")[0]
+            entry = next((item for item in data["servers"] if item["name"] == local), None)
+            if entry is None:
+                raise ValueError("Command not available: odev booking")
+            if args.server is not None and args.server not in entry["managed_servers"]:
+                raise ValueError(f"Invalid server: {args.server}")
+            if args.duration is not None:
+                try:
+                    if len(args.duration) > 32:
+                        raise ValueError()
+                    hours = Decimal(args.duration)
+                    if (not hours.is_finite() or hours <= 0
+                            or hours > Decimal(str(entry["maximum_duration_hours"]))
+                            or (hours * 3600) % 60 != 0):
+                        raise ValueError()
+                except (DecimalException, ValueError, OverflowError):
+                    raise ValueError(f"Invalid duration: {args.duration}") from None
+            return 0
         if args.timezone:
             print(booking_timezone(args.db))
             return 0

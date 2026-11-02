@@ -80,39 +80,77 @@ fi
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
-# run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+# check supplied values first, then check each answer before the next question
+for field in "" ${mandatory_flags//,/ }; do
+  if [[ -n "$field" && "${V[$field]:--}" != "-" ]]; then
+    continue
+  fi
+  # run interactive prompt
+  parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --field "$field" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
-# read flags
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
+  # read flags
+  if [[ -n "$parsed_flags" ]]; then
+    declare -A V
+    while IFS='=' read -r k v; do
+      V["$k"]="$v"
+    done <<< "$parsed_flags"
+  fi
 
-# assign flags
-name=${V[name]}
-template=${V[template]}
+  # assign flags
+  name=${V[name]:--}
+  template=${V[template]:--}
 
-# replace spaces with "_"
-name="${name// /_}"
+  # replace spaces with "_"
+  name="${name// /_}"
+
+  # check on template
+  template_path=""
+  if [ ! "$template" = "-" ]; then
+    if [[ -d "$WORKFLOWS_USER_PATH/$template" ]]; then
+      template_path="$WORKFLOWS_USER_PATH/$template"
+    elif [[ -d "$WORKFLOWS_PATH/$template" ]]; then
+      template_path="$WORKFLOWS_PATH/$template"
+    else
+      # this is in fact an existing workflow
+      echo "Template does not exist: $template"
+      exit 1
+    fi
+  fi
+
+  if [[ "$name" != "-" ]]; then
+    # check on name
+    if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
+      echo "Invalid workflow name: $name"
+      exit 1
+    fi
+
+    # check if workflow name exists (local)
+    if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
+       [[ -f "$ODEV_PATH/cmd/new/$name.sh" && ! -L "$ODEV_PATH/cmd/new/$name.sh" ]] || \
+       [[ -d "$WORKFLOWS_USER_PATH/$name" ]] || \
+       [[ -e "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]] || \
+       [[ -L "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]]; then
+      echo "Workflow already exists: $name"
+      exit 1
+    fi
+
+    # get GitHub user
+    github_user="$(gh api user --jq .login)" || exit 1
+
+    # check if workflow name exists (oreolag/workflows default branch)
+    folders="$(gh api repos/oreolag/workflows/contents --jq '.[] | select(.type == "dir") | .name')" || exit 1
+
+    if grep -Fxq -- "$name" <<< "$folders"; then
+      echo "Workflow already exists: $name"
+      exit 1
+    fi
+  fi
+done
 
 # check on ~/odev
 odev_path="$(dirname "$WORKFLOWS_USER_PATH")"
 if [[ ! -d "$odev_path" ]]; then
   mkdir -p "$odev_path"
-fi
-
-# get GitHub user
-github_user="$(gh api user --jq .login)" || exit 1
-
-# check if workflow name exists (oreolag/workflows default branch)
-folders="$(gh api repos/oreolag/workflows/contents --jq '.[] | select(.type == "dir") | .name')" || exit 1
-
-if grep -Fxq -- "$name" <<< "$folders"; then
-  echo "Workflow already exists: $name"
-  exit 1
 fi
 
 # create a fork
@@ -193,30 +231,6 @@ folders="$(gh api "repos/$github_user/workflows/contents?ref=$GITHUB_PUSH_BRANCH
 if grep -Fxq -- "$name" <<< "$folders"; then
   echo "Workflow already exists: $name"
   exit 1
-fi
-
-# check if workflow name exists (local)
-if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
-   [[ -f "$ODEV_PATH/cmd/new/$name.sh" && ! -L "$ODEV_PATH/cmd/new/$name.sh" ]] || \
-   [[ -d "$WORKFLOWS_USER_PATH/$name" ]] || \
-   [[ -e "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]] || \
-   [[ -L "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]]; then
-  echo "Workflow already exists: $name"
-  exit 1
-fi
-
-# check on template
-template_path=""
-if [ ! "$template" = "-" ]; then
-  if [[ -d "$WORKFLOWS_USER_PATH/$template" ]]; then
-    template_path="$WORKFLOWS_USER_PATH/$template"
-  elif [[ -d "$WORKFLOWS_PATH/$template" ]]; then
-    template_path="$WORKFLOWS_PATH/$template"
-  else
-    # this is in fact an existing workflow
-    echo "Template does not exist: $template"
-    exit 1
-  fi
 fi
 
 # create workflow name folder

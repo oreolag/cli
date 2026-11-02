@@ -69,26 +69,73 @@ if [[ "$has_start" == true ]]; then
   validate_start_time "$supplied_date" "$supplied_start" || exit 1
 fi
 
-# run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+# check supplied values first, then check each answer before the next question
+for field in "" ${mandatory_flags//,/ }; do
+  if [[ -n "$field" && "${V[$field]:--}" != "-" ]]; then
+    continue
+  fi
+  # run interactive prompt
+  parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --field "$field" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
-# read flags
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
+  # read flags
+  if [[ -n "$parsed_flags" ]]; then
+    declare -A V
+    while IFS='=' read -r k v; do
+      V["$k"]="$v"
+    done <<< "$parsed_flags"
+  fi
 
-# assign flags
-date=${V[date]}
-duration=${V[duration]}
-server=${V[server]}
-shared=${V[shared]}
-start=${V[start]}
+  # assign flags
+  date=${V[date]:--}
+  duration=${V[duration]:--}
+  server=${V[server]:--}
+  shared=${V[shared]:--}
+  start=${V[start]:--}
 
-# validate completed input
-validate_start_time "$date" "$start" || exit 1
+  # check on server and duration
+  booking_db="${BOOKING_DB_FILE:-}"
+  if [[ -z "$booking_db" ]]; then
+    booking_db="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths booking)" || exit 1
+  fi
+  booking_args=(--db "${booking_db:-/opt/booking.yml}" --duration "$duration")
+  if [[ "$server" != "-" ]]; then
+    booking_args+=(--server "$server")
+  fi
+  python3 "$ODEV_PATH/src/booking_is_server.py" "${booking_args[@]}" || exit 1
+
+  # check on date
+  if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
+     ! booking_day=$(TZ="$BOOKING_TIMEZONE" date -d "$date" +%F 2>/dev/null) ||
+     [[ "$booking_day" != "$date" || "$date" < "$(TZ="$BOOKING_TIMEZONE" date +%F)" ]]; then
+    echo "Invalid booking date: $date" >&2
+    exit 1
+  fi
+
+  # check on start when supplied or answered
+  if [[ "$start" != "-" ]]; then
+    validate_start_time "$date" "$start" || exit 1
+  fi
+
+  # check on shared users
+  if [[ "$shared" != "-" ]]; then
+    IFS=',' read -r -a shared_users <<< "$shared"
+    # read drops a trailing empty field.
+    if [[ "$shared" == *, ]]; then
+      echo "Invalid user: " >&2
+      exit 1
+    fi
+    for user in "${shared_users[@]}"; do
+      user="${user#"${user%%[![:space:]]*}"}"
+      user="${user%"${user##*[![:space:]]}"}"
+      if [[ -z "$user" || "$user" == -* || "$user" == *[[:space:]]* ]] ||
+         ! groups=$(id -nG -- "$user" 2>/dev/null) ||
+         [[ " $groups " != *" odev-users "* ]]; then
+        echo "Invalid user: $user" >&2
+        exit 1
+      fi
+    done
+  fi
+done
 
 # create booking
 python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \

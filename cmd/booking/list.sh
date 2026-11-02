@@ -52,6 +52,13 @@ fi
 # assign flags
 date=${V[date]}
 
+# check on date
+if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
+   ! booking_day=$(date -d "$date" +%F 2>/dev/null) || [[ "$booking_day" != "$date" ]]; then
+  echo "Invalid booking date: $date" >&2
+  exit 1
+fi
+
 # list bookings
 python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \
   --list --date "$date" || exit 1

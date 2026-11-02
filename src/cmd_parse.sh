@@ -74,7 +74,11 @@ while [[ $# -gt 0 ]]; do
   for p in "${PARAMS[@]}"; do
     IFS=',' read -r name short desc range def <<< "$p"
     if [[ "$1" == "--$name" || ( -n "$short" && "$1" == "-$short" ) ]]; then
-      val="${2:-}"
+      if [[ $# -lt 2 || -z "$2" || "$2" == --* || "$2" =~ ^-[[:alpha:]] ]]; then
+        echo "Missing value for $1" >&2
+        exit 1
+      fi
+      val="$2"
       validate_value "$name" "$val"
       V["$name"]="$val"
       shift 2

@@ -65,28 +65,34 @@ else
   mandatory_flags="$mandatory_flags,add"
 fi
 
-# run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+# check supplied values first, then check each answer before the next question
+for field in "" ${mandatory_flags//,/ }; do
+  if [[ -n "$field" && "${V[$field]:--}" != "-" ]]; then
+    continue
+  fi
+  # run interactive prompt
+  parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --field "$field" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
-# read flags
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
+  # read flags
+  if [[ -n "$parsed_flags" ]]; then
+    declare -A V
+    while IFS='=' read -r k v; do
+      V["$k"]="$v"
+    done <<< "$parsed_flags"
+  fi
 
-# assign flags
-add=${V[add]}
-booking=${V[booking]}
-remove=${V[remove]}
+  # assign flags
+  add=${V[add]:--}
+  booking=${V[booking]:--}
+  remove=${V[remove]:--}
 
-# validate the user entered in the dialog
-if [[ "$remove" != "-" ]]; then
-  validate_user "$remove" || exit 1
-else
-  validate_user "$add" || exit 1
-fi
+  # validate the user entered in the dialog
+  if [[ "$remove" != "-" ]]; then
+    validate_user "$remove" || exit 1
+  elif [[ "$add" != "-" ]]; then
+    validate_user "$add" || exit 1
+  fi
+done
 
 # Placeholder: echo parsed parameter values.
 echo "$add"

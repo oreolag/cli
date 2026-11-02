@@ -50,59 +50,83 @@ print_both="0"
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
-# run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+# check supplied values first, then check each answer before the next question
+for field in "" ${mandatory_flags//,/ }; do
+  if [[ -n "$field" && "${V[$field]:--}" != "-" ]]; then
+    continue
+  fi
+  # run interactive prompt
+  parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --field "$field" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
-# read flags
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
+  # read flags
+  if [[ -n "$parsed_flags" ]]; then
+    declare -A V
+    while IFS='=' read -r k v; do
+      V["$k"]="$v"
+    done <<< "$parsed_flags"
+  fi
 
-# assign flags
-device=${V[device]}
-numa=${V[numa]}
-port=${V[port]}
-type=${V[type]}
+  # assign flags
+  device=${V[device]:--}
+  numa=${V[numa]:--}
+  port=${V[port]:--}
+  type=${V[type]:--}
 
-# check on numa
-numa_devices=$($ODEV_PATH/src/cmdb_get.py cpu numa $numa $type)
-if [[ ! "$numa" =~ ^[0-9]+$ ]] || [ "$numa_devices" = "" ]; then
-  echo "Invalid numa: $numa" >&2
-  exit 1
-fi
-
-# check on device
-found=""
-if [[ ! "$device" =~ ^[0-9]+$ ]]; then
-  #echo "Invalid device: $device"
-  #exit 1
-  found="0"
-else
-  # check if device is part of numa
-  found="0"
-  for d in $numa_devices; do
-    if [[ "$d" == "$device" ]]; then
-      found="1"
-      break
+  # check on numa
+  numa_devices=""
+  if [[ "$numa" != "-" ]]; then
+    numa_devices=$($ODEV_PATH/src/cmdb_get.py cpu numa $numa $type)
+    if [[ ! "$numa" =~ ^[0-9]+$ ]] || [ "$numa_devices" = "" ]; then
+      echo "Invalid numa: $numa" >&2
+      exit 1
     fi
-  done
-fi
+  fi
 
-# print error
-if [[ "$found" == "0" ]]; then
-  echo "Invalid device: $device" >&2
-  exit 1
-fi
+  # check on device
+  if [[ "$device" != "-" ]]; then
+    device_cmdb=$("$ODEV_PATH/src/cmdb_get.py" "$type" "$device")
+    if [[ ! "$device" =~ ^[0-9]+$ || -z "$device_cmdb" ]]; then
+      echo "Invalid device: $device" >&2
+      exit 1
+    fi
+  fi
+  if [[ "$numa" != "-" && "$device" != "-" ]]; then
+    found=""
+    if [[ ! "$device" =~ ^[0-9]+$ ]]; then
+      #echo "Invalid device: $device"
+      #exit 1
+      found="0"
+    else
+      # check if device is part of numa
+      found="0"
+      for d in $numa_devices; do
+        if [[ "$d" == "$device" ]]; then
+          found="1"
+          break
+        fi
+      done
+    fi
 
-# check on port
-name_cmdb=$($ODEV_PATH/src/cmdb_get.py $type $device name $port)
-if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$name_cmdb" = "" ]; then
-  echo "Invalid port: $port" >&2
-  exit 1
-fi
+    # print error
+    if [[ "$found" == "0" ]]; then
+      echo "Invalid device: $device" >&2
+      exit 1
+    fi
+  fi
+
+  # check on port
+  if [[ ! "$port" =~ ^[0-9]+$ ]]; then
+    echo "Invalid port: $port" >&2
+    exit 1
+  fi
+  if [[ "$device" != "-" ]]; then
+    name_cmdb=$($ODEV_PATH/src/cmdb_get.py $type $device name $port)
+    if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$name_cmdb" = "" ]; then
+      echo "Invalid port: $port" >&2
+      exit 1
+    fi
+  fi
+done
 
 # get mac
 mac_system=$(ifconfig "$name_cmdb" | awk '/ether /{print $2; exit}')

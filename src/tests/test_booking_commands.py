@@ -39,7 +39,7 @@ class BookingCommandsTest(unittest.TestCase):
 
     def test_share_user_validation_before_prompt(self):
         source = (ROOT / "cmd/booking/share.sh").read_text()
-        checks = source.split("# validate supplied users before asking for missing fields\n", 1)[1].split("# run interactive prompt", 1)[0]
+        checks = source.split("# validate supplied users before asking for missing fields\n", 1)[1].split("# check supplied values first", 1)[0]
         identity = Path(self.temp.name) / "id"
         identity.write_text('''#!/bin/bash
 case "$3" in
@@ -152,7 +152,7 @@ print(now.astimezone(ZoneInfo(os.environ.get('TZ', 'UTC'))).strftime(sys.argv[1]
         # Exercise the command's actual validation blocks with a fixed clock.
         source = (ROOT / "cmd/booking/add.sh").read_text()
         validation = source.split("# validate supplied or completed start values\n", 1)[1].split("# parse flags", 1)[0]
-        early = source.split("# validate supplied input before asking for missing fields\n", 1)[1].split("# run interactive prompt", 1)[0]
+        early = source.split("# validate supplied input before asking for missing fields\n", 1)[1].split("# check supplied values first", 1)[0]
         clock = Path(self.temp.name) / "date"
         clock.write_text(f"#!{sys.executable}\n" + '''import datetime, os, sys
 from zoneinfo import ZoneInfo

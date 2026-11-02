@@ -59,37 +59,45 @@ print_both="0"
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
-# run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+# check supplied values first, then check each answer before the next question
+for field in "" ${mandatory_flags//,/ }; do
+  if [[ -n "$field" && "${V[$field]:--}" != "-" ]]; then
+    continue
+  fi
+  # run interactive prompt
+  parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --field "$field" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
-# read flags
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
+  # read flags
+  if [[ -n "$parsed_flags" ]]; then
+    declare -A V
+    while IFS='=' read -r k v; do
+      V["$k"]="$v"
+    done <<< "$parsed_flags"
+  fi
 
-# assign flags
-name=${V[name]}
+  # assign flags
+  name=${V[name]:--}
 
-# check on name
-if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
-  echo "Invalid playbook name: $name"
-  exit 1
-fi
+  if [[ "$name" != "-" ]]; then
+    # check on name
+    if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
+      echo "Invalid playbook name: $name"
+      exit 1
+    fi
 
-# check if exists
-if [[ ! -f "$PLAYBOOKS_USER_PATH/$name.yml" && ! -L "$PLAYBOOKS_USER_PATH/$name.yml" ]]; then
-  echo "Playbook does not exist: $name"
-  exit 1
-fi
+    # check if exists
+    if [[ ! -f "$PLAYBOOKS_USER_PATH/$name.yml" && ! -L "$PLAYBOOKS_USER_PATH/$name.yml" ]]; then
+      echo "Playbook does not exist: $name"
+      exit 1
+    fi
 
-# protect community playbooks
-if [[ -e "$PLAYBOOKS_PATH/$name.yml" || -L "$PLAYBOOKS_PATH/$name.yml" ]]; then
-  echo "Playbook cannot be deleted: $name"
-  exit 1
-fi
+    # protect community playbooks
+    if [[ -e "$PLAYBOOKS_PATH/$name.yml" || -L "$PLAYBOOKS_PATH/$name.yml" ]]; then
+      echo "Playbook cannot be deleted: $name"
+      exit 1
+    fi
+  fi
+done
 
 # check on branch
 cd "$PLAYBOOKS_USER_PATH" || exit 1
