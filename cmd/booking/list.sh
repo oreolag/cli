@@ -30,6 +30,12 @@ print_both="0"
   "${flags[@]}" -- "$@" && exit 0 || true
 
 # parse flags
+for flag in "$@"; do
+  if [[ "$flag" == "--all" || "$flag" == "-a" ]]; then
+    echo "Command not available: odev booking list --all" >&2
+    exit 1
+  fi
+done
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
 # run interactive prompt
@@ -44,9 +50,8 @@ if [[ -n "$parsed_flags" ]]; then
 fi
 
 # assign flags
-all=${V[all]}
 date=${V[date]}
 
-# Placeholder: echo parsed parameter values.
-echo "$all"
-echo "$date"
+# list bookings
+python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \
+  --list --date "$date" || exit 1

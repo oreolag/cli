@@ -2,20 +2,19 @@
 
 Booking reserves a server for an owner and optional collaborators.
 
-The command interface, prompts and booking creation are implemented. Listing,
-sharing and cancellation still print parameter values. Availability tables,
-confirmation and login enforcement are planned. The examples below describe the
-agreed workflow.
+Booking creation and local listing are implemented. Sharing and cancellation still
+print parameter values. Remote listing, confirmation and login enforcement are
+planned. The examples below describe the agreed workflow.
 
 ## Configuration
 
 Management copies `cmdb/booking.yml` to `/opt/booking.yml` on every server:
 
 ```yaml
-timezone: Europe/Madrid
 servers:
   - name: odev-booking-01
     id: "01"
+    timezone: Europe/Madrid
     managed_servers:
       - incus-01
       - incus-02
@@ -25,6 +24,9 @@ servers:
 
 Each booking service manages its own reservations. Assign each managed server to
 only one service. Booking servers require normal authentication but no reservation.
+Set `timezone` inside each booking server entry, for example `Europe/Madrid` or
+`Europe/Oslo`. Prompts, validation and tables use that service's timezone;
+database timestamps always remain UTC.
 Booking commands run only on booking servers. Managed machines and machines
 listed nowhere return `Command not available: odev booking` before any dialog.
 
@@ -125,14 +127,16 @@ Use the configured `paths.booking_db` if the default path was changed.
 ```bash
 odev booking list
 odev booking list --date 2026-11-01
-odev booking list --all
-odev booking list --all --date 2026-11-01
 ```
 
-The default is today and the local booking service. Listing remains a placeholder.
-`--all` is reserved for a future cluster overview; communication between booking
-services has not been implemented. Planned tables follow `odev examine` styling
-and show reservations and availability.
+Run these on the booking server. The default is today in the configured timezone.
+The table follows `odev examine` styling and shows booking ID, server, owner,
+start, end, collaborators and status. It includes reservations overlapping that
+day, excludes cancelled bookings and shows `Free` for servers with no reservations
+that day. Reservation statuses are active, upcoming or expired relative to now.
+
+Listing from managed machines and `--all` for a cluster overview remain planned.
+`--all` currently returns `Command not available: odev booking list --all`.
 
 ## Add
 

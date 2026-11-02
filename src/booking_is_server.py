@@ -11,14 +11,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import yaml
 
 
-def booking_timezone(path):
-    if not Path(path).exists():
-        return "UTC"
-    with Path(path).open(encoding="utf-8") as stream:
-        data = yaml.safe_load(stream)
-    if not isinstance(data, dict):
-        raise ValueError("booking inventory must be a mapping")
-    timezone = data.get("timezone", "UTC")
+def validate_timezone(timezone):
     if not isinstance(timezone, str) or not timezone:
         raise ValueError("booking timezone must be a valid timezone name")
     try:
@@ -28,6 +21,19 @@ def booking_timezone(path):
     return timezone
 
 
+def booking_timezone(path, hostname=None):
+    if not Path(path).exists():
+        return "UTC"
+    data = load_inventory(path)
+    timezone = data.get("timezone", "UTC")
+    local = (hostname or socket.gethostname()).split(".")[0]
+    for entry in data.get("servers", []):
+        if entry["name"] == local or local in entry["managed_servers"]:
+            timezone = entry.get("timezone", timezone)
+            break
+    return validate_timezone(timezone)
+
+
 def load_inventory(path):
     if not path or not str(path).strip():
         raise ValueError("booking inventory path must not be empty")
@@ -35,6 +41,7 @@ def load_inventory(path):
         data = yaml.safe_load(stream)
     if not isinstance(data, dict) or not isinstance(data.get("servers"), list):
         raise ValueError("booking inventory must contain a servers list")
+    validate_timezone(data.get("timezone", "UTC"))
     names = set()
     service_ids = set()
     managed = set()
@@ -47,6 +54,8 @@ def load_inventory(path):
         if name in names:
             raise ValueError(f"duplicate booking server: {name}")
         names.add(name)
+        if "timezone" in entry:
+            validate_timezone(entry["timezone"])
         service_id = entry.get("id")
         if not isinstance(service_id, str) or not re.fullmatch(r"[0-9]+", service_id) or int(service_id) == 0:
             raise ValueError(f"booking server id for {name} must be a quoted positive numeric string")

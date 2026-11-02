@@ -10,9 +10,10 @@ from socketserver import ThreadingMixIn, UnixStreamServer
 import struct
 import sys
 import threading
+from urllib.parse import parse_qs, urlsplit
 
 from runtime import configuration
-from storage import BookingConflict, create_booking
+from storage import BookingConflict, create_booking, list_bookings
 
 SOCKET_PATH = "/run/odev-booking/api.sock"
 
@@ -46,6 +47,29 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def do_GET(self):
+        try:
+            peer_user(self.connection)
+            url = urlsplit(self.path)
+            query = parse_qs(url.query, keep_blank_values=True)
+            if url.path != "/bookings":
+                self.reply(404, {"error": "Command not found: booking API"})
+                return
+            if set(query) != {"date"} or len(query["date"]) != 1:
+                raise ValueError("Invalid booking request")
+            config = configuration(self.server.odev_path, socket.gethostname())
+            if config["server"] is None:
+                self.reply(503, {"error": "Booking service unavailable"})
+                return
+            self.reply(200, list_bookings(config, query["date"][0]))
+        except PermissionError as error:
+            self.reply(403, {"error": str(error)})
+        except ValueError as error:
+            self.reply(400, {"error": str(error)})
+        except Exception as error:
+            print(f"ERROR: {error}", file=sys.stderr, flush=True)
+            self.reply(503, {"error": "Booking service unavailable"})
 
     def do_POST(self):
         try:

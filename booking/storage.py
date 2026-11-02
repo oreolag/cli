@@ -1,5 +1,5 @@
-"""SQLite booking creation; called by the authenticated booking API."""
-from datetime import datetime, timezone
+"""SQLite booking storage; called by the authenticated booking API."""
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal, DecimalException
 from pathlib import Path
 import re
@@ -10,6 +10,45 @@ from zoneinfo import ZoneInfo
 
 class BookingConflict(ValueError):
     pass
+
+
+def list_bookings(config, day):
+    zone = ZoneInfo(config["timezone"])
+    if not isinstance(day, str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", day):
+        raise ValueError(f"Invalid booking date: {day}")
+    try:
+        beginning = datetime.strptime(day, "%Y-%m-%d").replace(tzinfo=zone)
+        ending = beginning + timedelta(days=1)
+    except (ValueError, OverflowError):
+        raise ValueError(f"Invalid booking date: {day}") from None
+    entry = config["server"]
+    if entry is None:
+        raise ValueError("Booking service unavailable")
+    connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=ro", uri=True, timeout=10)
+    connection.row_factory = sqlite3.Row
+    try:
+        connection.execute("BEGIN")
+        if connection.execute("PRAGMA user_version").fetchone()[0] != 1:
+            raise ValueError("Unsupported booking database schema version")
+        metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
+        if metadata is None or metadata[0] != entry["id"]:
+            raise ValueError("Booking database service ID does not match booking.yml")
+        rows = connection.execute(
+            "SELECT booking_id, server, owner, start_time, end_time FROM bookings "
+            "WHERE cancelled_at IS NULL AND start_time < ? AND end_time > ? ORDER BY server, start_time, booking_id",
+            (int(ending.timestamp()), int(beginning.timestamp()))).fetchall()
+        bookings = []
+        for row in rows:
+            if row["server"] not in entry["managed_servers"]:
+                continue
+            booking = dict(row)
+            booking["shared"] = [share[0] for share in connection.execute(
+                "SELECT username FROM booking_shares WHERE booking_id = ? ORDER BY username", (row["booking_id"],))]
+            bookings.append(booking)
+        return {"service": entry["name"], "timezone": config["timezone"], "date": day,
+                "servers": entry["managed_servers"], "bookings": bookings}
+    finally:
+        connection.close()
 
 
 def create_booking(config, owner, request):

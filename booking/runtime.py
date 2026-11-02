@@ -23,7 +23,7 @@ def configuration(odev_path, hostname):
     if not inventory_path.is_absolute() or not database_path.is_absolute():
         raise ValueError("booking paths must be absolute")
     inventory = load_inventory(inventory_path)
-    timezone = booking_timezone(inventory_path)
+    timezone = booking_timezone(inventory_path, hostname)
     entry = next((item for item in inventory["servers"]
                   if item["name"] == hostname.split(".")[0]), None)
     return {"database": str(database_path), "timezone": timezone, "server": entry}

@@ -221,17 +221,14 @@ else:
         identity.write_text('#!/bin/bash\nif [[ "$1" == -nG && "$3" == javier ]]; then echo odev-users; else /usr/bin/id "$@"; fi\n')
         identity.chmod(0o755)
         self.env["PATH"] = self.temp.name + os.pathsep + os.environ["PATH"]
-        future_date = (datetime.now(timezone.utc) + timedelta(days=1)).date().isoformat()
         cases = {
-            "list": (["--all", "1", "--date", future_date],
-                     ["1", future_date]),
             "share": (["--booking", "391", "--add", "javier"],
                       ["javier", "391", "-"]),
             "cancel": (["--booking", "391"], ["391"]),
         }
         for name, machines in [(self.local, ["example-managed"])]:
             self.inventory(name, machines)
-            for action in ["list", "share", "cancel"]:
+            for action in ["share", "cancel"]:
                 with self.subTest(host=name, action=action):
                     args, values = cases[action]
                     result = self.run_command(*args, script=f"cmd/booking/{action}.sh")
