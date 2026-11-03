@@ -173,7 +173,7 @@ else:
             ("start=11:20", "Invalid start time: 2026-10-20 11:20"),
             ("start=11.20", "Invalid value for --start:"),
             ("start=6:55", "Invalid value for --start:"),
-            ("start=12:00", "Invalid start time: 2026-10-20 12:00"),
+            ("start=12:00", None),
             ("start=13:20", None),
             ("date=2026-10-21\nstart=11:20", None),
             ("server=incus-01", None),
@@ -220,10 +220,18 @@ else:
         identity = Path(self.temp.name) / "id"
         identity.write_text('#!/bin/bash\nif [[ "$1" == -nG && "$3" == javier ]]; then echo odev-users; else /usr/bin/id "$@"; fi\n')
         identity.chmod(0o755)
+        python = Path(self.temp.name) / "python3"
+        python.write_text(f"#!{sys.executable}\n"
+                          "import os, sys\n"
+                          "if sys.argv[1].endswith('/booking/client.py'):\n"
+                          "    print(' '.join(sys.argv[4:]))\n"
+                          "else:\n"
+                          "    os.execv(sys.executable, [sys.executable, *sys.argv[1:]])\n")
+        python.chmod(0o755)
         self.env["PATH"] = self.temp.name + os.pathsep + os.environ["PATH"]
         cases = {
             "share": (["--booking", "391", "--add", "javier"],
-                      ["javier", "391", "-"]),
+                      ["--share 391 add javier"]),
         }
         for name, machines in [(self.local, ["example-managed"])]:
             self.inventory(name, machines)

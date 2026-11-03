@@ -24,14 +24,14 @@ class Connection(http.client.HTTPConnection):
         self.sock.connect(self.host)
 
 
-def local_request(request, path=SOCKET_PATH):
+def local_request(request, path=SOCKET_PATH, endpoint="/bookings", expected_status=201):
     connection = Connection(str(path), timeout=15)
     try:
         body = json.dumps(request)
-        connection.request("POST", "/bookings", body, {"Content-Type": "application/json"})
+        connection.request("POST", endpoint, body, {"Content-Type": "application/json"})
         response = connection.getresponse()
         value = json.loads(response.read(16384))
-        if response.status != 201:
+        if response.status != expected_status:
             raise ValueError(value.get("error", "Booking request failed"))
         return value["booking_id"]
     finally:
@@ -73,6 +73,7 @@ def main():
     parser.add_argument("--odev-path", default="/opt/odev")
     parser.add_argument("--list", action="store_true")
     parser.add_argument("--cancel")
+    parser.add_argument("--share", nargs=3, metavar=("BOOKING", "ACTION", "USER"))
     parser.add_argument("--history", choices=["0", "1"], default="0")
     parser.add_argument("--server")
     parser.add_argument("--date")
@@ -89,6 +90,13 @@ def main():
     entry = next((entry for entry in inventory["servers"] if entry["name"] == local), None)
     if entry is None:
         raise ValueError("Command not available: odev booking")
+    if args.share:
+        booking, action, user = args.share
+        local_request({"booking": booking, "action": action, "user": user},
+                      endpoint="/bookings/share", expected_status=200)
+        message = "Booking shared with" if action == "add" else "Booking collaborator removed"
+        print(f"{message}: {user} ({booking})")
+        return
     if args.cancel:
         booking = local_cancellation(args.cancel)
         zone = ZoneInfo(booking["timezone"])

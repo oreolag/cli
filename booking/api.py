@@ -13,7 +13,7 @@ import threading
 from urllib.parse import parse_qs, urlsplit
 
 from runtime import configuration
-from storage import BookingConflict, cancel_booking, create_booking, list_bookings
+from storage import BookingConflict, cancel_booking, create_booking, list_bookings, share_booking
 
 SOCKET_PATH = "/run/odev-booking/api.sock"
 
@@ -91,13 +91,23 @@ class Handler(BaseHTTPRequestHandler):
         try:
             self.connection.settimeout(10)
             owner = peer_user(self.connection)
-            if self.path not in ["/bookings", "/bookings/cancel"]:
+            if self.path not in ["/bookings", "/bookings/cancel", "/bookings/share"]:
                 self.reply(404, {"error": "Command not found: booking API"})
                 return
             size = int(self.headers.get("Content-Length", "0"))
             if not 0 < size <= 16384:
                 raise ValueError("Invalid booking request")
             request = json.loads(self.rfile.read(size))
+            if self.path == "/bookings/share":
+                if (not isinstance(request, dict) or set(request) != {"booking", "action", "user"}
+                        or not all(isinstance(value, str) and value for value in request.values())
+                        or request["action"] not in ["add", "remove"]):
+                    raise ValueError("Invalid booking request")
+                require_user(request["user"])
+                config = configuration(self.server.odev_path, socket.gethostname())
+                share_booking(config, owner, request["booking"], request["action"], request["user"])
+                self.reply(200, {"booking_id": request["booking"]})
+                return
             if self.path == "/bookings/cancel":
                 if not isinstance(request, dict) or set(request) != {"booking"} or not isinstance(request["booking"], str):
                     raise ValueError("Invalid booking request")

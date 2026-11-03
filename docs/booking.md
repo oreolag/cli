@@ -2,8 +2,8 @@
 
 Booking reserves a server for an owner and optional collaborators.
 
-Booking creation, cancellation and local listing are implemented. Sharing still
-prints parameter values. Remote listing and login enforcement are
+Booking creation, sharing, cancellation and local listing are implemented.
+Remote listing and login enforcement are
 planned. The examples below describe the agreed workflow.
 
 ## Configuration
@@ -182,7 +182,7 @@ sudo -u odev-booking sqlite3 -readonly -header -column /var/lib/odev-booking/boo
   'SELECT booking_id, server, owner, start_time, end_time FROM bookings;'
 ```
 
-Reservations must start in the future and have a positive duration within
+Reservations can start in the current minute or later and must have a positive duration within
 `maximum_duration_hours`. They cannot overlap on the same server. A booking ending
 at 16:00 allows another to start at 16:00.
 
@@ -193,7 +193,7 @@ odev booking share --booking 01-0001 --add javier
 odev booking share --booking 01-0001 --remove quico
 ```
 
-Only the owner can change sharing. Add or remove one user per invocation; the flags
+Only the owner can change sharing on active or upcoming bookings. Add or remove one user per invocation; the flags
 cannot be combined. The user must exist and belong to `odev-users`. Adding an
 existing collaborator preserves the list without duplicates. Without either flag,
 the dialog asks for a user to add.

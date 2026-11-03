@@ -36,8 +36,11 @@ def print_bookings(result, history=False):
         rows = [row[:-1] for row in rows]
     widths = [max(len(header), *(len(row[index]) for row in rows)) if rows else len(header)
               for index, header in enumerate(headers)]
-    title = f"{result['service']} ({result['date']} {result['timezone']})"
+    service = result["service"]
+    title = f"{service} | Date: {result['date']} | Timezone: {result['timezone']}"
     inner = sum(widths) + 3 * (len(headers) - 1) + 2
+    widths[-1] += max(0, len(title) + 2 - inner)
+    inner = max(inner, len(title) + 2)
     bold = reset = passed = failed = ""
     if sys.stdout.isatty():
         try:
@@ -59,7 +62,8 @@ def print_bookings(result, history=False):
         elif history and cells[-1] == "Cancelled" and failed:
             values[-1] = failed + cells[-1] + reset + " " * (widths[-1] - len(cells[-1]))
         print("| " + " : ".join(values) + " |")
-    print(title.rjust(inner + 2))
+    rule()
+    print("| " + bold + service + reset + title[len(service):].ljust(inner - 2 - len(service)) + " |")
     rule()
     line(headers, heading=True)
     rule("|", "|")

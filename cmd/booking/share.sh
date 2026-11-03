@@ -94,7 +94,13 @@ for field in "" ${mandatory_flags//,/ }; do
   fi
 done
 
-# Placeholder: echo parsed parameter values.
-echo "$add"
-echo "$booking"
-echo "$remove"
+# update booking collaborators
+if [[ "$remove" != "-" ]]; then
+  action=remove
+  user="$remove"
+else
+  action=add
+  user="$add"
+fi
+python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \
+  --share "$booking" "$action" "$user" || exit 1

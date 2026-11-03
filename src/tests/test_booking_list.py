@@ -108,9 +108,9 @@ class BookingListTest(unittest.TestCase):
             print_bookings(list_bookings(self.config, "2026-10-25"), history=True)
         lines = output.getvalue().splitlines()
         self.assertEqual(len(set(map(len, lines))), 1)
-        self.assertEqual(lines[0].strip(), self.config["server"]["name"] + " (2026-10-25 Europe/Madrid)")
-        self.assertTrue(lines[1].startswith("+"))
-        self.assertTrue(lines[2].startswith("| Booking ID"))
+        self.assertEqual(lines[0], lines[2])
+        self.assertEqual(lines[1][1:-1].strip(), self.config["server"]["name"] + " | Date: 2026-10-25 | Timezone: Europe/Madrid")
+        self.assertTrue(lines[3].startswith("| Booking ID"))
         self.assertEqual(output.getvalue().count("Booking ID"), 1)
         for value in ["Booking ID", "Shared with", "Europe/Madrid", "01-0001"]:
             self.assertIn(value, output.getvalue())

@@ -33,7 +33,7 @@ print_both="0"
 
 # validate supplied or completed start values
 validate_start_time() {
-  local date="$1" start="$2" start_timestamp
+  local date="$1" start="$2" start_timestamp now
   # validate start time (from flags or the interactive prompt)
   if [[ ! "$start" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
     echo "Invalid value for --start: '$start' (expected HH:MM from 00:00 to 23:59)" >&2
@@ -46,7 +46,8 @@ validate_start_time() {
     echo "Invalid start time: $date $start" >&2
     return 1
   fi
-  if (( start_timestamp <= $(date +%s) )); then
+  now=$(date +%s)
+  if (( start_timestamp < now - now % 60 )); then
     echo "Invalid start time: $date $start" >&2
     return 1
   fi
@@ -75,6 +76,9 @@ for field in "" ${mandatory_flags//,/ }; do
     continue
   fi
   # run interactive prompt
+  if [[ "$field" == "start" ]]; then
+    mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
+  fi
   parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --field "$field" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
   # read flags
