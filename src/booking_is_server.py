@@ -22,6 +22,18 @@ def validate_timezone(timezone):
     return timezone
 
 
+def duration_seconds(value, maximum_hours):
+    try:
+        if not isinstance(value, str) or len(value) > 32 or not re.fullmatch(r"[0-9]+[mh]", value):
+            raise ValueError()
+        seconds = int(value[:-1]) * (60 if value[-1] == "m" else 3600)
+        if seconds <= 0 or seconds > Decimal(str(maximum_hours)) * 3600:
+            raise ValueError()
+        return seconds
+    except (DecimalException, ValueError, OverflowError):
+        raise ValueError(f"Invalid duration: {value}") from None
+
+
 def booking_timezone(path, hostname=None):
     if not Path(path).exists():
         return "UTC"
@@ -105,16 +117,7 @@ def main():
             if args.server is not None and args.server not in entry["managed_servers"]:
                 raise ValueError(f"Invalid server: {args.server}")
             if args.duration is not None:
-                try:
-                    if len(args.duration) > 32:
-                        raise ValueError()
-                    hours = Decimal(args.duration)
-                    if (not hours.is_finite() or hours <= 0
-                            or hours > Decimal(str(entry["maximum_duration_hours"]))
-                            or (hours * 3600) % 60 != 0):
-                        raise ValueError()
-                except (DecimalException, ValueError, OverflowError):
-                    raise ValueError(f"Invalid duration: {args.duration}") from None
+                duration_seconds(args.duration, entry["maximum_duration_hours"])
             return 0
         if args.timezone:
             print(booking_timezone(args.db))

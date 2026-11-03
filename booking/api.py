@@ -13,7 +13,7 @@ import threading
 from urllib.parse import parse_qs, urlsplit
 
 from runtime import configuration
-from storage import BookingConflict, create_booking, list_bookings
+from storage import BookingConflict, cancel_booking, create_booking, list_bookings
 
 SOCKET_PATH = "/run/odev-booking/api.sock"
 
@@ -39,6 +39,15 @@ def peer_user(connection):
         raise PermissionError("Permission denied: booking access") from None
 
 
+def is_administrator(username):
+    user = pwd.getpwnam(username)
+    try:
+        group = grp.getgrnam("odev-admins")
+    except KeyError:
+        return False
+    return group.gr_gid in os.getgrouplist(username, user.pw_gid)
+
+
 class Handler(BaseHTTPRequestHandler):
     def reply(self, status, value):
         body = json.dumps(value).encode()
@@ -50,11 +59,16 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         try:
-            peer_user(self.connection)
+            username = peer_user(self.connection)
             url = urlsplit(self.path)
             query = parse_qs(url.query, keep_blank_values=True)
             if url.path != "/bookings":
                 self.reply(404, {"error": "Command not found: booking API"})
+                return
+            if set(query) == {"booking"} and len(query["booking"]) == 1:
+                config = configuration(self.server.odev_path, socket.gethostname())
+                self.reply(200, cancel_booking(config, username, query["booking"][0],
+                                               administrator=is_administrator(username)))
                 return
             if ("date" not in query or set(query) - {"date", "history"}
                     or any(len(values) != 1 for values in query.values())
@@ -77,13 +91,21 @@ class Handler(BaseHTTPRequestHandler):
         try:
             self.connection.settimeout(10)
             owner = peer_user(self.connection)
-            if self.path != "/bookings":
+            if self.path not in ["/bookings", "/bookings/cancel"]:
                 self.reply(404, {"error": "Command not found: booking API"})
                 return
             size = int(self.headers.get("Content-Length", "0"))
             if not 0 < size <= 16384:
                 raise ValueError("Invalid booking request")
             request = json.loads(self.rfile.read(size))
+            if self.path == "/bookings/cancel":
+                if not isinstance(request, dict) or set(request) != {"booking"} or not isinstance(request["booking"], str):
+                    raise ValueError("Invalid booking request")
+                config = configuration(self.server.odev_path, socket.gethostname())
+                result = cancel_booking(config, owner, request["booking"],
+                                        administrator=is_administrator(owner), confirm=True)
+                self.reply(200, result)
+                return
             if not isinstance(request, dict) or set(request) - {"server", "date", "start", "duration", "shared"}:
                 raise ValueError("Invalid booking request")
             shared = request.get("shared", [])

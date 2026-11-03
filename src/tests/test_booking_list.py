@@ -54,7 +54,7 @@ class BookingListTest(unittest.TestCase):
         self.assertEqual(configuration(self.root, "other-booking")["timezone"], "Europe/Oslo")
         self.assertEqual(booking_timezone(self.inventory, "unlisted"), "Europe/Madrid")
         from storage import create_booking
-        request = {"server": "incus-01", "date": "2099-01-10", "start": "14:00", "duration": "1"}
+        request = {"server": "incus-01", "date": "2099-01-10", "start": "14:00", "duration": "1h"}
         create_booking(config, "javier", request)
         result = list_bookings(config, "2099-01-10")
         self.assertEqual(result["timezone"], "America/New_York")

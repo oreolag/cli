@@ -37,7 +37,7 @@ class BookingAddTest(unittest.TestCase):
         initialize_database(self.database, "01", ROOT / "booking/schema.sql")
         tomorrow = (datetime.now(timezone.utc) + timedelta(days=1)).date().isoformat()
         self.request = {"server": "incus-01", "date": tomorrow, "start": "14:15",
-                        "duration": "2", "shared": ["quico", "quico", "javier"]}
+                        "duration": "2h", "shared": ["quico", "quico", "javier"]}
 
     def test_create_and_share_then_adjacent_booking(self):
         self.assertEqual(create_booking(self.config, "javier", self.request), "01-0001")
@@ -47,6 +47,15 @@ class BookingAddTest(unittest.TestCase):
             self.assertEqual(row[4] - row[3], 7200)
             self.assertEqual(db.execute("SELECT username FROM booking_shares").fetchall(), [("quico",)])
         self.assertEqual(create_booking(self.config, "javier", {**self.request, "start": "16:15"}), "01-0002")
+
+    def test_duration_units(self):
+        from booking_is_server import duration_seconds
+        for value, expected in [("5m", 300), ("60m", 3600), ("1h", 3600), ("2h", 7200), ("300m", 18000)]:
+            self.assertEqual(duration_seconds(value, 5), expected)
+        create_booking(self.config, "javier", {**self.request, "duration": "5m"})
+        with sqlite3.connect(self.database) as db:
+            start, end = db.execute("SELECT start_time, end_time FROM bookings").fetchone()
+            self.assertEqual(end - start, 300)
 
     def test_concurrent_overlap_and_sequence(self):
         def reserve(_):
@@ -62,7 +71,7 @@ class BookingAddTest(unittest.TestCase):
             self.assertEqual(db.execute("SELECT last_sequence FROM booking_metadata").fetchone()[0], 1)
 
     def test_rejections_leave_no_rows_or_sequence_changes(self):
-        requests = [{**self.request, "duration": value} for value in ["0", "-1", "6", "NaN", "0.001"]]
+        requests = [{**self.request, "duration": value} for value in ["0m", "-1h", "6h", "301m", "NaN", "0.001h", "1", "5M", "m"]]
         requests += [{**self.request, "start": value} for value in ["6:55", "06.55", "24:00"]]
         requests += [{**self.request, "server": "other"}, {**self.request, "date": "2020-01-01"}]
         for request in requests:
@@ -109,7 +118,7 @@ class BookingAddTest(unittest.TestCase):
 
     def test_client_uses_only_local_api_and_does_not_claim_owner(self):
         args = ["client.py", "--odev-path", str(self.root), "--server", "incus-01",
-                "--date", self.request["date"], "--start", "14:15", "--duration", "2"]
+                "--date", self.request["date"], "--start", "14:15", "--duration", "2h"]
         with patch.object(sys, "argv", args), patch.object(client, "local_request", return_value="01-0001") as api_call:
             output = io.StringIO()
             with redirect_stdout(output):

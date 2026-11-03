@@ -46,5 +46,6 @@ fi
 # assign flags
 booking=${V[booking]}
 
-# Placeholder: echo parsed parameter values.
-echo "$booking"
+# cancel booking
+python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \
+  --cancel "$booking" || exit 1

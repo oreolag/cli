@@ -1,11 +1,12 @@
 """SQLite booking storage; called by the authenticated booking API."""
 from datetime import datetime, timedelta, timezone
-from decimal import Decimal, DecimalException
 from pathlib import Path
 import re
 import sqlite3
 import time
 from zoneinfo import ZoneInfo
+
+from booking_is_server import duration_seconds
 
 
 class BookingConflict(ValueError):
@@ -51,6 +52,37 @@ def list_bookings(config, day, history=False):
         connection.close()
 
 
+def cancel_booking(config, username, booking_id, administrator=False, confirm=False):
+    entry = config["server"]
+    if entry is None:
+        raise ValueError("Booking service unavailable")
+    connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=rw", uri=True, timeout=10)
+    connection.row_factory = sqlite3.Row
+    try:
+        connection.execute("BEGIN IMMEDIATE" if confirm else "BEGIN")
+        metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
+        if metadata is None or metadata[0] != entry["id"]:
+            raise ValueError("Booking database service ID does not match booking.yml")
+        row = connection.execute("SELECT * FROM bookings WHERE booking_id = ?", (booking_id,)).fetchone()
+        if row is None:
+            raise ValueError(f"Invalid booking: {booking_id}")
+        if row["owner"] != username and not administrator:
+            raise PermissionError(f"Permission denied: {booking_id}")
+        if row["cancelled_at"] is not None:
+            raise ValueError(f"Booking already cancelled: {booking_id}")
+        now = int(time.time())
+        if row["end_time"] <= now:
+            raise ValueError(f"Booking expired: {booking_id}")
+        if confirm:
+            connection.execute("UPDATE bookings SET cancelled_at = ?, cancelled_by = ? WHERE booking_id = ?",
+                               (now, username, booking_id))
+            connection.commit()
+        return {"booking_id": booking_id, "server": row["server"], "owner": row["owner"],
+                "start_time": row["start_time"], "end_time": row["end_time"], "timezone": config["timezone"]}
+    finally:
+        connection.close()
+
+
 def create_booking(config, owner, request):
     entry = config["server"]
     server = request.get("server")
@@ -70,19 +102,7 @@ def create_booking(config, owner, request):
         start_time = int(local.timestamp())
     except (ValueError, OverflowError):
         raise ValueError(f"Invalid start time: {day} {start}") from None
-    try:
-        duration = str(request.get("duration", ""))
-        if len(duration) > 32:
-            raise ValueError()
-        hours = Decimal(duration)
-        seconds = hours * 3600
-        if (not hours.is_finite() or hours <= 0
-                or hours > Decimal(str(entry["maximum_duration_hours"]))
-                or seconds % 60 != 0):
-            raise ValueError()
-        end_time = start_time + int(seconds)
-    except (DecimalException, ValueError, OverflowError):
-        raise ValueError(f"Invalid duration: {request.get('duration')}") from None
+    end_time = start_time + duration_seconds(request.get("duration"), entry["maximum_duration_hours"])
     shared = request.get("shared", [])
     if not isinstance(shared, list) or any(not isinstance(user, str) or not user for user in shared):
         raise ValueError("Invalid shared users")

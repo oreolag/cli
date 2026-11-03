@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Access bookings through the local HTTP API on a booking server."""
 import argparse
+from datetime import datetime
 import http.client
 import json
 from pathlib import Path
 import socket
 import sys
+from zoneinfo import ZoneInfo
 
 import yaml
 from urllib.parse import urlencode
@@ -49,15 +51,33 @@ def local_listing(day, path=SOCKET_PATH, history=False):
         connection.close()
 
 
+def local_cancellation(booking, confirm=False, path=SOCKET_PATH):
+    connection = Connection(str(path), timeout=15)
+    try:
+        if confirm:
+            connection.request("POST", "/bookings/cancel", json.dumps({"booking": booking}),
+                               {"Content-Type": "application/json"})
+        else:
+            connection.request("GET", "/bookings?" + urlencode({"booking": booking}))
+        response = connection.getresponse()
+        value = json.loads(response.read())
+        if response.status != 200:
+            raise ValueError(value.get("error", "Booking request failed"))
+        return value
+    finally:
+        connection.close()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--odev-path", default="/opt/odev")
     parser.add_argument("--list", action="store_true")
+    parser.add_argument("--cancel")
     parser.add_argument("--history", choices=["0", "1"], default="0")
     parser.add_argument("--server")
     parser.add_argument("--date")
     parser.add_argument("--start")
-    parser.add_argument("--duration", default="1")
+    parser.add_argument("--duration", default="1h")
     parser.add_argument("--shared", default="-")
     args = parser.parse_args()
     root = Path(args.odev_path)
@@ -69,6 +89,21 @@ def main():
     entry = next((entry for entry in inventory["servers"] if entry["name"] == local), None)
     if entry is None:
         raise ValueError("Command not available: odev booking")
+    if args.cancel:
+        booking = local_cancellation(args.cancel)
+        zone = ZoneInfo(booking["timezone"])
+        start = datetime.fromtimestamp(booking["start_time"], zone).strftime("%Y-%m-%d %H:%M")
+        end = datetime.fromtimestamp(booking["end_time"], zone).strftime("%Y-%m-%d %H:%M")
+        print(f"{booking['booking_id']}: {booking['server']} | {start} - {end} ({booking['timezone']})")
+        try:
+            answer = input("Cancel booking? [y/N]: ")
+        except EOFError:
+            return
+        if answer.strip().lower() not in ["y", "yes"]:
+            return
+        local_cancellation(args.cancel, confirm=True)
+        print(f"Booking cancelled: {args.cancel}")
+        return
     if args.list:
         history = args.history == "1"
         print_bookings(local_listing(args.date, history=history), history=history)

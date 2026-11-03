@@ -224,11 +224,10 @@ else:
         cases = {
             "share": (["--booking", "391", "--add", "javier"],
                       ["javier", "391", "-"]),
-            "cancel": (["--booking", "391"], ["391"]),
         }
         for name, machines in [(self.local, ["example-managed"])]:
             self.inventory(name, machines)
-            for action in ["share", "cancel"]:
+            for action in ["share"]:
                 with self.subTest(host=name, action=action):
                     args, values = cases[action]
                     result = self.run_command(*args, script=f"cmd/booking/{action}.sh")

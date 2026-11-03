@@ -2,8 +2,8 @@
 
 Booking reserves a server for an owner and optional collaborators.
 
-Booking creation and local listing are implemented. Sharing and cancellation still
-print parameter values. Remote listing, confirmation and login enforcement are
+Booking creation, cancellation and local listing are implemented. Sharing still
+prints parameter values. Remote listing and login enforcement are
 planned. The examples below describe the agreed workflow.
 
 ## Configuration
@@ -148,7 +148,7 @@ Listing from managed machines and `--all` for a cluster overview remain planned.
 
 ```bash
 odev booking add --server incus-01
-odev booking add --server incus-01 --date 2026-11-01 --start 14:15 --duration 2
+odev booking add --server incus-01 --date 2026-11-01 --start 14:15 --duration 2h
 odev booking add --server incus-01 --shared javier,quico
 ```
 
@@ -156,7 +156,9 @@ The authenticated user owns the reservation. Missing required values open the
 dialog. Dates use `YYYY-MM-DD`; times require `HH:MM`, including leading zeros.
 Input and display use the configured timezone; database timestamps use UTC.
 
-The date defaults to today, duration to one hour, and start to the next five-minute
+Duration accepts a positive whole number followed by `m` or `h`, for example
+`5m`, `60m`, `1h` or `2h`. Plain numbers and decimal values are not accepted.
+The date defaults to today, duration to `1h`, and start to the next five-minute
 boundary. Availability-based suggestions will follow once storage is implemented.
 Supplied start values are validated before prompting, then checked again afterward.
 
@@ -169,7 +171,7 @@ For example, after deploying `booking=true` on all machines, run this on the
 booking server to create a reservation with a future start time:
 
 ```bash
-odev booking add --server incus-01 --date 2026-11-01 --start 14:15 --duration 1
+odev booking add --server incus-01 --date 2026-11-01 --start 14:15 --duration 1h
 # Booking created: 01-0001
 ```
 
@@ -208,6 +210,9 @@ odev booking cancel --booking 01-0001
 Owners and administrators can cancel active or future bookings. Show the server,
 date and times before asking for confirmation, with No as the default. Keep
 cancelled bookings as history.
+Administrators are members of `odev-admins`. Cancellation preserves collaborators
+and the booking ID; `odev booking list --history` includes the cancelled record.
+Existing sessions continue until access enforcement implements the handover rule.
 
 ## Access and handover
 
