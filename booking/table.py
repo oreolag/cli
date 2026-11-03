@@ -38,13 +38,14 @@ def print_bookings(result, history=False):
               for index, header in enumerate(headers)]
     title = f"{result['service']} ({result['date']} {result['timezone']})"
     inner = sum(widths) + 3 * (len(headers) - 1) + 2
-    bold = reset = passed = ""
+    bold = reset = passed = failed = ""
     if sys.stdout.isatty():
         try:
             curses.setupterm()
             bold = (curses.tigetstr("bold") or b"").decode()
             reset = (curses.tigetstr("sgr0") or b"").decode()
             passed = ast.literal_eval((Path(__file__).resolve().parents[1] / "src/COLOR_PASSED").read_text().strip())
+            failed = ast.literal_eval((Path(__file__).resolve().parents[1] / "src/COLOR_FAILED").read_text().strip())
         except curses.error:
             pass
     def rule(left="+", right="+"):
@@ -55,6 +56,8 @@ def print_bookings(result, history=False):
             values[0] = bold + cells[0] + reset + " " * (widths[0] - len(cells[0]))
         elif not history and cells[-1] == "Free" and passed:
             values[-1] = passed + cells[-1] + reset + " " * (widths[-1] - len(cells[-1]))
+        elif history and cells[-1] == "Cancelled" and failed:
+            values[-1] = failed + cells[-1] + reset + " " * (widths[-1] - len(cells[-1]))
         print("| " + " : ".join(values) + " |")
     print(title.rjust(inner + 2))
     rule()
