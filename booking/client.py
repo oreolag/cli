@@ -36,10 +36,10 @@ def local_request(request, path=SOCKET_PATH):
         connection.close()
 
 
-def local_listing(day, path=SOCKET_PATH):
+def local_listing(day, path=SOCKET_PATH, history=False):
     connection = Connection(str(path), timeout=15)
     try:
-        connection.request("GET", "/bookings?" + urlencode({"date": day}))
+        connection.request("GET", "/bookings?" + urlencode({"date": day, "history": int(history)}))
         response = connection.getresponse()
         value = json.loads(response.read())
         if response.status != 200:
@@ -53,6 +53,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--odev-path", default="/opt/odev")
     parser.add_argument("--list", action="store_true")
+    parser.add_argument("--history", choices=["0", "1"], default="0")
     parser.add_argument("--server")
     parser.add_argument("--date")
     parser.add_argument("--start")
@@ -69,7 +70,8 @@ def main():
     if entry is None:
         raise ValueError("Command not available: odev booking")
     if args.list:
-        print_bookings(local_listing(args.date))
+        history = args.history == "1"
+        print_bookings(local_listing(args.date, history=history), history=history)
         return
     if args.server not in entry["managed_servers"]:
         raise ValueError(f"Invalid server: {args.server}")

@@ -30,13 +30,18 @@ print_both="0"
   "${flags[@]}" -- "$@" && exit 0 || true
 
 # parse flags
+args=()
 for flag in "$@"; do
   if [[ "$flag" == "--all" || "$flag" == "-a" ]]; then
     echo "Command not available: odev booking list --all" >&2
     exit 1
   fi
+  args+=("$flag")
+  if [[ "$flag" == "--history" ]]; then
+    args+=("1")
+  fi
 done
-parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
+parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "${args[@]}")" || exit 1
 
 # run interactive prompt
 parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
@@ -51,6 +56,7 @@ fi
 
 # assign flags
 date=${V[date]}
+history=${V[history]}
 
 # check on date
 if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
@@ -61,4 +67,4 @@ fi
 
 # list bookings
 python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \
-  --list --date "$date" || exit 1
+  --list --date "$date" --history "$history" || exit 1

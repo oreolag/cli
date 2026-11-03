@@ -12,7 +12,7 @@ class BookingConflict(ValueError):
     pass
 
 
-def list_bookings(config, day):
+def list_bookings(config, day, history=False):
     zone = ZoneInfo(config["timezone"])
     if not isinstance(day, str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", day):
         raise ValueError(f"Invalid booking date: {day}")
@@ -34,9 +34,9 @@ def list_bookings(config, day):
         if metadata is None or metadata[0] != entry["id"]:
             raise ValueError("Booking database service ID does not match booking.yml")
         rows = connection.execute(
-            "SELECT booking_id, server, owner, start_time, end_time FROM bookings "
-            "WHERE cancelled_at IS NULL AND start_time < ? AND end_time > ? ORDER BY server, start_time, booking_id",
-            (int(ending.timestamp()), int(beginning.timestamp()))).fetchall()
+            "SELECT booking_id, server, owner, start_time, end_time, cancelled_at FROM bookings "
+            "WHERE (? OR cancelled_at IS NULL) AND start_time < ? AND end_time > ? ORDER BY server, start_time, booking_id",
+            (history, int(ending.timestamp()), int(beginning.timestamp()))).fetchall()
         bookings = []
         for row in rows:
             if row["server"] not in entry["managed_servers"]:

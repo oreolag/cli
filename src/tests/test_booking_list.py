@@ -105,15 +105,37 @@ class BookingListTest(unittest.TestCase):
         self.insert("01-0003", "2026-10-25 15:00", "2026-10-25 16:00")
         output = io.StringIO()
         with redirect_stdout(output), patch("table.time.time", return_value=self.stamp("2026-10-25 14:30")):
-            print_bookings(list_bookings(self.config, "2026-10-25"))
+            print_bookings(list_bookings(self.config, "2026-10-25"), history=True)
         lines = output.getvalue().splitlines()
         self.assertEqual(len(set(map(len, lines))), 1)
         self.assertEqual(lines[0].strip(), self.config["server"]["name"] + " (2026-10-25 Europe/Madrid)")
         self.assertTrue(lines[1].startswith("+"))
         self.assertTrue(lines[2].startswith("| Booking ID"))
         self.assertEqual(output.getvalue().count("Booking ID"), 1)
-        for value in ["Booking ID", "Shared with", "Europe/Madrid", "Active", "Upcoming", "Expired", "Free", "incus-02"]:
+        for value in ["Booking ID", "Shared with", "Europe/Madrid", "01-0001"]:
             self.assertIn(value, output.getvalue())
+        for value in ["Status", "Active", "Upcoming", "Expired", "Free", "incus-02", "01-0002", "01-0003"]:
+            self.assertNotIn(value, output.getvalue())
+        output = io.StringIO()
+        with redirect_stdout(output), patch("table.time.time", return_value=self.stamp("2026-10-25 14:30")):
+            print_bookings(list_bookings(self.config, "2026-10-25"))
+        self.assertNotIn("Expired", output.getvalue())
+        self.assertNotIn("01-0001", output.getvalue())
+        self.assertIn("Active", output.getvalue())
+        self.assertIn("Upcoming", output.getvalue())
+
+    def test_history_includes_cancelled_and_keeps_status(self):
+        self.insert("01-0001", "2026-10-25 13:00", "2026-10-25 14:00")
+        self.insert("01-0002", "2026-10-25 15:00", "2026-10-25 16:00", cancelled=True)
+        result = list_bookings(self.config, "2026-10-25", history=True)
+        self.assertEqual(len(result["bookings"]), 2)
+        output = io.StringIO()
+        with redirect_stdout(output), patch("table.time.time", return_value=self.stamp("2026-10-25 14:30")):
+            print_bookings(result, history=True)
+        for value in ["Status", "Expired", "Cancelled", "01-0001", "01-0002"]:
+            self.assertIn(value, output.getvalue())
+        self.assertNotIn("Free", output.getvalue())
+        self.assertNotIn("Upcoming", output.getvalue())
 
     def test_http_listing_and_client(self):
         self.insert("01-0001", "2026-10-25 13:00", "2026-10-25 14:00")
@@ -125,7 +147,7 @@ class BookingListTest(unittest.TestCase):
             self.assertEqual(result["bookings"][0]["booking_id"], "01-0001")
             with self.assertRaisesRegex(ValueError, "Invalid booking date"):
                 client.local_listing("2026-02-30", path)
-            args = ["client.py", "--odev-path", str(self.root), "--list", "--date", "2026-10-25"]
+            args = ["client.py", "--odev-path", str(self.root), "--list", "--date", "2026-10-25", "--history", "1"]
             with patch.object(sys, "argv", args), patch.object(client, "local_listing", return_value=result), redirect_stdout(io.StringIO()) as output:
                 client.main()
             self.assertIn("01-0001", output.getvalue())

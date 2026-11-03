@@ -56,13 +56,15 @@ class Handler(BaseHTTPRequestHandler):
             if url.path != "/bookings":
                 self.reply(404, {"error": "Command not found: booking API"})
                 return
-            if set(query) != {"date"} or len(query["date"]) != 1:
+            if ("date" not in query or set(query) - {"date", "history"}
+                    or any(len(values) != 1 for values in query.values())
+                    or query.get("history", ["0"])[0] not in ["0", "1"]):
                 raise ValueError("Invalid booking request")
             config = configuration(self.server.odev_path, socket.gethostname())
             if config["server"] is None:
                 self.reply(503, {"error": "Booking service unavailable"})
                 return
-            self.reply(200, list_bookings(config, query["date"][0]))
+            self.reply(200, list_bookings(config, query["date"][0], history=query.get("history", ["0"])[0] == "1"))
         except PermissionError as error:
             self.reply(403, {"error": str(error)})
         except ValueError as error:

@@ -127,13 +127,19 @@ Use the configured `paths.booking_db` if the default path was changed.
 ```bash
 odev booking list
 odev booking list --date 2026-11-01
+odev booking list --history
+odev booking list --history --date 2026-11-01
 ```
 
 Run these on the booking server. The default is today in the configured timezone.
 The table follows `odev examine` styling and shows booking ID, server, owner,
 start, end, collaborators and status. It includes reservations overlapping that
 day, excludes cancelled bookings and shows `Free` for servers with no reservations
-that day. Reservation statuses are active, upcoming or expired relative to now.
+that day. By default, only active and upcoming reservations are shown. Today,
+servers without an active reservation also show a `Free` row. Use `--history`
+to show only expired and cancelled reservations for the selected day, without
+`Free` rows. History hides the Status column when all rows are expired; it keeps
+the column when cancelled reservations are present.
 
 Listing from managed machines and `--all` for a cluster overview remain planned.
 `--all` currently returns `Command not available: odev booking list --all`.

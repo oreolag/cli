@@ -36,10 +36,11 @@ if [[ "${KEY:-BOOKING}" == BOOKING* ]]; then
   BOOKING_DESCRIPTION="Add, cancel, list or share bookings" # (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
   BOOKING_FLAGS=()
   # list
-  BOOKING_LIST_DESCRIPTION="List active bookings" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
+  BOOKING_LIST_DESCRIPTION="List server availability and bookings" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
   BOOKING_LIST_FLAGS=(
     "all,a,Show all booking services,-,-"
     "date,d,Booking date (YYYY-MM-DD),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
+    "history,,Include expired bookings for the selected day,0|1,0"
   )
   BOOKING_LIST_FLAGS_MANDATORY=""
   # add
