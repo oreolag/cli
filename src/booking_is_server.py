@@ -115,7 +115,8 @@ def main():
             if entry is None:
                 raise ValueError("Command not available: odev booking")
             if args.server is not None and args.server not in entry["managed_servers"]:
-                raise ValueError(f"Invalid server: {args.server}")
+                print(f"Invalid server: {args.server}", file=sys.stderr)
+                return 1
             if args.duration is not None:
                 duration_seconds(args.duration, entry["maximum_duration_hours"])
             return 0
