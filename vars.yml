@@ -1,17 +1,23 @@
 ---
 
-#github
+# constants
+constants:
+  mtu_min: 1500
+  mtu_max: 9000
+  mtu_default: 1500
+
+# github
 github:
   push_branch_workflows: my_workflows
   workflows_repo: "oreolag/workflows"
   push_branch_playbooks: my_playbooks
   playbooks_repo: "oreolag/playbooks"
 
-#mpi
+# mpi
 mpi:
   home: /usr/lib/aarch64-linux-gnu/openmpi
 
-#paths
+# paths
 paths:
   banner: /opt
   booking: /opt/booking.yml
