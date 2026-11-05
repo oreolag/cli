@@ -141,8 +141,10 @@ to show only expired and cancelled reservations for the selected day, without
 `Free` rows. History hides the Status column when all rows are expired; it keeps
 the column when cancelled reservations are present.
 
-Listing from managed machines and `--all` for a cluster overview remain planned.
-`--all` currently returns `Command not available: odev booking list --all`.
+`odev booking list --all` prints the local table first, then runs the booking
+list playbook against the other services in the inventory with the same date
+and history options. It uses the caller's existing SSH access and requires
+Ansible on the local booking server. Failed peers are reported by name.
 
 ## Add
 

@@ -1,0 +1,22 @@
+---
+- name: List bookings on remote services
+  hosts: booking_peers
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Get booking table
+      ansible.builtin.command:
+        argv: "{{ booking_list_command }}"
+      register: booking_list
+      changed_when: false
+      failed_when: false
+      ignore_unreachable: true
+
+    - name: Collect booking tables
+      ansible.builtin.copy:
+        content: "{{ dict(ansible_play_hosts_all | zip(ansible_play_hosts_all | map('extract', hostvars, 'booking_list'))) | to_json }}"
+        dest: "{{ booking_list_results }}"
+        mode: "0600"
+      delegate_to: localhost
+      run_once: true

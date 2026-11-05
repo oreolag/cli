@@ -6,7 +6,9 @@ import http.client
 import json
 from pathlib import Path
 import socket
+import subprocess
 import sys
+import tempfile
 from zoneinfo import ZoneInfo
 
 import yaml
@@ -68,10 +70,43 @@ def local_cancellation(booking, confirm=False, path=SOCKET_PATH):
         connection.close()
 
 
+def list_remote_bookings(root, peers, date, history):
+    if not peers:
+        return
+    sys.stdout.flush()
+    with tempfile.TemporaryDirectory(prefix="odev-booking-") as directory:
+        inventory = Path(directory) / "inventory.yml"
+        results = Path(directory) / "results.json"
+        inventory.write_text(yaml.safe_dump({"booking_peers": {"hosts": {peer: {} for peer in peers}}}))
+        command = [str(root / "odev"), "booking", "list", "--date", date]
+        if history:
+            command.append("--history")
+        variables = {"booking_list_command": command, "booking_list_results": str(results)}
+        run = subprocess.run(["ansible-playbook", "-i", str(inventory), "--ssh-extra-args=-o BatchMode=yes",
+                              "--extra-vars", json.dumps(variables),
+                              str(root / "cmd/booking/booking_list_all.yml")],
+                             capture_output=True, text=True)
+        if run.returncode:
+            raise ValueError(f"Could not list remote bookings:\n{run.stderr.strip() or run.stdout.strip()}")
+        remote = json.loads(results.read_text())
+        failed = False
+        for peer in peers:
+            result = remote.get(peer, {})
+            if result.get("rc") == 0:
+                print(result["stdout"])
+            else:
+                detail = result.get("stderr") or result.get("msg") or "No result"
+                print(f"Could not list bookings on {peer}: {detail}", file=sys.stderr)
+                failed = True
+        if failed:
+            sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--odev-path", default="/opt/odev")
     parser.add_argument("--list", action="store_true")
+    parser.add_argument("--all", choices=["0", "1"], default="0")
     parser.add_argument("--cancel")
     parser.add_argument("--share", nargs=3, metavar=("BOOKING", "ACTION", "USER"))
     parser.add_argument("--history", choices=["0", "1"], default="0")
@@ -115,6 +150,9 @@ def main():
     if args.list:
         history = args.history == "1"
         print_bookings(local_listing(args.date, history=history), history=history)
+        if args.all == "1":
+            peers = [item["name"] for item in inventory["servers"] if item["name"] != local]
+            list_remote_bookings(root, peers, args.date, history)
         return
     if args.server not in entry["managed_servers"]:
         raise ValueError(f"Invalid server: {args.server}")
