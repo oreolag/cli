@@ -2,6 +2,7 @@
 
 # constants
 constants:
+  # networking
   mtu_min: 1500
   mtu_max: 9000
   mtu_default: 1500
