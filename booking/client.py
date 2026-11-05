@@ -150,8 +150,7 @@ def main():
             return
         local_request({"booking": booking, "action": action, "user": user},
                       endpoint="/bookings/share", expected_status=200)
-        message = "Booking shared with" if action == "add" else "Booking collaborator removed"
-        print(f"{message}: {user} ({booking})")
+        print(f"Share {action}: {user} ({booking})")
         return
     if args.cancel:
         if args.cancel_stage:
