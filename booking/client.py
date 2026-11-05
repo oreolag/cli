@@ -77,7 +77,7 @@ def list_remote_bookings(root, peers, date=None):
     run_remote_booking(root, peers, command, "list bookings")
 
 
-def run_remote_booking(root, peers, command, operation, capture=False):
+def run_remote_booking(root, peers, command, operation, capture=False, plain_error=False):
     if not peers:
         return
     sys.stdout.flush()
@@ -103,6 +103,8 @@ def run_remote_booking(root, peers, command, operation, capture=False):
                 else:
                     print(result["stdout"])
             else:
+                if plain_error and result.get("stderr"):
+                    raise ValueError(result["stderr"].strip())
                 detail = result.get("stderr") or result.get("msg") or "No result"
                 print(f"Could not {operation} on {peer}: {detail}", file=sys.stderr)
                 failed = True
@@ -146,7 +148,7 @@ def main():
         if assigned is not None:
             command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
                        "--local-only", "--share", booking, action, user]
-            run_remote_booking(root, [assigned["name"]], command, "update booking collaborators")
+            run_remote_booking(root, [assigned["name"]], command, "update booking collaborators", plain_error=True)
             return
         local_request({"booking": booking, "action": action, "user": user},
                       endpoint="/bookings/share", expected_status=200)
