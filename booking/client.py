@@ -42,10 +42,12 @@ def local_request(request, path=SOCKET_PATH, endpoint="/bookings", expected_stat
         connection.close()
 
 
-def local_listing(day, path=SOCKET_PATH, history=False):
+def local_listing(day, path=SOCKET_PATH, history=False, availability=False):
     connection = Connection(str(path), timeout=15)
     try:
         query = {"active": "1"} if day is None else {"date": day, "history": int(history)}
+        if availability:
+            query = {"availability": "1"}
         connection.request("GET", "/bookings?" + urlencode(query))
         response = connection.getresponse()
         value = json.loads(response.read())
@@ -126,6 +128,7 @@ def main():
     parser.add_argument("--list", action="store_true")
     parser.add_argument("--active", action="store_true")
     parser.add_argument("--booked-hosts", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--availability", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--local-only", action="store_true")
     parser.add_argument("--all", choices=["0", "1"], default="0")
     parser.add_argument("--cancel")
@@ -144,6 +147,13 @@ def main():
     inventory = load_inventory(inventory_path)
     local = socket.gethostname().split(".")[0]
     entry = next((entry for entry in inventory["servers"] if entry["name"] == local), None)
+    if args.availability:
+        if entry is None:
+            raise ValueError("Command not available: odev booking")
+        result = local_listing(None, availability=True)
+        free = result["free"]
+        print(result["total"], len(free), free[0] if len(free) == 1 else "", sep="\t")
+        return
     if entry is None and args.local_only:
         raise ValueError("Command not available: odev booking")
     if args.booked_hosts:

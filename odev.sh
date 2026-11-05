@@ -99,6 +99,40 @@ if ! is_booking=$("$ODEV_PATH/src/is_server.sh" "$ODEV_PATH" "booking"); then
 fi
 is_build=$($ODEV_PATH/src/is_server.sh "$ODEV_PATH" "build")
 
+print_booking_status() {
+  if [[ "$is_booking" != "1" ]]; then
+    return
+  fi
+
+  local availability total free server red="" strong="" reset=""
+  if [[ -t 1 && "${TERM:-dumb}" != "dumb" ]]; then
+    strong="$bold"
+    reset="$normal"
+  fi
+  if availability="$(timeout 2s python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \
+    --availability 2>/dev/null)"; then
+    IFS=$'\t' read -r total free server <<< "$availability"
+    printf '  The booking service is %sup and running%s.' "$strong" "$reset"
+    if [[ "$total" == 0 ]]; then
+      :
+    elif [[ "$free" == "$total" ]]; then
+      printf ' %sAll servers are free%s.' "$strong" "$reset"
+    elif [[ "$free" == 0 ]]; then
+      printf ' %sAll servers are booked%s.' "$strong" "$reset"
+    elif [[ "$free" == 1 ]]; then
+      printf ' Only %s%s%s is free.' "$strong" "$server" "$reset"
+    else
+      printf ' %s%s of %s servers are free%s.' "$strong" "$free" "$total" "$reset"
+    fi
+    printf '\n'
+  else
+    if [[ -t 1 && "${TERM:-dumb}" != "dumb" ]]; then
+      red="$("$ODEV_PATH/src/constant_get.sh" "$ODEV_PATH" COLOR_FAILED)"
+    fi
+    printf '  The booking service is %s%bunavailable%s.\n' "$strong" "$red" "$reset"
+  fi
+}
+
 print_help() {
   echo "The CLI for hetero${italic}genius${normal} computing."
   echo ""
@@ -140,12 +174,7 @@ print_help() {
 
   # print server status
   echo ""  
-  echo "${bold}SERVER STATUS${normal}"
-
-  # booking
-  if [ "$is_booking" = "1" ]; then
-    echo "  This is a ${bold}booking${normal} server"
-  fi
+  printf '%s\n' "${bold}SERVER STATUS${normal}"
 
   # development or deployment
   if [ "$is_build" = "0" ]; then
@@ -163,6 +192,7 @@ print_help() {
   if [ ! "$ts_status" = "" ]; then
     echo "  $ts_status"
   fi
+  print_booking_status
 
   echo ""
   echo "${bold}EXAMPLES${normal}"

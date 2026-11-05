@@ -16,7 +16,7 @@ from zoneinfo import ZoneInfo
 from urllib.parse import parse_qs, urlsplit
 
 from runtime import configuration
-from storage import BookingConflict, cancel_booking, create_booking, list_bookings, share_booking
+from storage import BookingConflict, booking_availability, cancel_booking, create_booking, list_bookings, share_booking
 
 SOCKET_PATH = "/run/odev-booking/api.sock"
 
@@ -67,6 +67,10 @@ class Handler(BaseHTTPRequestHandler):
             query = parse_qs(url.query, keep_blank_values=True)
             if url.path != "/bookings":
                 self.reply(404, {"error": "Command not found: booking API"})
+                return
+            if query == {"availability": ["1"]}:
+                config = configuration(self.server.odev_path, socket.gethostname())
+                self.reply(200, booking_availability(config))
                 return
             if query == {"active": ["1"]}:
                 config = configuration(self.server.odev_path, socket.gethostname())

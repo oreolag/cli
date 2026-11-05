@@ -13,6 +13,25 @@ class BookingConflict(ValueError):
     pass
 
 
+def booking_availability(config):
+    entry = config["server"]
+    if entry is None:
+        raise ValueError("Booking service unavailable")
+    connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=ro", uri=True, timeout=2)
+    try:
+        metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
+        if metadata is None or metadata[0] != entry["id"]:
+            raise ValueError("Booking database service ID does not match booking.yml")
+        now = int(time.time())
+        booked = {row[0] for row in connection.execute(
+            "SELECT DISTINCT server FROM bookings "
+            "WHERE cancelled_at IS NULL AND start_time <= ? AND end_time > ?", (now, now))}
+        servers = entry["managed_servers"]
+        return {"total": len(servers), "free": [server for server in servers if server not in booked]}
+    finally:
+        connection.close()
+
+
 def list_bookings(config, day, history=False):
     zone = ZoneInfo(config["timezone"])
     if not isinstance(day, str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", day):
