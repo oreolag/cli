@@ -127,24 +127,17 @@ Use the configured `paths.booking_db` if the default path was changed.
 ```bash
 odev booking list
 odev booking list --date 2026-11-01
-odev booking list --history
-odev booking list --history --date 2026-11-01
+odev booking list --all
 ```
 
-Run these on the booking server. The default is today in the configured timezone.
-The table follows `odev examine` styling and shows booking ID, server, owner,
-start, end, collaborators and status. It includes reservations overlapping that
-day, excludes cancelled bookings and shows `Free` for servers with no reservations
-that day. By default, only active and upcoming reservations are shown. Today,
-servers without an active reservation also show a `Free` row. Use `--history`
-to show only expired and cancelled reservations for the selected day, without
-`Free` rows. History hides the Status column when all rows are expired; it keeps
-the column when cancelled reservations are present.
+The default view shows availability and active or upcoming reservations for
+today in the local service's timezone. An explicit `--date` shows every
+reservation overlapping that day, including expired and cancelled bookings.
 
-`odev booking list --all` prints the local table first, then runs the booking
-list playbook against the other services in the inventory with the same date
-and history options. It uses the caller's existing SSH access and requires
-Ansible on the local booking server. Failed peers are reported by name.
+`--all` prints the local table first, then runs the booking list playbook
+against the other services. Each service uses its own local date. It uses
+the caller's existing SSH access and requires Ansible on the local booking
+server. Failed peers are reported by name. `--all` and `--date` cannot be combined.
 
 ## Add
 
@@ -213,7 +206,7 @@ Owners and administrators can cancel active or future bookings. Show the server,
 date and times before asking for confirmation, with No as the default. Keep
 cancelled bookings as history.
 Administrators are members of `odev-admins`. Cancellation preserves collaborators
-and the booking ID; `odev booking list --history` includes the cancelled record.
+and the booking ID; `odev booking list --date YYYY-MM-DD` includes the cancelled record.
 Existing sessions continue until access enforcement implements the handover rule.
 
 ## Access and handover

@@ -15,7 +15,7 @@ import yaml
 from urllib.parse import urlencode
 
 from api import SOCKET_PATH
-from runtime import load_inventory
+from runtime import booking_timezone, load_inventory
 from table import print_bookings
 
 
@@ -70,7 +70,7 @@ def local_cancellation(booking, confirm=False, path=SOCKET_PATH):
         connection.close()
 
 
-def list_remote_bookings(root, peers, date, history):
+def list_remote_bookings(root, peers):
     if not peers:
         return
     sys.stdout.flush()
@@ -78,9 +78,7 @@ def list_remote_bookings(root, peers, date, history):
         inventory = Path(directory) / "inventory.yml"
         results = Path(directory) / "results.json"
         inventory.write_text(yaml.safe_dump({"booking_peers": {"hosts": {peer: {} for peer in peers}}}))
-        command = [str(root / "odev"), "booking", "list", "--date", date]
-        if history:
-            command.append("--history")
+        command = [str(root / "odev"), "booking", "list"]
         variables = {"booking_list_command": command, "booking_list_results": str(results)}
         run = subprocess.run(["ansible-playbook", "-i", str(inventory), "--ssh-extra-args=-o BatchMode=yes",
                               "--extra-vars", json.dumps(variables),
@@ -109,7 +107,6 @@ def main():
     parser.add_argument("--all", choices=["0", "1"], default="0")
     parser.add_argument("--cancel")
     parser.add_argument("--share", nargs=3, metavar=("BOOKING", "ACTION", "USER"))
-    parser.add_argument("--history", choices=["0", "1"], default="0")
     parser.add_argument("--server")
     parser.add_argument("--date")
     parser.add_argument("--start")
@@ -148,11 +145,17 @@ def main():
         print(f"Booking cancelled: {args.cancel}")
         return
     if args.list:
-        history = args.history == "1"
-        print_bookings(local_listing(args.date, history=history), history=history)
+        full_day = args.date is not None
+        if full_day and args.all == "1":
+            raise ValueError("Invalid flags: --all and --date")
+        date = args.date
+        if not full_day:
+            zone = ZoneInfo(booking_timezone(inventory_path, local))
+            date = datetime.now(zone).date().isoformat()
+        print_bookings(local_listing(date, history=full_day), full_day=full_day)
         if args.all == "1":
             peers = [item["name"] for item in inventory["servers"] if item["name"] != local]
-            list_remote_bookings(root, peers, args.date, history)
+            list_remote_bookings(root, peers)
         return
     if args.server not in entry["managed_servers"]:
         raise ValueError(f"Invalid server: {args.server}")

@@ -33,11 +33,16 @@ print_both="0"
 args=()
 for flag in "$@"; do
   args+=("$flag")
-  if [[ "$flag" == "--history" || "$flag" == "--all" || "$flag" == "-a" ]]; then
+  if [[ "$flag" == "--all" || "$flag" == "-a" ]]; then
     args+=("1")
   fi
 done
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "${args[@]}")" || exit 1
+
+date_supplied=false
+if [[ $'\n'$parsed_flags == *$'\n'date=* ]]; then
+  date_supplied=true
+fi
 
 # run interactive prompt
 parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
@@ -53,15 +58,21 @@ fi
 # assign flags
 all=${V[all]}
 date=${V[date]}
-history=${V[history]}
 
-# check on date
-if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
-   ! booking_day=$(date -d "$date" +%F 2>/dev/null) || [[ "$booking_day" != "$date" ]]; then
-  echo "Invalid booking date: $date" >&2
-  exit 1
+# check on date and service scope
+list_args=(--list --all "$all")
+if [[ "$date_supplied" == true ]]; then
+  if [[ "$all" == "1" ]]; then
+    echo "Invalid flags: --all and --date" >&2
+    exit 1
+  fi
+  if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
+     ! booking_day=$(date -d "$date" +%F 2>/dev/null) || [[ "$booking_day" != "$date" ]]; then
+    echo "Invalid booking date: $date" >&2
+    exit 1
+  fi
+  list_args+=(--date "$date")
 fi
 
 # list bookings
-python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \
-  --list --date "$date" --history "$history" --all "$all" || exit 1
+python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" "${list_args[@]}" || exit 1
