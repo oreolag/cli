@@ -109,7 +109,7 @@ done
 wait "$pid"
 echo ""
 
-# refresh the user's Ansible inventory
+# refresh the user's Ansible inventory (requires Tailscale login)
 "$ODEV_PATH/src/get_ansible_hosts.sh" "$username" || true
 
 # check on workflows

@@ -25,7 +25,10 @@ if [[ "$EUID" == 0 ]]; then
 fi
 
 status=0
-if booked_hosts=$("${command[@]}" 2>/dev/null); then
+if [[ "$("$ODEV_PATH/src/tailscale_auth_status.sh")" != 1 ]]; then
+  # Keep only the local template when Tailscale is unavailable.
+  :
+elif booked_hosts=$("${command[@]}" 2>/dev/null); then
   if [[ -n "$booked_hosts" ]]; then
     while IFS= read -r host; do
       if [[ ! "$host" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]; then

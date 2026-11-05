@@ -12,3 +12,10 @@ if [[ "$is_booking" != 1 ]]; then
   echo "Command not available: odev booking"
   exit 1
 fi
+if [[ "${2:-}" == "--participant" ]]; then
+  is_local=$(python3 "$ODEV_PATH/src/booking_is_server.py" --db "$booking_db")
+  if [[ "$is_local" != 1 && "$("$ODEV_PATH/src/tailscale_auth_status.sh")" != 1 ]]; then
+    echo "Login failed: tailscale" >&2
+    exit 1
+  fi
+fi

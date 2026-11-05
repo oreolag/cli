@@ -81,6 +81,9 @@ def list_remote_bookings(root, peers, date=None):
 def run_remote_booking(root, peers, command, operation, capture=False, plain_error=False):
     if not peers:
         return
+    status = subprocess.run([str(root / "src/tailscale_auth_status.sh")], capture_output=True, text=True)
+    if status.returncode or status.stdout.strip() != "1":
+        raise ValueError("Login failed: tailscale")
     sys.stdout.flush()
     with tempfile.TemporaryDirectory(prefix="odev-booking-") as directory:
         inventory = Path(directory) / "inventory.yml"
