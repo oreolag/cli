@@ -121,10 +121,6 @@ interface_name_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface name $port)
 # calculate closest MTU
 mtu=$(calculate_closest_mtu $mtu $IPV6_HEADER_SIZE $PAYLOAD_MULTIPLES)
 
-#echo "mtu: $mtu"
-#echo "interface_name_cmdb: $interface_name_cmdb"
-#exit
-
 # set inventory
 username="$(id -un)"
 inventory_file="$TMP_PATH/hosts_$username"
@@ -147,8 +143,5 @@ if [[ "$remote" == "1" ]]; then
   "$MGMT_PATH/ansible-play.sh" "$ODEV_PATH/cmd/set/mtu.yml" "my_hosts" \
     -i "$inventory_file" --extra-vars "$mtu_vars" || exit 1
 fi
-
-#echo "remote: $remote"
-#echo "inventory: $inventory"
 
 # author: https://github.com/jmoya82
