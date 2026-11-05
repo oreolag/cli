@@ -43,7 +43,8 @@ def local_request(request, path=SOCKET_PATH, endpoint="/bookings", expected_stat
 def local_listing(day, path=SOCKET_PATH, history=False):
     connection = Connection(str(path), timeout=15)
     try:
-        connection.request("GET", "/bookings?" + urlencode({"date": day, "history": int(history)}))
+        query = {"active": "1"} if day is None else {"date": day, "history": int(history)}
+        connection.request("GET", "/bookings?" + urlencode(query))
         response = connection.getresponse()
         value = json.loads(response.read())
         if response.status != 200:
@@ -118,6 +119,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--odev-path", default="/opt/odev")
     parser.add_argument("--list", action="store_true")
+    parser.add_argument("--booked-hosts", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--local-only", action="store_true")
     parser.add_argument("--all", choices=["0", "1"], default="0")
     parser.add_argument("--cancel")
@@ -138,6 +140,17 @@ def main():
     entry = next((entry for entry in inventory["servers"] if entry["name"] == local), None)
     if entry is None and args.local_only:
         raise ValueError("Command not available: odev booking")
+    if args.booked_hosts:
+        hosts = set(local_listing(None)["servers"]) if entry is not None else set()
+        if not args.local_only:
+            peers = [item["name"] for item in inventory["servers"] if item["name"] != local]
+            if peers:
+                command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
+                           "--local-only", "--booked-hosts"]
+                hosts.update(run_remote_booking(root, peers, command, "get booked hosts", capture=True).splitlines())
+        for host in sorted(hosts - {local} if not args.local_only else hosts):
+            print(host)
+        return
     assigned = None
     if entry is None:
         assigned = next((item for item in inventory["servers"] if local in item["managed_servers"]), None)

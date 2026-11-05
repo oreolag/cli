@@ -1,5 +1,6 @@
 """Local HTTP API. Unix peer credentials authenticate the caller on Linux."""
 import grp
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler
 import json
 import os
@@ -10,6 +11,8 @@ from socketserver import ThreadingMixIn, UnixStreamServer
 import struct
 import sys
 import threading
+import time
+from zoneinfo import ZoneInfo
 from urllib.parse import parse_qs, urlsplit
 
 from runtime import configuration
@@ -64,6 +67,19 @@ class Handler(BaseHTTPRequestHandler):
             query = parse_qs(url.query, keep_blank_values=True)
             if url.path != "/bookings":
                 self.reply(404, {"error": "Command not found: booking API"})
+                return
+            if query == {"active": ["1"]}:
+                config = configuration(self.server.odev_path, socket.gethostname())
+                if config["server"] is None:
+                    self.reply(503, {"error": "Booking service unavailable"})
+                    return
+                now = int(time.time())
+                day = datetime.fromtimestamp(now, ZoneInfo(config["timezone"])).date().isoformat()
+                bookings = list_bookings(config, day)["bookings"]
+                hosts = {row["server"] for row in bookings
+                         if row["start_time"] <= now < row["end_time"]
+                         and (row["owner"] == username or username in row["shared"])}
+                self.reply(200, {"servers": sorted(hosts)})
                 return
             if set(query) == {"booking"} and len(query["booking"]) == 1:
                 config = configuration(self.server.odev_path, socket.gethostname())

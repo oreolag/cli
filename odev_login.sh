@@ -10,8 +10,6 @@ BANNER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.y
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths cmdb)")"
 COLOR_OREOL=$($ODEV_PATH/src/constant_get.sh $ODEV_PATH COLOR_OREOL)
 STORAGE_UNIT="TB"
-TEMPLATES_PATH="$ODEV_PATH/templates"
-TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"
 
 #get username
 username=$(getent passwd ${SUDO_UID})
@@ -111,11 +109,8 @@ done
 wait "$pid"
 echo ""
 
-# fillup hosts
-cp -f "$TEMPLATES_PATH/playbooks/hosts" "$TMP_PATH/hosts_$username"
-
-# add local host after [my_hosts]
-echo "$hostname ansible_connection=local" >> "$TMP_PATH/hosts_$username"
+# refresh the user's Ansible inventory
+"$ODEV_PATH/src/get_ansible_hosts.sh" "$username" || true
 
 # check on workflows
 is_odev_developer=$("$ODEV_PATH/src/is_member.sh" "$username" odev-developers)
@@ -132,9 +127,6 @@ logged_in="$(sudo -H -u "$username" -- "$ODEV_PATH/src/gh_auth_status.sh")"
 if [ "$is_odev_developer" = "1" ] && [ "$installed" = "1" ] && [ "$logged_in" = "1" ]; then
   sudo -H -u "$username" -- "$ODEV_PATH/src/playbooks_sync.sh" >/dev/null 2>&1 || true
 fi
-
-# add remote hosts
-# ...
 
 #print welcome message (1/2)
 echo ""
