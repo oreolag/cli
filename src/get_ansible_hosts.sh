@@ -30,14 +30,26 @@ if [[ "$("$ODEV_PATH/src/tailscale_auth_status.sh")" != 1 ]]; then
   :
 elif booked_hosts=$("${command[@]}" 2>/dev/null); then
   if [[ -n "$booked_hosts" ]]; then
-    while IFS= read -r host; do
-      if [[ ! "$host" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]; then
-        status=1
-        break
-      fi
-    done <<< "$booked_hosts"
-    if [[ "$status" == 0 ]]; then
-      printf '%s\n' "$booked_hosts" >> "$inventory"
+    if magicdns_hosts=$(tailscale status --json | python3 -c '
+import json
+import re
+import sys
+
+status = json.load(sys.stdin)
+tailnet = status.get("CurrentTailnet") or {}
+suffix = (tailnet.get("MagicDNSSuffix") or status.get("MagicDNSSuffix") or "").rstrip(".").lower()
+peers = {peer.get("DNSName", "").rstrip(".").lower() for peer in (status.get("Peer") or {}).values()}
+hosts = []
+for host in sys.argv[1].splitlines():
+    name = f"{host.lower()}.{suffix}"
+    if not suffix or not re.fullmatch(r"[a-z0-9][a-z0-9.-]*", name) or name not in peers:
+        sys.exit(f"No MagicDNS peer found for {host}")
+    hosts.append(name)
+print("\n".join(hosts))
+' "$booked_hosts"); then
+      printf '%s\n' "$magicdns_hosts" >> "$inventory"
+    else
+      status=1
     fi
   fi
 else
