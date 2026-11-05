@@ -30,8 +30,9 @@ def print_bookings(result, full_day=False):
             rows.append([booking["booking_id"], server, booking["owner"],
                          display_time(booking["start_time"]), display_time(booking["end_time"]),
                          ", ".join(booking["shared"]) or "-", status])
-    widths = [max(len(header), *(len(row[index]) for row in rows)) if rows else len(header)
-              for index, header in enumerate(headers)]
+    minimum_widths = [10, 12, 12, 5, 5, 16, 9]
+    widths = [max(minimum, len(header), *(len(row[index]) for row in rows))
+              for index, (header, minimum) in enumerate(zip(headers, minimum_widths))]
     service = result["service"]
     title = f"{service} | Date: {result['date']} | Timezone: {result['timezone']}"
     inner = sum(widths) + 3 * (len(headers) - 1) + 2
