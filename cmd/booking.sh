@@ -12,7 +12,7 @@ SUBCOMMAND="-"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
 # check on booking configuration
-"$ODEV_PATH/src/booking_available.sh" "$ODEV_PATH" || exit $?
+"$ODEV_PATH/src/booking_available.sh" "$ODEV_PATH" --help-only || exit $?
 
 # read command description and subcommands
 KEY="$(printf '%s' "$COMMAND" | tr '[:lower:]' '[:upper:]')"
