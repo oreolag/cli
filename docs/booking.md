@@ -28,7 +28,7 @@ Set `timezone` inside each booking server entry, for example `Europe/Madrid` or
 `Europe/Oslo`. Prompts, validation and tables use that service's timezone;
 database timestamps always remain UTC.
 Booking servers support all booking commands. Managed machines can also run
-`odev booking list` and `odev booking add` using their assigned service over SSH.
+all four booking subcommands using their assigned service over SSH.
 On a managed machine, the add prompt defaults to that machine and uses the
 assigned service's timezone. Machines listed
 nowhere return `Command not available: odev booking`.

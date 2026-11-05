@@ -10,7 +10,7 @@ COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$(dirname "$SCRIPT_DIR")")"}"
 
 # check on booking configuration
-"$ODEV_PATH/src/booking_available.sh" "$ODEV_PATH" || exit $?
+"$ODEV_PATH/src/booking_available.sh" "$ODEV_PATH" --participant || exit $?
 
 # set KEY
 KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"

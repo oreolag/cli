@@ -77,7 +77,7 @@ def list_remote_bookings(root, peers, date=None):
     run_remote_booking(root, peers, command, "list bookings")
 
 
-def run_remote_booking(root, peers, command, operation):
+def run_remote_booking(root, peers, command, operation, capture=False):
     if not peers:
         return
     sys.stdout.flush()
@@ -94,16 +94,22 @@ def run_remote_booking(root, peers, command, operation):
             raise ValueError(f"Could not {operation} remotely:\n{run.stderr.strip() or run.stdout.strip()}")
         remote = json.loads(results.read_text())
         failed = False
+        outputs = []
         for peer in peers:
             result = remote.get(peer, {})
             if result.get("rc") == 0:
-                print(result["stdout"])
+                if capture:
+                    outputs.append(result["stdout"])
+                else:
+                    print(result["stdout"])
             else:
                 detail = result.get("stderr") or result.get("msg") or "No result"
                 print(f"Could not {operation} on {peer}: {detail}", file=sys.stderr)
                 failed = True
         if failed:
             sys.exit(1)
+        if capture:
+            return "\n".join(outputs)
 
 
 def main():
@@ -113,6 +119,7 @@ def main():
     parser.add_argument("--local-only", action="store_true")
     parser.add_argument("--all", choices=["0", "1"], default="0")
     parser.add_argument("--cancel")
+    parser.add_argument("--cancel-stage", choices=["preview", "confirm"], help=argparse.SUPPRESS)
     parser.add_argument("--share", nargs=3, metavar=("BOOKING", "ACTION", "USER"))
     parser.add_argument("--server")
     parser.add_argument("--date")
@@ -127,7 +134,7 @@ def main():
     inventory = load_inventory(inventory_path)
     local = socket.gethostname().split(".")[0]
     entry = next((entry for entry in inventory["servers"] if entry["name"] == local), None)
-    if entry is None and (args.cancel or args.share or args.local_only):
+    if entry is None and args.local_only:
         raise ValueError("Command not available: odev booking")
     assigned = None
     if entry is None:
@@ -136,13 +143,31 @@ def main():
             raise ValueError("Command not available: odev booking")
     if args.share:
         booking, action, user = args.share
+        if assigned is not None:
+            command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
+                       "--local-only", "--share", booking, action, user]
+            run_remote_booking(root, [assigned["name"]], command, "update booking collaborators")
+            return
         local_request({"booking": booking, "action": action, "user": user},
                       endpoint="/bookings/share", expected_status=200)
         message = "Booking shared with" if action == "add" else "Booking collaborator removed"
         print(f"{message}: {user} ({booking})")
         return
     if args.cancel:
-        booking = local_cancellation(args.cancel)
+        if args.cancel_stage:
+            if not args.local_only:
+                raise ValueError("Invalid cancellation request")
+            result = local_cancellation(args.cancel, confirm=args.cancel_stage == "confirm")
+            print(json.dumps(result))
+            return
+        if assigned is None:
+            booking = local_cancellation(args.cancel)
+        else:
+            peers = [assigned["name"]]
+            command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
+                       "--local-only", "--cancel", args.cancel, "--cancel-stage"]
+            booking = json.loads(run_remote_booking(root, peers, command + ["preview"],
+                                                   "preview cancellation", capture=True))
         zone = ZoneInfo(booking["timezone"])
         start = datetime.fromtimestamp(booking["start_time"], zone).strftime("%Y-%m-%d %H:%M")
         end = datetime.fromtimestamp(booking["end_time"], zone).strftime("%Y-%m-%d %H:%M")
@@ -153,7 +178,10 @@ def main():
             return
         if answer.strip().lower() not in ["y", "yes"]:
             return
-        local_cancellation(args.cancel, confirm=True)
+        if assigned is None:
+            local_cancellation(args.cancel, confirm=True)
+        else:
+            run_remote_booking(root, peers, command + ["confirm"], "cancel booking", capture=True)
         print(f"Booking cancelled: {args.cancel}")
         return
     if args.list:
