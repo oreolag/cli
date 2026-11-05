@@ -33,7 +33,7 @@ print_both="0"
 args=()
 for flag in "$@"; do
   args+=("$flag")
-  if [[ "$flag" == "--all" || "$flag" == "-a" ]]; then
+  if [[ "$flag" == "--all" || "$flag" == "-a" || "$flag" == "--active" ]]; then
     args+=("1")
   fi
 done
@@ -61,6 +61,13 @@ date=${V[date]}
 
 # check on date and service scope
 list_args=(--list --all "$all")
+if [[ "${V[active]}" == "1" ]]; then
+  if [[ "$all" == "1" || "$date_supplied" == true ]]; then
+    echo "Invalid flags: --active cannot be combined with --all or --date" >&2
+    exit 1
+  fi
+  list_args+=(--active)
+fi
 if [[ "$date_supplied" == true ]]; then
   if [[ "$all" == "1" ]]; then
     echo "Invalid flags: --all and --date" >&2

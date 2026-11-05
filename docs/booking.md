@@ -131,6 +131,7 @@ Use the configured `paths.booking_db` if the default path was changed.
 odev booking list
 odev booking list --date 2026-11-01
 odev booking list --all
+odev booking list --active
 ```
 
 The default view shows availability and active or upcoming reservations for
@@ -144,6 +145,10 @@ from the other services. Each service uses its own local date. Remote listing
 uses the caller's existing SSH access and requires Ansible on the machine
 running the command. Failed peers are reported by name. `--all` and `--date`
 cannot be combined.
+
+`--active` shows the bookings you own and that are active now across all
+services. The table uses the local or assigned service's timezone.
+Use it on its own.
 
 ## Add
 

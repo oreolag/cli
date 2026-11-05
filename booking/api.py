@@ -75,11 +75,12 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 now = int(time.time())
                 day = datetime.fromtimestamp(now, ZoneInfo(config["timezone"])).date().isoformat()
-                bookings = list_bookings(config, day)["bookings"]
-                hosts = {row["server"] for row in bookings
-                         if row["start_time"] <= now < row["end_time"]
-                         and (row["owner"] == username or username in row["shared"])}
-                self.reply(200, {"servers": sorted(hosts)})
+                result = list_bookings(config, day)
+                active = [row for row in result["bookings"] if row["start_time"] <= now < row["end_time"]]
+                hosts = {row["server"] for row in active
+                         if row["owner"] == username or username in row["shared"]}
+                owned = [dict(row, service=result["service"]) for row in active if row["owner"] == username]
+                self.reply(200, {"servers": sorted(hosts), "bookings": owned})
                 return
             if set(query) == {"booking"} and len(query["booking"]) == 1:
                 config = configuration(self.server.odev_path, socket.gethostname())

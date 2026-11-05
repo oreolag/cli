@@ -4,7 +4,9 @@ import argparse
 from datetime import datetime, timedelta
 import http.client
 import json
+import os
 from pathlib import Path
+import pwd
 import socket
 import subprocess
 import sys
@@ -122,6 +124,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--odev-path", default="/opt/odev")
     parser.add_argument("--list", action="store_true")
+    parser.add_argument("--active", action="store_true")
     parser.add_argument("--booked-hosts", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--local-only", action="store_true")
     parser.add_argument("--all", choices=["0", "1"], default="0")
@@ -184,7 +187,7 @@ def main():
             command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
                        "--local-only", "--cancel", args.cancel, "--cancel-stage"]
             booking = json.loads(run_remote_booking(root, peers, command + ["preview"],
-                                                   "preview cancellation", capture=True))
+                                                   "preview cancellation", capture=True, plain_error=True))
         zone = ZoneInfo(booking["timezone"])
         start = datetime.fromtimestamp(booking["start_time"], zone).strftime("%Y-%m-%d %H:%M")
         end = datetime.fromtimestamp(booking["end_time"], zone).strftime("%Y-%m-%d %H:%M")
@@ -198,10 +201,31 @@ def main():
         if assigned is None:
             local_cancellation(args.cancel, confirm=True)
         else:
-            run_remote_booking(root, peers, command + ["confirm"], "cancel booking", capture=True)
+            run_remote_booking(root, peers, command + ["confirm"], "cancel booking",
+                               capture=True, plain_error=True)
         print(f"Booking cancelled: {args.cancel}")
         return
     if args.list:
+        if args.active:
+            if args.all == "1" or args.date is not None:
+                raise ValueError("Invalid flags: --active cannot be combined with --all or --date")
+            bookings = local_listing(None)["bookings"] if entry is not None else []
+            if args.local_only:
+                print(json.dumps(bookings))
+                return
+            peers = [item["name"] for item in inventory["servers"] if item["name"] != local]
+            if peers:
+                command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
+                           "--local-only", "--list", "--active"]
+                output = run_remote_booking(root, peers, command, "list active bookings", capture=True)
+                for line in output.splitlines():
+                    bookings.extend(json.loads(line))
+            timezone = booking_timezone(inventory_path, (entry or assigned)["name"])
+            date = datetime.now(ZoneInfo(timezone)).date().isoformat()
+            print_bookings({"username": pwd.getpwuid(os.getuid()).pw_name, "date": date, "timezone": timezone,
+                            "servers": sorted({row["server"] for row in bookings}), "bookings": bookings},
+                           full_day=True)
+            return
         full_day = args.date is not None
         if full_day and args.all == "1":
             raise ValueError("Invalid flags: --all and --date")
@@ -230,7 +254,7 @@ def main():
         command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
                    "--local-only", "--server", args.server, "--date", args.date, "--start", args.start,
                    "--duration", args.duration, "--shared", args.shared]
-        run_remote_booking(root, [service["name"]], command, "create booking")
+        run_remote_booking(root, [service["name"]], command, "create booking", plain_error=True)
         return
     shared = [] if args.shared == "-" else [user.strip() for user in args.shared.split(",")]
     request = {"server": args.server, "date": args.date, "start": args.start,

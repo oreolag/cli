@@ -126,19 +126,27 @@ mtu=$(calculate_closest_mtu $mtu $IPV6_HEADER_SIZE $PAYLOAD_MULTIPLES)
 #exit
 
 # set inventory
-inventory_file="$TMP_PATH/hosts_$USER"
+username="$(id -un)"
+inventory_file="$TMP_PATH/hosts_$username"
 
-# get target
-if [[ "$remote" == "1" && -f "$inventory_file" ]]; then
-  target="my_hosts"
-else
-  target="local"
+# check remote access before changing any interface
+if [[ "$remote" == "1" ]]; then
+  "$ODEV_PATH/src/ansible_remote_preflight.sh" "$inventory_file" || exit 1
 fi
 
-# call the playbook
+# set mtu_vars
 mtu_vars="$(python3 -c 'import json, sys; print(json.dumps({"interface_name": sys.argv[1], "mtu_value": sys.argv[2]}))' "$interface_name_cmdb" "$mtu")" || exit 1
-"$MGMT_PATH/ansible-play.sh" "$ODEV_PATH/cmd/set/mtu.yml" "$target" \
-  -i "$inventory_file" --extra-vars "$mtu_vars"
+
+# call the playbook (local)
+"$MGMT_PATH/ansible-play.sh" "$ODEV_PATH/cmd/set/mtu.yml" "local" \
+  -i "$inventory_file" --extra-vars "$mtu_vars" || exit 1
+
+# check on remote
+if [[ "$remote" == "1" ]]; then
+  # call the playbook (my_hosts)
+  "$MGMT_PATH/ansible-play.sh" "$ODEV_PATH/cmd/set/mtu.yml" "my_hosts" \
+    -i "$inventory_file" --extra-vars "$mtu_vars" || exit 1
+fi
 
 #echo "remote: $remote"
 #echo "inventory: $inventory"
