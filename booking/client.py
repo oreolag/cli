@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Access bookings through the local HTTP API on a booking server."""
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 import http.client
 import json
 from pathlib import Path
@@ -149,9 +149,10 @@ def main():
         if full_day and args.all == "1":
             raise ValueError("Invalid flags: --all and --date")
         date = args.date
-        if not full_day:
+        relative_days = {"yesterday": -1, "today": 0, "tomorrow": 1}
+        if not full_day or date in relative_days:
             zone = ZoneInfo(booking_timezone(inventory_path, local))
-            date = datetime.now(zone).date().isoformat()
+            date = (datetime.now(zone).date() + timedelta(days=relative_days.get(date, 0))).isoformat()
         print_bookings(local_listing(date, history=full_day), full_day=full_day)
         if args.all == "1":
             peers = [item["name"] for item in inventory["servers"] if item["name"] != local]

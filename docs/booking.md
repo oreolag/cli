@@ -133,6 +133,8 @@ odev booking list --all
 The default view shows availability and active or upcoming reservations for
 today in the local service's timezone. An explicit `--date` shows every
 reservation overlapping that day, including expired and cancelled bookings.
+Use `YYYY-MM-DD`, `today`, `yesterday` or `tomorrow`. Relative dates use the
+service's timezone.
 
 `--all` prints the local table first, then runs the booking list playbook
 against the other services. Each service uses its own local date. It uses

@@ -39,7 +39,7 @@ if [[ "${KEY:-BOOKING}" == BOOKING* ]]; then
   BOOKING_LIST_DESCRIPTION="List server availability and bookings" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
   BOOKING_LIST_FLAGS=(
     "all,a,Show all booking services,0|1,0"
-    "date,d,Show all bookings for a date (YYYY-MM-DD),-,-"
+    "date,d,Show all bookings for YYYY-MM-DD or today/yesterday/tomorrow,-,-"
   )
   BOOKING_LIST_FLAGS_MANDATORY=""
   # add

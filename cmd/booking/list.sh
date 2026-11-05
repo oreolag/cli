@@ -66,8 +66,9 @@ if [[ "$date_supplied" == true ]]; then
     echo "Invalid flags: --all and --date" >&2
     exit 1
   fi
-  if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
-     ! booking_day=$(date -d "$date" +%F 2>/dev/null) || [[ "$booking_day" != "$date" ]]; then
+  if [[ "$date" != today && "$date" != yesterday && "$date" != tomorrow ]] &&
+     { [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
+       ! booking_day=$(date -d "$date" +%F 2>/dev/null) || [[ "$booking_day" != "$date" ]]; }; then
     echo "Invalid booking date: $date" >&2
     exit 1
   fi
