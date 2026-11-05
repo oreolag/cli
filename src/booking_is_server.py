@@ -106,14 +106,20 @@ def main():
     parser.add_argument("--timezone", action="store_true", help="Print the booking timezone (defaults to UTC)")
     parser.add_argument("--server", help="Check a managed target on this booking host")
     parser.add_argument("--duration", help="Check duration against this booking host's limit")
+    parser.add_argument("--default-server", action="store_true", help="Print the default booking target")
     args = parser.parse_args()
     try:
-        if args.server is not None or args.duration is not None:
+        if args.server is not None or args.duration is not None or args.default_server:
             data = load_inventory(args.db)
             local = socket.gethostname().split(".")[0]
             entry = next((item for item in data["servers"] if item["name"] == local), None)
+            if entry is None and args.participant:
+                entry = next((item for item in data["servers"] if local in item["managed_servers"]), None)
             if entry is None:
                 raise ValueError("Command not available: odev booking")
+            if args.default_server:
+                print("-" if entry["name"] == local else local)
+                return 0
             if args.server is not None and args.server not in entry["managed_servers"]:
                 print(f"Invalid server: {args.server}", file=sys.stderr)
                 return 1

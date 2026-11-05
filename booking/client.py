@@ -70,7 +70,14 @@ def local_cancellation(booking, confirm=False, path=SOCKET_PATH):
         connection.close()
 
 
-def list_remote_bookings(root, peers):
+def list_remote_bookings(root, peers, date=None):
+    command = [str(root / "odev"), "booking", "list"]
+    if date is not None:
+        command.extend(["--date", date])
+    run_remote_booking(root, peers, command, "list bookings")
+
+
+def run_remote_booking(root, peers, command, operation):
     if not peers:
         return
     sys.stdout.flush()
@@ -78,14 +85,13 @@ def list_remote_bookings(root, peers):
         inventory = Path(directory) / "inventory.yml"
         results = Path(directory) / "results.json"
         inventory.write_text(yaml.safe_dump({"booking_peers": {"hosts": {peer: {} for peer in peers}}}))
-        command = [str(root / "odev"), "booking", "list"]
         variables = {"booking_list_command": command, "booking_list_results": str(results)}
         run = subprocess.run(["ansible-playbook", "-i", str(inventory), "--ssh-extra-args=-o BatchMode=yes",
                               "--extra-vars", json.dumps(variables),
                               str(root / "cmd/booking/booking_list_all.yml")],
                              capture_output=True, text=True)
         if run.returncode:
-            raise ValueError(f"Could not list remote bookings:\n{run.stderr.strip() or run.stdout.strip()}")
+            raise ValueError(f"Could not {operation} remotely:\n{run.stderr.strip() or run.stdout.strip()}")
         remote = json.loads(results.read_text())
         failed = False
         for peer in peers:
@@ -94,7 +100,7 @@ def list_remote_bookings(root, peers):
                 print(result["stdout"])
             else:
                 detail = result.get("stderr") or result.get("msg") or "No result"
-                print(f"Could not list bookings on {peer}: {detail}", file=sys.stderr)
+                print(f"Could not {operation} on {peer}: {detail}", file=sys.stderr)
                 failed = True
         if failed:
             sys.exit(1)
@@ -104,6 +110,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--odev-path", default="/opt/odev")
     parser.add_argument("--list", action="store_true")
+    parser.add_argument("--local-only", action="store_true")
     parser.add_argument("--all", choices=["0", "1"], default="0")
     parser.add_argument("--cancel")
     parser.add_argument("--share", nargs=3, metavar=("BOOKING", "ACTION", "USER"))
@@ -120,8 +127,13 @@ def main():
     inventory = load_inventory(inventory_path)
     local = socket.gethostname().split(".")[0]
     entry = next((entry for entry in inventory["servers"] if entry["name"] == local), None)
-    if entry is None:
+    if entry is None and (args.cancel or args.share or args.local_only):
         raise ValueError("Command not available: odev booking")
+    assigned = None
+    if entry is None:
+        assigned = next((item for item in inventory["servers"] if local in item["managed_servers"]), None)
+        if assigned is None:
+            raise ValueError("Command not available: odev booking")
     if args.share:
         booking, action, user = args.share
         local_request({"booking": booking, "action": action, "user": user},
@@ -148,6 +160,12 @@ def main():
         full_day = args.date is not None
         if full_day and args.all == "1":
             raise ValueError("Invalid flags: --all and --date")
+        if assigned is not None:
+            peers = [assigned["name"]]
+            if args.all == "1":
+                peers.extend(item["name"] for item in inventory["servers"] if item["name"] != assigned["name"])
+            list_remote_bookings(root, peers, args.date)
+            return
         date = args.date
         relative_days = {"yesterday": -1, "today": 0, "tomorrow": 1}
         if not full_day or date in relative_days:
@@ -158,8 +176,17 @@ def main():
             peers = [item["name"] for item in inventory["servers"] if item["name"] != local]
             list_remote_bookings(root, peers)
         return
-    if args.server not in entry["managed_servers"]:
+    service = assigned if assigned is not None else entry
+    if args.server not in service["managed_servers"]:
         raise ValueError(f"Invalid server: {args.server}")
+    if assigned is not None:
+        if args.date is None or args.start is None:
+            raise ValueError("Booking date and start time are required")
+        command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
+                   "--local-only", "--server", args.server, "--date", args.date, "--start", args.start,
+                   "--duration", args.duration, "--shared", args.shared]
+        run_remote_booking(root, [service["name"]], command, "create booking")
+        return
     shared = [] if args.shared == "-" else [user.strip() for user in args.shared.split(",")]
     request = {"server": args.server, "date": args.date, "start": args.start,
                "duration": args.duration, "shared": shared}

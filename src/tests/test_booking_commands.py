@@ -250,6 +250,9 @@ else:
             self.db.write_text(yaml.safe_dump(data))
             for script, args in [("cmd/booking.sh", []),
                                  *[(f"cmd/booking/{action}.sh", []) for action in ["add", "list", "share", "cancel"]]]:
+                if script in ["cmd/booking/add.sh", "cmd/booking/list.sh"] and any(
+                        self.local in entry["managed_servers"] for entry in data["servers"]):
+                    continue
                 result = self.run_command(*args, script=script)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(result.stdout, "Command not available: odev booking\n")

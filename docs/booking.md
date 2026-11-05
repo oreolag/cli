@@ -27,8 +27,11 @@ only one service. Booking servers require normal authentication but no reservati
 Set `timezone` inside each booking server entry, for example `Europe/Madrid` or
 `Europe/Oslo`. Prompts, validation and tables use that service's timezone;
 database timestamps always remain UTC.
-Booking commands run only on booking servers. Managed machines and machines
-listed nowhere return `Command not available: odev booking` before any dialog.
+Booking servers support all booking commands. Managed machines can also run
+`odev booking list` and `odev booking add` using their assigned service over SSH.
+On a managed machine, the add prompt defaults to that machine and uses the
+assigned service's timezone. Machines listed
+nowhere return `Command not available: odev booking`.
 
 Service IDs are quoted positive numbers, unique across the inventory. Keep them
 unchanged when reordering entries or renaming hosts; never reuse an ID for another
@@ -56,8 +59,8 @@ inactive and retries after configuration is corrected.
 
 On a booking server, the daemon serves a local HTTP API at
 `/run/odev-booking/api.sock`. The socket is accessible to `odev-users`; Linux peer
-credentials identify the caller. Commands use this local API; no server-to-server
-SSH connection or network HTTP port is needed. Log into the booking server using
+credentials identify the caller. Remote booking commands reach the service
+over SSH and use the same local API there. Log into the booking server using
 your normal credentials and an account in `odev-users`:
 
 ```bash
@@ -136,10 +139,11 @@ reservation overlapping that day, including expired and cancelled bookings.
 Use `YYYY-MM-DD`, `today`, `yesterday` or `tomorrow`. Relative dates use the
 service's timezone.
 
-`--all` prints the local table first, then runs the booking list playbook
-against the other services. Each service uses its own local date. It uses
-the caller's existing SSH access and requires Ansible on the local booking
-server. Failed peers are reported by name. `--all` and `--date` cannot be combined.
+`--all` prints the local or assigned service's table first, then shows tables
+from the other services. Each service uses its own local date. Remote listing
+uses the caller's existing SSH access and requires Ansible on the machine
+running the command. Failed peers are reported by name. `--all` and `--date`
+cannot be combined.
 
 ## Add
 
@@ -159,8 +163,8 @@ The date defaults to today, duration to `1h`, and start to the next five-minute
 boundary. Availability-based suggestions will follow once storage is implemented.
 Supplied start values are validated before prompting, then checked again afterward.
 
-`add.sh` calls `booking/client.py`, which requires a local booking-server role and
-a target managed by that service. `booking/api.py` authenticates the caller and validates shared
+`add.sh` calls `booking/client.py` on the local or assigned booking service.
+The target must be managed by that service. `booking/api.py` authenticates the caller and validates shared
 users against `odev-users`. `booking/storage.py` performs the SQLite transaction.
 The API repeats validation, including policy and conflict checks.
 

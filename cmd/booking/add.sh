@@ -10,7 +10,7 @@ COMMAND="$(basename "$SCRIPT_DIR")"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$(dirname "$SCRIPT_DIR")")"}"
 
 # check on booking configuration
-"$ODEV_PATH/src/booking_available.sh" "$ODEV_PATH" || exit $?
+"$ODEV_PATH/src/booking_available.sh" "$ODEV_PATH" --participant || exit $?
 BOOKING_TIMEZONE="$(bash "$ODEV_PATH/src/booking_timezone.sh" "$ODEV_PATH")" || exit 1
 export BOOKING_TIMEZONE
 
@@ -56,6 +56,21 @@ validate_start_time() {
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
+# set the managed machine as the default target
+booking_db="${BOOKING_DB_FILE:-}"
+if [[ -z "$booking_db" ]]; then
+  booking_db="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths booking)" || exit 1
+fi
+booking_db="${booking_db:-/opt/booking.yml}"
+default_server="$(python3 "$ODEV_PATH/src/booking_is_server.py" --db "$booking_db" --participant --default-server)" || exit 1
+if [[ "$default_server" != "-" ]]; then
+  for i in "${!flags[@]}"; do
+    if [[ "${flags[i]}" == server,* ]]; then
+      flags[i]="${flags[i]%,*},$default_server"
+    fi
+  done
+fi
+
 # validate supplied input before asking for missing fields
 supplied_date="$(TZ="$BOOKING_TIMEZONE" date +%F)"
 supplied_start=""
@@ -97,11 +112,7 @@ for field in "" ${mandatory_flags//,/ }; do
   start=${V[start]:--}
 
   # check on server and duration
-  booking_db="${BOOKING_DB_FILE:-}"
-  if [[ -z "$booking_db" ]]; then
-    booking_db="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths booking)" || exit 1
-  fi
-  booking_args=(--db "${booking_db:-/opt/booking.yml}" --duration "$duration")
+  booking_args=(--db "$booking_db" --participant --duration "$duration")
   if [[ "$server" != "-" ]]; then
     booking_args+=(--server "$server")
   fi
