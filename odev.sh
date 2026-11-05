@@ -155,6 +155,8 @@ print_help() {
   echo "  get:             $get"
   echo "  ifconfig:        $ifconfig"
   echo ""
+  echo "  ${italic}Type odev followed by a space, then press Tab to explore commands.${normal}"
+  echo ""
   echo "${bold}FLAGS${normal}"
   echo "  -h, --help       Show help for command"
   echo "  -v, --version    Show odev version"
