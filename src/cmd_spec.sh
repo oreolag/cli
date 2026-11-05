@@ -174,11 +174,16 @@ SET_FLAGS=(
 )
 # mtu
 SET_MTU_DESCRIPTION="Set the Maximum Transmission Unit (MTU) for a data network interface"
+if [[ "${KEY:-SET_MTU}" == SET_MTU ]]; then
+  mtu_min="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" constants mtu_min)"
+  mtu_max="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" constants mtu_max)"
+  mtu_default="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" constants mtu_default)"
+fi
 SET_MTU_FLAGS=(
   "interface,i,Interface index (endata),-,-"
   "port,p,Interface port index,-,0"
   "remote,r,Also configure remote hosts when set to 1,0|1,0"
-  "value,v,MTU value,1500-9000,1500"
+  "value,v,MTU value,${mtu_min:-1500}-${mtu_max:-9000},${mtu_default:-1500}"
 )
 SET_MTU_FLAGS_MANDATORY="interface,value"
 

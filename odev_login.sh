@@ -128,6 +128,9 @@ if [ "$is_odev_developer" = "1" ] && [ "$installed" = "1" ] && [ "$logged_in" = 
   sudo -H -u "$username" -- "$ODEV_PATH/src/playbooks_sync.sh" >/dev/null 2>&1 || true
 fi
 
+# reverting commands
+"$ODEV_PATH/src/mtu_revert.sh" || true
+
 #print welcome message (1/2)
 echo ""
 echo "Welcome, ${bold}$username!${normal}"
