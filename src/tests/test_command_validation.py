@@ -171,7 +171,7 @@ fi''')
             ("booking/add", ["--shared", "missing"], "Invalid user: missing", ["server:", "start ["]),
             ("booking/share", ["--add", "missing"], "Invalid user: missing", ["booking:"]),
             ("booking/share", ["--add", "tester", "--remove", "tester"], "Invalid flags", ["booking:"]),
-            ("booking/list", ["--date", "bad"], "Invalid booking date", []),
+            ("booking/list", ["--history", "bad"], "Invalid booking date", []),
             ("run/playbook", ["--inventory", str(self.root / "missing")], "Inventory does not exist", ["name:"]),
             ("run/playbook", ["--name", "missing"], "Playbook does not exist", []),
             ("delete/playbook", ["--name", "missing"], "Playbook does not exist", []),
@@ -240,7 +240,7 @@ fi''')
             ("set/mtu", ["--interface", "0", "--value", "1500"], "EXECUTED"),
             ("run/playbook", ["--name", "demo"], "EXECUTED"),
             ("booking/add", ["--server", "incus-01", "--date", "2099-01-01", "--start", "14:00"], "BOOKING EXECUTED"),
-            ("booking/list", ["--date", "2099-01-01"], "BOOKING EXECUTED"),
+            ("booking/list", ["--history", "2099-01-01"], "BOOKING EXECUTED"),
             ("booking/share", ["--booking", "391", "--add", "tester"], "tester\n391\n-"),
             ("booking/cancel", ["--booking", "391"], "391"),
         ]:

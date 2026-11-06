@@ -76,7 +76,8 @@ def local_cancellation(booking, confirm=False, path=SOCKET_PATH):
 
 
 def list_remote_bookings(root, peers, date=None):
-    command = [str(root / "odev"), "booking", "list"]
+    command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
+               "--local-only", "--list"]
     if date is not None:
         command.extend(["--date", date])
     run_remote_booking(root, peers, command, "list bookings")
@@ -132,7 +133,6 @@ def main():
     parser.add_argument("--booked-hosts", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--availability", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--local-only", action="store_true")
-    parser.add_argument("--all", choices=["0", "1"], default="0")
     parser.add_argument("--cancel")
     parser.add_argument("--cancel-stage", choices=["preview", "confirm"], help=argparse.SUPPRESS)
     parser.add_argument("--share", nargs=3, metavar=("BOOKING", "ACTION", "USER"))
@@ -219,8 +219,8 @@ def main():
         return
     if args.list:
         if args.active:
-            if args.all == "1" or args.date is not None:
-                raise ValueError("Invalid flags: --active cannot be combined with --all or --date")
+            if args.date is not None:
+                raise ValueError("Invalid flags: --active and --history")
             bookings = local_listing(None)["bookings"] if entry is not None else []
             if args.local_only:
                 print(json.dumps(bookings))
@@ -239,12 +239,9 @@ def main():
                            full_day=True)
             return
         full_day = args.date is not None
-        if full_day and args.all == "1":
-            raise ValueError("Invalid flags: --all and --date")
         if assigned is not None:
             peers = [assigned["name"]]
-            if args.all == "1":
-                peers.extend(item["name"] for item in inventory["servers"] if item["name"] != assigned["name"])
+            peers.extend(item["name"] for item in inventory["servers"] if item["name"] != assigned["name"])
             list_remote_bookings(root, peers, args.date)
             return
         date = args.date
@@ -253,9 +250,9 @@ def main():
             zone = ZoneInfo(booking_timezone(inventory_path, local))
             date = (datetime.now(zone).date() + timedelta(days=relative_days.get(date, 0))).isoformat()
         print_bookings(local_listing(date, history=full_day), full_day=full_day)
-        if args.all == "1":
+        if not args.local_only:
             peers = [item["name"] for item in inventory["servers"] if item["name"] != local]
-            list_remote_bookings(root, peers)
+            list_remote_bookings(root, peers, args.date)
         return
     service = assigned if assigned is not None else entry
     if args.server not in service["managed_servers"]:

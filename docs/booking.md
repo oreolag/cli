@@ -129,22 +129,20 @@ Use the configured `paths.booking_db` if the default path was changed.
 
 ```bash
 odev booking list
-odev booking list --date 2026-11-01
-odev booking list --all
+odev booking list --history 2026-11-01
 odev booking list --active
 ```
 
 The default view shows availability and active or upcoming reservations for
-today in the local service's timezone. An explicit `--date` shows every
-reservation overlapping that day, including expired and cancelled bookings.
+today across all services. `--history` shows every reservation across all
+services overlapping the selected day, including expired and cancelled bookings.
 Use `YYYY-MM-DD`, `today`, `yesterday` or `tomorrow`. Relative dates use the
-service's timezone.
+timezone of each service.
 
-`--all` prints the local or assigned service's table first, then shows tables
+Both views print the local or assigned service's table first, then show tables
 from the other services. Each service uses its own local date. Remote listing
 uses the caller's existing SSH access and requires Ansible on the machine
-running the command. Failed peers are reported by name. `--all` and `--date`
-cannot be combined.
+running the command. Failed peers are reported by name.
 
 `--active` shows the bookings you own and that are active now across all
 services. The table uses the local or assigned service's timezone.
@@ -217,7 +215,7 @@ Owners and administrators can cancel active or future bookings. Show the server,
 date and times before asking for confirmation, with No as the default. Keep
 cancelled bookings as history.
 Administrators are members of `odev-admins`. Cancellation preserves collaborators
-and the booking ID; `odev booking list --date YYYY-MM-DD` includes the cancelled record.
+and the booking ID; `odev booking list --history YYYY-MM-DD` includes the cancelled record.
 Existing sessions continue until access enforcement implements the handover rule.
 
 ## Access and handover

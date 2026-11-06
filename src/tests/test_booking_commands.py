@@ -288,7 +288,7 @@ else:
     def test_flag_specs_and_mandatory_flags(self):
         self.inventory(self.local, [])
         expected = {
-            "list": ["active", "all", "date"],
+            "list": ["active", "history"],
             "add": ["server", "date", "start", "duration", "shared"],
             "share": ["add", "booking", "remove"],
             "cancel": ["booking"],
