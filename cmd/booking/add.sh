@@ -47,6 +47,7 @@ validate_start_time() {
     echo "Invalid value for --start: '$start' (expected HH:MM from 00:00 to 23:59)" >&2
     return 1
   fi
+  [[ -n "$date" ]] || return 0
 
   # validate the combined date and time in the booking timezone (odev targets Ubuntu)
   if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
@@ -80,17 +81,27 @@ if [[ "$default_server" != "-" ]]; then
 fi
 
 # validate supplied input before asking for missing fields
-supplied_date="$(TZ="$BOOKING_TIMEZONE" date +%F)"
+supplied_date="today"
 supplied_start=""
+supplied_server=""
 has_start=false
 while IFS='=' read -r k v; do
   case "$k" in
-    date) supplied_date="$(resolve_booking_date "$v")" || exit 1 ;;
+    date) supplied_date="$v" ;;
+    server) supplied_server="$v" ;;
     start) supplied_start="$v"; has_start=true ;;
   esac
 done <<< "$parsed_flags"
+if [[ -n "$supplied_server" ]]; then
+  BOOKING_TIMEZONE="$(python3 "$ODEV_PATH/src/booking_is_server.py" --db "$booking_db" \
+    --participant --server="$supplied_server" --timezone)" || exit 1
+fi
 if [[ "$has_start" == true ]]; then
-  validate_start_time "$supplied_date" "$supplied_start" || exit 1
+  start_date=""
+  if [[ -n "$supplied_server" ]]; then
+    start_date="$(resolve_booking_date "$supplied_date")" || exit 1
+  fi
+  validate_start_time "$start_date" "$supplied_start" || exit 1
 fi
 
 # check supplied values first, then check each answer before the next question
@@ -113,32 +124,32 @@ for field in "" ${mandatory_flags//,/ }; do
   fi
 
   # assign flags
-  date=${V[date]:--}
-  if [[ "$date" == today || "$date" == tomorrow ]]; then
-    date="$supplied_date"
-  fi
   duration=${V[duration]:--}
   server=${V[server]:--}
   shared=${V[shared]:--}
   start=${V[start]:--}
 
   # check on server and duration
-  booking_args=(--db "$booking_db" --participant --duration "$duration")
   if [[ "$server" != "-" ]]; then
-    booking_args+=(--server "$server")
+    BOOKING_TIMEZONE="$(python3 "$ODEV_PATH/src/booking_is_server.py" --db "$booking_db" \
+      --participant --server="$server" --duration="$duration" --timezone)" || exit 1
+  elif [[ ! "$duration" =~ ^0*[1-9][0-9]*[mh]$ ]]; then
+    echo "Invalid duration: $duration" >&2
+    exit 1
   fi
-  python3 "$ODEV_PATH/src/booking_is_server.py" "${booking_args[@]}" || exit 1
+  date="$(resolve_booking_date "$supplied_date")" || exit 1
 
   # check on date
   if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
      ! booking_day=$(TZ="$BOOKING_TIMEZONE" date -d "$date" +%F 2>/dev/null) ||
-     [[ "$booking_day" != "$date" || "$date" < "$(TZ="$BOOKING_TIMEZONE" date +%F)" ]]; then
+     [[ "$booking_day" != "$date" ]] ||
+     [[ "$server" != "-" && "$date" < "$(TZ="$BOOKING_TIMEZONE" date +%F)" ]]; then
     echo "Invalid booking date: $date" >&2
     exit 1
   fi
 
   # check on start when supplied or answered
-  if [[ "$start" != "-" ]]; then
+  if [[ "$server" != "-" && "$start" != "-" ]]; then
     validate_start_time "$date" "$start" || exit 1
   fi
 

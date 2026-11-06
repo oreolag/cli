@@ -190,7 +190,9 @@ else:
         for timezone, values, error in timezone_cases:
             with self.subTest(values=values):
                 result = subprocess.run(
-                    ["bash", "-c", validation + '\nparsed_flags="$1"\n' + early + '\necho DIALOG\n', "test", values],
+                    ["bash", "-c", validation + '\npython3() { echo "$BOOKING_TIMEZONE"; }\n'
+                     'parsed_flags="$1"\nbooking_db=unused\n' + early + '\necho DIALOG\n',
+                     "test", "server=incus-01\n" + values],
                     env={**self.env, "TZ": "UTC", "BOOKING_TIMEZONE": timezone,
                          "PATH": self.temp.name + os.pathsep + os.environ["PATH"]},
                     capture_output=True, text=True)

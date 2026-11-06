@@ -166,8 +166,8 @@ The date defaults to today, duration to `1h`, and start to the next five-minute
 boundary. Availability-based suggestions will follow once storage is implemented.
 Supplied start values are validated before prompting, then checked again afterward.
 
-`add.sh` calls `booking/client.py` on the local or assigned booking service.
-The target must be managed by that service. `booking/api.py` authenticates the caller and validates shared
+`add.sh` routes the request to the service that manages the target server.
+Date and time inputs use that service's timezone. `booking/api.py` authenticates the caller and validates shared
 users against `odev-users`. `booking/storage.py` performs the SQLite transaction.
 The API repeats validation, including policy and conflict checks.
 

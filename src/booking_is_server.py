@@ -104,7 +104,7 @@ def main():
     parser.add_argument("--db", required=True, help="Path to booking.yml")
     parser.add_argument("--participant", action="store_true", help="Include managed machines")
     parser.add_argument("--timezone", action="store_true", help="Print the booking timezone (defaults to UTC)")
-    parser.add_argument("--server", help="Check a managed target on this booking host")
+    parser.add_argument("--server", help="Check a managed booking target")
     parser.add_argument("--duration", help="Check duration against this booking host's limit")
     parser.add_argument("--default-server", action="store_true", help="Print the default booking target")
     args = parser.parse_args()
@@ -120,11 +120,15 @@ def main():
             if args.default_server:
                 print("-" if entry["name"] == local else local)
                 return 0
-            if args.server is not None and args.server not in entry["managed_servers"]:
-                print(f"Invalid server: {args.server}", file=sys.stderr)
-                return 1
+            if args.server is not None:
+                entry = next((item for item in data["servers"] if args.server in item["managed_servers"]), None)
+                if entry is None:
+                    print(f"Invalid server: {args.server}", file=sys.stderr)
+                    return 1
             if args.duration is not None:
                 duration_seconds(args.duration, entry["maximum_duration_hours"])
+            if args.timezone:
+                print(validate_timezone(entry.get("timezone", data.get("timezone", "UTC"))))
             return 0
         if args.timezone:
             print(booking_timezone(args.db))

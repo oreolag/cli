@@ -254,10 +254,10 @@ def main():
             peers = [item["name"] for item in inventory["servers"] if item["name"] != local]
             list_remote_bookings(root, peers, args.date)
         return
-    service = assigned if assigned is not None else entry
-    if args.server not in service["managed_servers"]:
+    service = next((item for item in inventory["servers"] if args.server in item["managed_servers"]), None)
+    if service is None or (args.local_only and service["name"] != local):
         raise ValueError(f"Invalid server: {args.server}")
-    if assigned is not None:
+    if service["name"] != local:
         if args.date is None or args.start is None:
             raise ValueError("Booking date and start time are required")
         command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),

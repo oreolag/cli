@@ -129,25 +129,26 @@ class BookingAddTest(unittest.TestCase):
 
     def test_managed_client_routes_to_assigned_service(self):
         self.entry["name"] = "booking-host"
-        self.inventory.write_text(yaml.safe_dump({"servers": [self.entry]}))
-        args = ["client.py", "--odev-path", str(self.root), "--server", "incus-01",
+        other = {**self.entry, "name": "other-booking", "id": "02", "managed_servers": ["incus-03"]}
+        self.inventory.write_text(yaml.safe_dump({"servers": [self.entry, other]}))
+        args = ["client.py", "--odev-path", str(self.root), "--server", "incus-03",
                 "--date", self.request["date"], "--start", "14:15", "--duration", "2h"]
         with patch.object(sys, "argv", args), patch.object(client.socket, "gethostname", return_value="incus-01"), \
                 patch.object(client, "run_remote_booking") as remote, patch.object(client, "local_request") as local:
             client.main()
         root, peers, command, operation = remote.call_args.args
-        self.assertEqual((root, peers, operation), (self.root, ["booking-host"], "create booking"))
+        self.assertEqual((root, peers, operation), (self.root, ["other-booking"], "create booking"))
         self.assertIn("--local-only", command)
-        self.assertEqual(command[command.index("--server") + 1], "incus-01")
+        self.assertEqual(command[command.index("--server") + 1], "incus-03")
         local.assert_not_called()
 
-    def test_client_rejects_unassigned_host_and_other_service_target(self):
+    def test_client_rejects_unassigned_host_and_unknown_target(self):
         self.entry["name"] = "booking-host"
         other = {**self.entry, "name": "other-booking", "id": "02", "managed_servers": ["incus-02"]}
         self.inventory.write_text(yaml.safe_dump({"servers": [self.entry, other]}))
         cases = [("unassigned", "incus-01", "Command not available: odev booking"),
-                 ("incus-01", "incus-02", "Invalid server: incus-02"),
-                 ("booking-host", "incus-02", "Invalid server: incus-02")]
+                 ("incus-01", "incus-99", "Invalid server: incus-99"),
+                 ("booking-host", "incus-99", "Invalid server: incus-99")]
         for hostname, target, error in cases:
             args = ["client.py", "--odev-path", str(self.root), "--server", target]
             with self.subTest(hostname=hostname), patch.object(sys, "argv", args), \
