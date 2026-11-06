@@ -6,6 +6,9 @@
 #   - name: odev-booking-01
 #     id: "01" # Permanent; never reuse for another booking database.
 #     timezone: Europe/Madrid # Booking input and display; storage uses UTC.
+#     access:
+#       host: booking-01.internal.example.com # IP, DNS or tailnet address serving OpenSSH.
+#       port: 22 # Optional, defaults to 22.
 #     managed_servers:
 #       - incus-01
 #       - incus-02

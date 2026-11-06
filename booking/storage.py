@@ -13,6 +13,26 @@ class BookingConflict(ValueError):
     pass
 
 
+def booking_access_allowed(config, server, username):
+    entry = config["server"]
+    if entry is None or server not in entry["managed_servers"]:
+        raise ValueError(f"Invalid server: {server}")
+    connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=ro", uri=True, timeout=2)
+    try:
+        metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
+        if metadata is None or metadata[0] != entry["id"]:
+            raise ValueError("Booking database service ID does not match booking.yml")
+        now = int(time.time())
+        row = connection.execute(
+            "SELECT 1 FROM bookings WHERE server = ? AND cancelled_at IS NULL AND start_time <= ? AND end_time > ? "
+            "AND (owner = ? OR EXISTS (SELECT 1 FROM booking_shares "
+            "WHERE booking_shares.booking_id = bookings.booking_id AND username = ?)) LIMIT 1",
+            (server, now, now, username, username)).fetchone()
+        return row is not None
+    finally:
+        connection.close()
+
+
 def booking_availability(config):
     entry = config["server"]
     if entry is None:

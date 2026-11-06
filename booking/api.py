@@ -16,9 +16,10 @@ from zoneinfo import ZoneInfo
 from urllib.parse import parse_qs, urlsplit
 
 from runtime import configuration
-from storage import BookingConflict, booking_availability, cancel_booking, create_booking, list_bookings, share_booking
+from storage import BookingConflict, booking_access_allowed, booking_availability, cancel_booking, create_booking, list_bookings, share_booking
 
 SOCKET_PATH = "/run/odev-booking/api.sock"
+ACCESS_ACCOUNT = "odev-booking-check"
 
 
 def require_user(username):
@@ -31,11 +32,17 @@ def require_user(username):
         raise ValueError(f"Invalid user: {username}") from None
 
 
-def peer_user(connection):
+def peer_identity(connection):
     credentials = connection.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize("3i"))
     _, uid, _ = struct.unpack("3i", credentials)
+    return pwd.getpwuid(uid).pw_name
+
+
+def peer_user(connection):
     try:
-        username = pwd.getpwuid(uid).pw_name
+        username = peer_identity(connection)
+        if username == ACCESS_ACCOUNT:
+            raise PermissionError("Permission denied: booking access")
         require_user(username)
         return username
     except (KeyError, ValueError):
@@ -62,9 +69,18 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         try:
-            username = peer_user(self.connection)
             url = urlsplit(self.path)
             query = parse_qs(url.query, keep_blank_values=True)
+            if url.path == "/access":
+                if peer_identity(self.connection) != ACCESS_ACCOUNT:
+                    raise PermissionError("Permission denied: booking access")
+                if set(query) != {"server", "user"} or any(len(values) != 1 or not values[0] for values in query.values()):
+                    raise ValueError("Invalid booking access request")
+                config = configuration(self.server.odev_path, socket.gethostname())
+                allowed = booking_access_allowed(config, query["server"][0], query["user"][0])
+                self.reply(200, {"allowed": allowed})
+                return
+            username = peer_user(self.connection)
             if url.path != "/bookings":
                 self.reply(404, {"error": "Command not found: booking API"})
                 return
