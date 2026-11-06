@@ -117,13 +117,13 @@ print_booking_status() {
     if [[ "$total" == 0 ]]; then
       :
     elif [[ "$free" == "$total" ]]; then
-      printf '  All servers are free\n'
+      printf '  All servers are %sfree%s\n' "$strong" "$reset"
     elif [[ "$free" == 0 ]]; then
-      printf '  %sAll servers are booked%s\n' "$strong" "$reset"
+      printf '  All servers are %sbooked%s\n' "$strong" "$reset"
     elif [[ "$free" == 1 ]]; then
       printf '  Only %s%s%s is free\n' "$strong" "$server" "$reset"
     else
-      printf '  %s%s of %s servers are free%s\n' "$strong" "$free" "$total" "$reset"
+      printf '  %s%s of %s%s servers are free\n' "$strong" "$free" "$total" "$reset"
     fi
   else
     if [[ -t 1 && "${TERM:-dumb}" != "dumb" ]]; then
