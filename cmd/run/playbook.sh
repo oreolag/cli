@@ -69,7 +69,13 @@ for field in "" ${mandatory_flags//,/ }; do
   name=${V[name]:--}
   hosts=${V[hosts]:-local}
   inventory=${V[inventory]:--}
+  remote=${V[remote]:-0}
   vars=${V[vars]:--}
+
+  if [[ "$remote" == "1" && ( "$hosts" != "local" || "$inventory" != "-" ) ]]; then
+    echo "Invalid flags: --remote requires local and the generated inventory" >&2
+    exit 1
+  fi
 
   if [[ "$name" != "-" ]]; then
     # check on name
@@ -112,6 +118,14 @@ if [[ "$vars" != "-" ]]; then
 fi
 
 # run the playbook on the selected hosts
+if [[ "$remote" == "1" ]]; then
+  "$ODEV_PATH/src/ansible_remote_preflight.sh" "$inventory_file" || exit 1
+  "$MGMT_PATH/ansible-play.sh" "$playbook" local \
+    -i "$inventory_file" "${args[@]}" --limit local || exit 1
+  exec "$MGMT_PATH/ansible-play.sh" "$playbook" my_hosts \
+    -i "$inventory_file" "${args[@]}" --limit my_hosts
+fi
+
 if [[ -f "$inventory_file" || -d "$inventory_file" ]]; then
   exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts" -i "$inventory_file" "${args[@]}"
 else
