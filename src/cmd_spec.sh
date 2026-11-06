@@ -46,7 +46,7 @@ if [[ "${KEY:-BOOKING}" == BOOKING* ]]; then
   # add
   BOOKING_ADD_DESCRIPTION="Reserve a server for a specific time" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
   BOOKING_ADD_FLAGS=(
-    "date,d,Booking date (YYYY-MM-DD),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
+    "date,d,Booking date (YYYY-MM-DD or today/tomorrow),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
     "duration,,Duration (e.g. 5m or 1h),-,1h"
     "server,s,Server inventory name,-,-"
     "shared,,Users to share the booking with (comma-separated),-,-"

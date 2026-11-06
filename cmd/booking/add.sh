@@ -32,6 +32,14 @@ print_both="0"
   "${flags[@]}" -- "$@" && exit 0 || true
 
 # validate supplied or completed start values
+resolve_booking_date() {
+  case "$1" in
+    today) TZ="$BOOKING_TIMEZONE" date +%F ;;
+    tomorrow) TZ="$BOOKING_TIMEZONE" date -d tomorrow +%F ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+
 validate_start_time() {
   local date="$1" start="$2" start_timestamp now
   # validate start time (from flags or the interactive prompt)
@@ -77,7 +85,7 @@ supplied_start=""
 has_start=false
 while IFS='=' read -r k v; do
   case "$k" in
-    date) supplied_date="$v" ;;
+    date) supplied_date="$(resolve_booking_date "$v")" || exit 1 ;;
     start) supplied_start="$v"; has_start=true ;;
   esac
 done <<< "$parsed_flags"
@@ -106,6 +114,9 @@ for field in "" ${mandatory_flags//,/ }; do
 
   # assign flags
   date=${V[date]:--}
+  if [[ "$date" == today || "$date" == tomorrow ]]; then
+    date="$supplied_date"
+  fi
   duration=${V[duration]:--}
   server=${V[server]:--}
   shared=${V[shared]:--}

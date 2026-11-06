@@ -159,6 +159,8 @@ from zoneinfo import ZoneInfo
 args = sys.argv[1:]
 if args == ['+%F']:
     print('2026-10-20')
+elif args == ['-d', 'tomorrow', '+%F']:
+    print('2026-10-21')
 elif args == ['+%s']:
     print(int(datetime.datetime(2026, 10, 20, 12, 0, tzinfo=datetime.timezone.utc).timestamp()))
 else:
@@ -176,6 +178,8 @@ else:
             ("start=12:00", None),
             ("start=13:20", None),
             ("date=2026-10-21\nstart=11:20", None),
+            ("date=today\nstart=11:20", "Invalid start time: 2026-10-20 11:20"),
+            ("date=tomorrow\nstart=11:20", None),
             ("server=incus-01", None),
         ]
         timezone_cases = [("UTC", values, error) for values, error in cases]
