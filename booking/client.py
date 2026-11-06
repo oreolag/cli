@@ -94,6 +94,8 @@ def run_remote_booking(root, peers, command, operation, capture=False, plain_err
         results = Path(directory) / "results.json"
         inventory.write_text(yaml.safe_dump({"booking_peers": {"hosts": {peer: {} for peer in peers}}}))
         variables = {"booking_list_command": command, "booking_list_results": str(results)}
+        if sys.stdout.isatty():
+            variables["booking_output_term"] = os.environ.get("TERM", "")
         run = subprocess.run(["ansible-playbook", "-i", str(inventory), "--ssh-extra-args=-o BatchMode=yes",
                               "--extra-vars", json.dumps(variables),
                               str(root / "cmd/booking/booking_list_all.yml")],

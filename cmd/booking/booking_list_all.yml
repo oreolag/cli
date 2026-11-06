@@ -8,6 +8,8 @@
     - name: Run booking command
       ansible.builtin.command:
         argv: "{{ booking_list_command }}"
+      environment:
+        ODEV_BOOKING_OUTPUT_TERM: "{{ booking_output_term | default('') }}"
       register: booking_list
       changed_when: false
       failed_when: false

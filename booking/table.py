@@ -2,6 +2,7 @@
 import ast
 import curses
 from datetime import datetime
+import os
 from pathlib import Path
 import sys
 import time
@@ -48,9 +49,10 @@ def print_bookings(result, full_day=False):
     widths[-1] += max(0, len(title) + 2 - inner)
     inner = max(inner, len(title) + 2)
     bold = reset = passed = failed = ""
-    if sys.stdout.isatty():
+    output_term = os.environ.get("ODEV_BOOKING_OUTPUT_TERM")
+    if sys.stdout.isatty() or (output_term and output_term != "dumb"):
         try:
-            curses.setupterm()
+            curses.setupterm(term=output_term or None, fd=1)
             bold = (curses.tigetstr("bold") or b"").decode()
             reset = (curses.tigetstr("sgr0") or b"").decode()
             passed = ast.literal_eval((Path(__file__).resolve().parents[1] / "src/COLOR_PASSED").read_text().strip())
