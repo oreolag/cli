@@ -116,14 +116,17 @@ if [[ ! -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
 fi
 
 # set inventory
-inventory_file="$TMP_PATH/hosts_$USER"
+inventory_file="$TMP_PATH/hosts_$(id -un)"
+playbook="$WORKFLOWS_USER_PATH/$SUBCOMMAND/program.yml"
 
-# get target
-if [[ "$remote" == "1" && -f "$inventory_file" ]]; then
-  target="my_hosts"
-else
-  target="local"
+# check remote access before programming any device
+if [[ "$remote" == "1" ]]; then
+  "$ODEV_PATH/src/ansible_remote_preflight.sh" "$inventory_file" || exit 1
 fi
 
 # call the playbook (add your code here!)
-"$MGMT_PATH/ansible-play.sh" "$WORKFLOWS_USER_PATH/$SUBCOMMAND/program.yml" "$target" -i "$inventory_file"
+"$MGMT_PATH/ansible-play.sh" "$playbook" local -i "$inventory_file" --limit local || exit 1
+
+if [[ "$remote" == "1" ]]; then
+  "$MGMT_PATH/ansible-play.sh" "$playbook" my_hosts -i "$inventory_file" --limit my_hosts
+fi
