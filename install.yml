@@ -89,6 +89,7 @@
           ansible.posix.synchronize:
             src: "{{ cli.local_path }}/cmd/booking/"
             dest: "{{ cli_remote_path }}/odev/cmd/booking/"
+            use_ssh_args: true
             recursive: true
             archive: true
             links: true
