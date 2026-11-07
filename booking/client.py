@@ -90,6 +90,15 @@ def run_remote_booking(root, peers, command, operation, capture=False, plain_err
     if status.returncode or status.stdout.strip() != "1":
         raise ValueError("Login failed: tailscale")
     sys.stdout.flush()
+    for peer in peers:
+        try:
+            login = subprocess.run(
+                ["ssh", "-n", "-T", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "--", peer, "true"],
+                stdout=subprocess.DEVNULL, timeout=20)
+        except subprocess.TimeoutExpired:
+            raise ValueError(f"Login failed: {peer} (SSH check timed out)") from None
+        if login.returncode:
+            raise ValueError(f"Login failed: {peer}")
     with tempfile.TemporaryDirectory(prefix="odev-booking-") as directory:
         inventory = Path(directory) / "inventory.yml"
         results = Path(directory) / "results.json"
@@ -97,10 +106,16 @@ def run_remote_booking(root, peers, command, operation, capture=False, plain_err
         variables = {"booking_list_command": command, "booking_list_results": str(results)}
         if sys.stdout.isatty():
             variables["booking_output_term"] = os.environ.get("TERM", "")
-        run = subprocess.run(["ansible-playbook", "-i", str(inventory), "--ssh-extra-args=-o BatchMode=yes",
-                              "--extra-vars", json.dumps(variables),
-                              str(root / "cmd/booking/booking_list_all.yml")],
-                             capture_output=True, text=True)
+        try:
+            run = subprocess.run(["ansible-playbook", "-i", str(inventory), "--ssh-extra-args=-o BatchMode=yes",
+                                  "--extra-vars", json.dumps(variables),
+                                  str(root / "cmd/booking/booking_list_all.yml")],
+                                 capture_output=True, text=True, timeout=60)
+        except subprocess.TimeoutExpired as error:
+            detail = error.stderr or b""
+            if isinstance(detail, bytes):
+                detail = detail.decode(errors="replace")
+            raise ValueError(f"Remote booking command timed out\n{detail.strip()}") from None
         if run.returncode:
             raise ValueError(f"Could not {operation} remotely:\n{run.stderr.strip() or run.stdout.strip()}")
         remote = json.loads(results.read_text())

@@ -19,7 +19,7 @@ inventory="$temp_dir/hosts"
 cp "$ODEV_PATH/templates/playbooks/hosts" "$inventory"
 chmod 600 "$inventory"
 
-command=(timeout 20s python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" --booked-hosts)
+command=(timeout 90s python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" --booked-hosts)
 if [[ "$EUID" == 0 ]]; then
   command=(sudo -H -u "$username" -- "${command[@]}")
 fi
@@ -28,7 +28,7 @@ status=0
 if [[ "$("$ODEV_PATH/src/tailscale_auth_status.sh")" != 1 ]]; then
   # Keep only the local template when Tailscale is unavailable.
   :
-elif booked_hosts=$("${command[@]}" 2>/dev/null); then
+elif booked_hosts=$("${command[@]}"); then
   if [[ -n "$booked_hosts" ]]; then
     if magicdns_hosts=$(tailscale status --json | python3 -c '
 import json

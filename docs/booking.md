@@ -2,6 +2,9 @@
 
 Booking reserves a server for an owner and optional collaborators.
 
+**Tailscale is required for remote booking commands.** Connect the machine to
+the tailnet before using booking commands that contact another service.
+
 Booking creation, sharing, cancellation and local listing are implemented.
 Remote listing and login enforcement are
 planned. The examples below describe the agreed workflow.
@@ -68,8 +71,29 @@ ssh odev-booking-01
 ```
 
 The API derives ownership from the local connection rather than accepting a
-username supplied in the request. Managed machines still run an idle daemon;
-reservation checks at login remain a later step.
+username supplied in the request. Managed machines still run an idle daemon.
+
+Remote booking commands require Ansible, working SSH access and a connected
+Tailscale node. A disconnected node returns `Login failed: tailscale`.
+For example, on `incus-01`, this creates a booking through its remote service:
+
+```bash
+odev booking add --server incus-01 --duration 5m
+```
+
+The same command on `odev-booking-01`, when it manages `incus-01`, uses its
+local API and works without Tailscale. Local sharing and cancellation work the
+same way for reservations stored on that service.
+
+Listing contacts all configured services, so even a booking server needs
+Tailscale when the list includes remote services. With only one configured
+service, listing on that service uses only its local API.
+
+Tailscale connectivity and Tailscale SSH approval are separate checks. A
+connected node may still receive a browser approval request when opening SSH.
+The OpenSSH booking admission lookup uses the dedicated machine credential
+and configured `access.host` and `access.port`. It works without Tailscale
+when that endpoint is reachable through another network.
 
 ## Database
 

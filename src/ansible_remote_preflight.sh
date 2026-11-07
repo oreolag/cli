@@ -10,7 +10,7 @@ if [[ "$("$ODEV_PATH/src/tailscale_auth_status.sh")" != 1 ]]; then
   exit 1
 fi
 
-"$ODEV_PATH/src/get_ansible_hosts.sh" "$username"
+"$ODEV_PATH/src/get_ansible_hosts.sh" "$username" || exit 1
 if [[ ! -f "$inventory_file" ]] ||
    ! inventory_json="$(ANSIBLE_INVENTORY_ANY_UNPARSED_IS_FAILED=true ansible-inventory -i "$inventory_file" --list)"; then
   echo "Invalid inventory: $inventory_file" >&2

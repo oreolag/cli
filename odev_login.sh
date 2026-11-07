@@ -110,7 +110,7 @@ wait "$pid"
 echo ""
 
 # refresh the user's Ansible inventory (requires Tailscale login)
-"$ODEV_PATH/src/get_ansible_hosts.sh" "$username" || true
+"$ODEV_PATH/src/get_ansible_hosts.sh" "$username" >/dev/null 2>&1 || true
 
 # check on workflows
 is_odev_developer=$("$ODEV_PATH/src/is_member.sh" "$username" odev-developers)
