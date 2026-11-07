@@ -5,9 +5,26 @@ Booking reserves a server for an owner and optional collaborators.
 **Tailscale is required for remote booking commands.** Connect the machine to
 the tailnet before using booking commands that contact another service.
 
-Booking creation, sharing, cancellation and local listing are implemented.
-Remote listing and login enforcement are
-planned. The examples below describe the agreed workflow.
+## Version 1 notes
+
+Booking creation, sharing, cancellation, cross-service listing and commands,
+generated Ansible inventories and remote playbook execution are implemented.
+OpenSSH admission has been validated for owners, collaborators, unbooked users,
+administrators, booking-service failure and removal of a managed-server assignment.
+
+Managed machines check session authorization every 30 seconds. Users without an
+active owned or shared booking are disconnected after expiry, cancellation or
+removal from sharing. Root and `odev-admins` are exempt. The `terminate_jobs`
+setting controls cleanup of remaining user jobs.
+
+Each service stores reservations in its own SQLite database. Back up that
+database for recovery. Reassigning a managed server in `booking.yml` does not
+transfer its existing reservations to the new service.
+
+Remote booking commands require Tailscale and working user SSH access.
+Tailscale SSH can request browser approval even when the node is connected.
+The OpenSSH admission lookup uses a separate machine credential and can work
+without Tailscale when its configured endpoint is reachable through another network.
 
 ## Configuration
 
@@ -240,18 +257,35 @@ date and times before asking for confirmation, with No as the default. Keep
 cancelled bookings as history.
 Administrators are members of `odev-admins`. Cancellation preserves collaborators
 and the booking ID; `odev booking list --history YYYY-MM-DD` includes the cancelled record.
-Existing sessions continue until access enforcement implements the handover rule.
+Cancellation releases the reservation immediately. The next session expiry
+check disconnects users who have no other active owned or shared booking.
 
-## Access and handover
+## Access and session expiry
 
-A new session requires an active booking as owner or collaborator. Expiration,
-cancellation or removal from sharing revokes that access immediately but leaves
-existing sessions running.
+A new SSH session requires an active booking as owner or collaborator.
+Expiration, cancellation or removal from sharing immediately revokes new login
+access. The root-owned `odev-booking-expiry.timer` checks existing sessions
+every 30 seconds, allowing a short lookup delay. Cleanup is independent of
+whether another user logs in.
 
-At the next authorized login, disconnect users without current reservation access.
-With `terminate_jobs: true`, also terminate their remaining jobs. With `false`
-(the default when omitted), preserve detached/background jobs. Preserve system
-services and users authorized by the current reservation.
+With `terminate_jobs: true`, systemd terminates the unauthorized user's sessions
+and user-managed jobs. System services outside that user's login resources are
+preserved. With `false` (the default), only SSH session leaders are signalled
+to disconnect them; remaining jobs follow the system's normal logout policy.
+Root, system accounts and `odev-admins` are exempt.
+
+Checks run only where the OpenSSH booking admission hook is installed.
+Each check reads the current local `booking.yml`. Removing a machine from
+`managed_servers`, or promoting it to a booking service, stops expiry cleanup.
+
+```bash
+sudo python3 /opt/odev/booking/expiry.py --dry-run
+systemctl status odev-booking-expiry.timer
+sudo journalctl -u odev-booking-expiry.service -n 30 --no-pager
+```
+
+The dry run reports intended cleanup without disconnecting users.
 
 If the booking service is unavailable, deny new bookings and new access to managed
-servers. Existing sessions continue, and booking servers remain accessible.
+servers. Existing sessions and jobs are preserved on a failed expiry lookup;
+the timer retries. Booking servers remain accessible.

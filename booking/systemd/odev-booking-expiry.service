@@ -1,0 +1,13 @@
+[Unit]
+Description=Expire unauthorized odev booking sessions
+After=network.target systemd-logind.service
+ConditionPathExists=/etc/odev/booking-access/endpoint.json
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -EsB "{{ cli_remote_path }}/odev/booking/expiry.py"
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+UMask=0077

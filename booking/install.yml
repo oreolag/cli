@@ -113,3 +113,21 @@
     daemon_reload: true
     enabled: true
     state: restarted
+
+- name: Install booking session expiry units
+  ansible.builtin.template:
+    src: "{{ cli.local_path | default(playbook_dir) }}/booking/systemd/{{ item }}"
+    dest: "/etc/systemd/system/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - odev-booking-expiry.service
+    - odev-booking-expiry.timer
+
+- name: Enable the booking session expiry timer
+  ansible.builtin.systemd_service:
+    name: odev-booking-expiry.timer
+    daemon_reload: true
+    enabled: true
+    state: started

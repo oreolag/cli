@@ -25,16 +25,23 @@ ACCESS_PATH = Path("/etc/odev/booking-access")
 
 def serve(server):
     username = os.environ.get("SSH_ORIGINAL_COMMAND", "")
-    if not re.fullmatch(r"[a-zA-Z_][a-zA-Z0-9_.-]*\$?", username):
+    active_users = username == "@active-users"
+    if not active_users and not re.fullmatch(r"[a-zA-Z_][a-zA-Z0-9_.-]*\$?", username):
         raise ValueError("Invalid booking access user")
+    query = {"server": server}
+    if not active_users:
+        query["user"] = username
     connection = Connection(SOCKET_PATH, timeout=2)
     try:
-        connection.request("GET", "/access?" + urlencode({"server": server, "user": username}))
+        connection.request("GET", "/access?" + urlencode(query))
         response = connection.getresponse()
         if response.status != 200:
             raise ValueError("Booking access lookup failed")
         result = json.load(response)
-        print("allow" if result["allowed"] is True else "deny")
+        if active_users:
+            print(json.dumps(result))
+        else:
+            print("allow" if result["allowed"] is True else "deny")
     finally:
         connection.close()
 
@@ -49,11 +56,7 @@ def assigned_service(root):
     return next((entry["name"] for entry in inventory["servers"] if hostname in entry["managed_servers"]), None)
 
 
-def check(root, username, service=None):
-    if service is None:
-        service = assigned_service(root)
-    if service is None:
-        raise ValueError("No booking service assigned to this machine")
+def remote_lookup(service, command):
     endpoint = json.loads((ACCESS_PATH / "endpoint.json").read_text())
     if endpoint["service"] != service:
         raise ValueError(f"Booking access endpoint does not match {service}")
@@ -62,11 +65,21 @@ def check(root, username, service=None):
          "-o", "StrictHostKeyChecking=yes", "-o", "GlobalKnownHostsFile=/dev/null",
          "-o", f"UserKnownHostsFile={ACCESS_PATH / 'known_hosts'}", "-o", f"HostKeyAlias={service}",
          "-o", "IdentitiesOnly=yes", "-o", "IdentityAgent=none", "-i", str(ACCESS_PATH / "id_ed25519"),
-         "-p", str(endpoint["port"]), "-l", ACCESS_ACCOUNT, "--", endpoint["address"], username],
+         "-p", str(endpoint["port"]), "-l", ACCESS_ACCOUNT, "--", endpoint["address"], command],
         capture_output=True, text=True, timeout=5)
-    decision = result.stdout.strip()
-    if result.returncode or decision not in {"allow", "deny"}:
+    if result.returncode:
         raise ValueError(result.stderr.strip() or f"Booking access lookup failed on {service}")
+    return result.stdout.strip()
+
+
+def check(root, username, service=None):
+    if service is None:
+        service = assigned_service(root)
+    if service is None:
+        raise ValueError("No booking service assigned to this machine")
+    decision = remote_lookup(service, username)
+    if decision not in {"allow", "deny"}:
+        raise ValueError(f"Booking access lookup failed on {service}")
     if decision == "allow":
         print(f"Access allowed: {username}")
         return 0

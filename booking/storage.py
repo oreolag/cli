@@ -33,6 +33,27 @@ def booking_access_allowed(config, server, username):
         connection.close()
 
 
+def booking_access_users(config, server):
+    entry = config["server"]
+    if entry is None or server not in entry["managed_servers"]:
+        raise ValueError(f"Invalid server: {server}")
+    connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=ro", uri=True, timeout=2)
+    try:
+        connection.execute("BEGIN")
+        metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
+        if metadata is None or metadata[0] != entry["id"]:
+            raise ValueError("Booking database service ID does not match booking.yml")
+        now = int(time.time())
+        rows = connection.execute(
+            "WITH active AS (SELECT booking_id, owner FROM bookings "
+            "WHERE server = ? AND cancelled_at IS NULL AND start_time <= ? AND end_time > ?) "
+            "SELECT owner FROM active UNION SELECT username FROM booking_shares "
+            "JOIN active USING (booking_id) ORDER BY 1", (server, now, now)).fetchall()
+        return [row[0] for row in rows]
+    finally:
+        connection.close()
+
+
 def booking_availability(config):
     entry = config["server"]
     if entry is None:

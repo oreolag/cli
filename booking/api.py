@@ -16,7 +16,7 @@ from zoneinfo import ZoneInfo
 from urllib.parse import parse_qs, urlsplit
 
 from runtime import configuration
-from storage import BookingConflict, booking_access_allowed, booking_availability, cancel_booking, create_booking, list_bookings, share_booking
+from storage import BookingConflict, booking_access_allowed, booking_access_users, booking_availability, cancel_booking, create_booking, list_bookings, share_booking
 
 SOCKET_PATH = "/run/odev-booking/api.sock"
 ACCESS_ACCOUNT = "odev-booking-check"
@@ -74,9 +74,12 @@ class Handler(BaseHTTPRequestHandler):
             if url.path == "/access":
                 if peer_identity(self.connection) != ACCESS_ACCOUNT:
                     raise PermissionError("Permission denied: booking access")
-                if set(query) != {"server", "user"} or any(len(values) != 1 or not values[0] for values in query.values()):
+                if set(query) not in [{"server"}, {"server", "user"}] or any(len(values) != 1 or not values[0] for values in query.values()):
                     raise ValueError("Invalid booking access request")
                 config = configuration(self.server.odev_path, socket.gethostname())
+                if "user" not in query:
+                    self.reply(200, {"users": booking_access_users(config, query["server"][0])})
+                    return
                 allowed = booking_access_allowed(config, query["server"][0], query["user"][0])
                 self.reply(200, {"allowed": allowed})
                 return
