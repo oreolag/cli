@@ -196,3 +196,14 @@ devices:
       vendor: "NVIDIA"
       model: "A100 80GB PCIe"
       bdf: "0000:a1:00.0"
+
+# Shared storage assignments reference servers and shares in storage.yml.
+# Each mount_path must be unique on this machine.
+# Example:
+# storage:
+#   mounts:
+#     - server: odev-storage-01
+#       share: scratch
+#       mount_path: /scratch
+storage:
+  mounts: []
