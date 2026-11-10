@@ -199,11 +199,14 @@ devices:
 
 # Shared storage assignments reference servers and shares in storage.yml.
 # Each mount_path must be unique on this machine.
+# State is required: present mounts the share; absent unmounts it and removes
+# its persistent mount entry. Neither state deletes shared data.
 # Example:
 # storage:
 #   mounts:
 #     - server: odev-storage-01
 #       share: scratch
 #       mount_path: /scratch
+#       state: present
 storage:
   mounts: []
