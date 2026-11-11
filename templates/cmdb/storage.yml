@@ -1,6 +1,7 @@
 # Storage servers and the shares they provide.
 # An empty list means no shared storage is configured.
 # Use short hostnames and reachable storage service IPs.
+# Each share requires state: present (export) or absent (withdraw export, keep data).
 # Client mounts reference the server and share in each machine's storage.mounts.
 # Example entries:
 # servers:
@@ -10,10 +11,12 @@
 #       scratch:
 #         type: nfs
 #         export: /exports/scratch
+#         state: present
 #   - name: odev-storage-02
 #     ip: 10.42.30.101
 #     shares:
 #       scratch:
 #         type: nfs
 #         export: /exports/scratch
+#         state: present
 servers: []
