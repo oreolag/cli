@@ -65,6 +65,16 @@ PYTHON
 )
 
 # ---- single output block ----
+if [[ "$unit" == "auto" ]]; then
+    unit=$(awk -v b="$total_bytes" 'BEGIN {
+        if (b >= 1024^4) print "TB";
+        else if (b >= 1024^3) print "GB";
+        else if (b >= 1024^2) print "MB";
+        else if (b >= 1024) print "KB";
+        else print "B";
+    }')
+fi
+
 case "$unit" in
     B)  printf "%sB\n"  "$total_bytes" ;;
     KB) printf "%.0fKB\n" "$(awk -v b="$total_bytes" 'BEGIN{print b/1024}')" ;;
