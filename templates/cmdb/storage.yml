@@ -1,22 +1,27 @@
-# Storage servers and the shares they provide.
+# Storage servers and the named shares they provide.
 # An empty list means no shared storage is configured.
-# Use short hostnames and reachable storage service IPs.
-# Each share requires state: present (export) or absent (withdraw export, keep data).
-# Client mounts reference the server and share in each machine's storage.mounts.
+# Server path + share name determines the export: /exports/scratch.
+# Clients mount each share at /<share name>, for example /scratch.
+# Present shares get private 0700 directories for present users in users.login.
+# Accounts must exist with matching numeric UID/GID on server and clients.
+# State absent withdraws the export without deleting directories or data.
 # Example entries:
 # servers:
 #   - name: odev-storage-01
 #     ip: 10.42.30.100
+#     path: /exports
 #     shares:
-#       scratch:
+#       - name: scratch
 #         type: nfs
-#         export: /exports/scratch
+#         state: present
+#       - name: scratch_2
+#         type: nfs
 #         state: present
 #   - name: odev-storage-02
 #     ip: 10.42.30.101
+#     path: /exports
 #     shares:
-#       scratch:
+#       - name: scratch
 #         type: nfs
-#         export: /exports/scratch
 #         state: present
 servers: []
