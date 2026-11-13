@@ -94,7 +94,7 @@ def run_remote_booking(root, peers, command, operation, capture=False, plain_err
         try:
             login = subprocess.run(
                 ["ssh", "-n", "-T", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "--", peer, "true"],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=20)
+                stdout=subprocess.DEVNULL, timeout=20)
         except subprocess.TimeoutExpired:
             raise ValueError(f"Login failed: {peer}") from None
         if login.returncode:
