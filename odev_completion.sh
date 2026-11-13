@@ -60,7 +60,7 @@ _odev_source_flags() {
 
   if [[ -f "$base/src/cmd_spec.sh" ]]; then
     # shellcheck source=/dev/null
-    source "$base/src/cmd_spec.sh"
+    source "$base/src/cmd_spec.sh" || return 1
     return 0
   fi
 
@@ -85,7 +85,7 @@ _odev_completions() {
   base="$(_odev_script_dir)"
   root="$base/cmd"
 
-  _odev_source_flags "$base" "${words[1]:-GENERAL}"
+  _odev_source_flags "$base" "${words[1]:-GENERAL}" || return 0
 
   # -----------------------------
   # Global flags (odev --<TAB>)

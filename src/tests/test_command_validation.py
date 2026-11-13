@@ -59,8 +59,14 @@ class CommandValidationTest(unittest.TestCase):
             "managed_servers": ["incus-01"], "maximum_duration_hours": 5}]}))
         (self.root / "vars.yml").write_text(yaml.safe_dump({"paths": {
             "booking": str(self.inventory), "cmdb": str(self.root), "tmp": str(self.root),
-            "workflows": str(self.root / "workflows"), "playbooks": str(self.root / "playbooks"),
             "mgmt": str(self.root / "mgmt")}}))
+        self.data_config = self.root / "odev_path.yml"
+        self.data_config.write_text(yaml.safe_dump({"data_path": str(self.root)}))
+        self.script(self.root / "bin/python3", "")
+        (self.root / "bin/python3").write_text(f"#!{sys.executable}\n" +
+            "import os, sys\nargs = sys.argv[1:]\n" +
+            "if args and args[0].endswith('/src/odev_path.py'): args += ['--db', os.environ['TEST_ODEV_PATH_CONFIG']]\n" +
+            "os.execv(sys.executable, [sys.executable, *args])\n")
         self.marker = self.root / "actions"
         self.script(self.root / "bin/ifconfig", 'echo ifconfig >> "$ACTION_LOG"\necho "inet 192.0.2.1"\necho "ether aa:bb:cc:dd:ee:ff"')
         self.script(self.root / "mgmt/ansible-play.sh", '[[ -f "$1" ]] || exit 81\necho "ansible $*" >> "$ACTION_LOG"\necho EXECUTED')
@@ -85,6 +91,7 @@ fi''')
         self.env = {**os.environ, "ODEV_PATH": str(self.root), "CMDB_DB_FILE": str(self.cmdb),
                     "BOOKING_DB_FILE": str(self.inventory), "TERM": "xterm", "USER": "tester",
                     "ACTION_LOG": str(self.marker), "PYTHONDONTWRITEBYTECODE": "1",
+                    "TEST_ODEV_PATH_CONFIG": str(self.data_config),
                     "PATH": str(self.root / "bin") + os.pathsep + os.environ["PATH"]}
 
     def script(self, path, body):
@@ -195,6 +202,20 @@ fi''')
         playbook.unlink()
         playbook.symlink_to(community / "missing.yml")
         self.assert_early("delete/playbook", ["--name", "demo"], "Playbook cannot be deleted: demo", [])
+
+    def test_new_playbook_without_flags_prompts_before_github_actions(self):
+        status, output = self.dialog("new/playbook", [], [("name: ", "../bad")])
+        self.assertNotEqual(status, 0, output)
+        self.assertIn("Invalid playbook name: ../bad", output)
+        self.assertNotIn("operand expected", output)
+        self.assertFalse(self.marker.exists(), output)
+
+    def test_new_workflow_without_flags_prompts_before_github_actions(self):
+        status, output = self.dialog("new/workflow", [], [("name: ", "../bad")])
+        self.assertNotEqual(status, 0, output)
+        self.assertIn("Invalid workflow name: ../bad", output)
+        self.assertNotIn("operand expected", output)
+        self.assertFalse(self.marker.exists(), output)
 
     def test_invalid_answer_stops_before_next_question(self):
         status, output = self.dialog("get/ip", [], [("numa: ", "1")])

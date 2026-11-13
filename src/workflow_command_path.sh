@@ -15,10 +15,7 @@ elif [[ -f "$personal" ]]; then
     printf '%s\n' "$personal"
 elif [[ -L "$shared" ]]; then
     # Keep existing personal links usable only by their owning workflow user.
-    workflows="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)"
-    workflows="${workflows//\$\{HOME\}/$HOME}"
-    workflows="${workflows//\$HOME/$HOME}"
-    workflows="${workflows/#\~/$HOME}"
+    workflows="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit 1
     target="$(readlink -f "$shared")" || exit 1
     [[ "$target" == "$(readlink -f "$workflows")/"* ]] || exit 1
     printf '%s\n' "$shared"

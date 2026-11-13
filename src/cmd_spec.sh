@@ -9,12 +9,12 @@ WORKFLOWS_PATH="$SCRIPT_DIR/../submodules/workflows"
 
 # constants
 WORKFLOWS_REPOSITORY="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github workflows_repo)")"
-PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
+PLAYBOOKS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" playbooks)" || return 1
 WORKFLOWS_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)"
 WORKFLOWS_REPO="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github workflows_repo)"
 PLAYBOOKS_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_playbooks)"
 PLAYBOOKS_REPO="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github playbooks_repo)"
-WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
+WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || return 1
 
 #if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
 #  WORKFLOWS_PUSH_BRANCH="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")"

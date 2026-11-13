@@ -26,7 +26,7 @@ GITHUB_PUSH_BRANCH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH
 WORKFLOW_COMMAND_PATH="$ODEV_PATH/users/$(id -un)/workflows"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
-WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
+WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit 1
 
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
@@ -81,6 +81,7 @@ fi
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
 # check supplied values first, then check each answer before the next question
+declare -A V=()
 for field in "" ${mandatory_flags//,/ }; do
   if [[ -n "$field" && "${V[$field]:--}" != "-" ]]; then
     continue
@@ -90,7 +91,6 @@ for field in "" ${mandatory_flags//,/ }; do
 
   # read flags
   if [[ -n "$parsed_flags" ]]; then
-    declare -A V
     while IFS='=' read -r k v; do
       V["$k"]="$v"
     done <<< "$parsed_flags"

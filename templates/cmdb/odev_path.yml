@@ -1,0 +1,8 @@
+# Single root for odev user data.
+# Subdirectories: models/, projects/, workflows/ and playbooks/.
+# Shared-storage example: scratch is defined in storage.yml and mounted
+# at /scratch through this machine's storage.mounts.
+# data_path: "/scratch/${USER}/odev"
+
+# Default: store data in the user's home directory.
+data_path: "${HOME}/odev"

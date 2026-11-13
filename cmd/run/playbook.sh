@@ -17,7 +17,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
-PLAYBOOKS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
+PLAYBOOKS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" playbooks)" || exit 1
 
 MGMT_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths mgmt)")"
 TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"

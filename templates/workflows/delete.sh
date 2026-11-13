@@ -22,9 +22,9 @@ normal=$(tput sgr0)
 
 # constants
 COLOR_PASSED=$($ODEV_PATH/src/constant_get.sh $ODEV_PATH COLOR_PASSED)
-PROJECTS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths projects)")"
+PROJECTS_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" projects)" || exit 1
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
-WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
+WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit 1
 
 # check on users
 # ...

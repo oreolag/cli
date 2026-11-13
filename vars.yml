@@ -25,8 +25,4 @@ paths:
   booking_db: /var/lib/odev-booking/booking.db
   cmdb: /opt
   mgmt: /opt/mgmt
-  models: "${HOME}/odev/models"
-  projects: "${HOME}/odev/projects"
   tmp: /tmp
-  workflows: "${HOME}/odev/workflows"
-  playbooks: "${HOME}/odev/playbooks"

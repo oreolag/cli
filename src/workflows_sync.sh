@@ -24,10 +24,7 @@ fi
 
 # constants
 WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
-WORKFLOWS_USER_PATH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)"
-WORKFLOWS_USER_PATH="${WORKFLOWS_USER_PATH//\$\{HOME\}/$HOME}"
-WORKFLOWS_USER_PATH="${WORKFLOWS_USER_PATH//\$HOME/$HOME}"
-WORKFLOWS_USER_PATH="${WORKFLOWS_USER_PATH/#\~/$HOME}"
+WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit 1
 GITHUB_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)"
 
 # get the existing fork when this user has no local checkout

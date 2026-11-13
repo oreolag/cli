@@ -198,6 +198,8 @@ devices:
       bdf: "0000:a1:00.0"
 
 # Shared storage assignments reference servers and shares in storage.yml.
+# In this example, scratch is a shared directory provided by odev-storage-01.
+# Its server directory is defined by storage.yml and is mounted here at /scratch.
 # Shares mount at /<share name>; share names must be unique on this machine.
 # State is required: present mounts the share; absent unmounts it and removes
 # its persistent mount entry. Neither state deletes shared data.

@@ -21,7 +21,7 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # constants
-WORKFLOWS_USER_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
+WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit 1
 
 WORKFLOW_COMMAND_PATH="$ODEV_PATH/users/$(id -un)/workflows"
 

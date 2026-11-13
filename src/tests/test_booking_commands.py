@@ -84,6 +84,8 @@ esac
             'echo source >> "$ODEV_PATH/spec_reads"\n' + source)
         for name in ["cmd_description_read.sh", "cmd_flags_read.sh", "cmd_mandatory_flags_read.sh"]:
             (checkout / "src" / name).symlink_to(ROOT / "src" / name)
+        (checkout / "src/odev_path.py").symlink_to(ROOT / "src/odev_path.py")
+        (checkout / "odev_path.yml").write_text(yaml.safe_dump({"data_path": str(checkout / "users")}))
         scripts = {
             "read_yml.py": 'echo "$ODEV_PATH/users/workflows"',
             "booking_timezone.sh": 'echo read >> "$ODEV_PATH/timezone_reads"\necho Europe/Madrid',
@@ -92,7 +94,8 @@ esac
             helper = checkout / "src" / name
             helper.write_text("#!/bin/bash\n" + body + "\n")
             helper.chmod(0o755)
-        env = {**self.env, "ODEV_PATH": str(checkout), "BOOKING_TIMEZONE": ""}
+        env = {**self.env, "ODEV_PATH": str(checkout), "BOOKING_TIMEZONE": "",
+               "TEST_ODEV_PATH_CONFIG": str(checkout / "odev_path.yml")}
         def metadata(script, key):
             result = subprocess.run(["bash", str(checkout / "src" / script), str(checkout), key],
                                     env=env, capture_output=True, text=True)
@@ -210,6 +213,16 @@ else:
         self.db = Path(self.temp.name) / "booking.yml"
         self.local = socket.gethostname().split(".")[0]
         self.env = {**os.environ, "BOOKING_DB_FILE": str(self.db), "ODEV_PATH": str(ROOT), "TERM": "xterm"}
+        self.data_config = Path(self.temp.name) / "odev_path.yml"
+        self.data_config.write_text(yaml.safe_dump({"data_path": str(Path(self.temp.name) / "data")}))
+        python = Path(self.temp.name) / "python3"
+        python.write_text(f"#!{sys.executable}\n" +
+            "import os, sys\nargs = sys.argv[1:]\n" +
+            "if args and args[0].endswith('/src/odev_path.py'): args += ['--db', os.environ['TEST_ODEV_PATH_CONFIG']]\n" +
+            "os.execv(sys.executable, [sys.executable, *args])\n")
+        python.chmod(0o755)
+        self.env["TEST_ODEV_PATH_CONFIG"] = str(self.data_config)
+        self.env["PATH"] = self.temp.name + os.pathsep + os.environ["PATH"]
 
     def inventory(self, name, machines):
         self.db.write_text(yaml.safe_dump({"servers": [{
@@ -232,7 +245,9 @@ else:
                           "if sys.argv[1].endswith('/booking/client.py'):\n"
                           "    print(' '.join(sys.argv[4:]))\n"
                           "else:\n"
-                          "    os.execv(sys.executable, [sys.executable, *sys.argv[1:]])\n")
+                          "    args = sys.argv[1:]\n"
+                          "    if args[0].endswith('/src/odev_path.py'): args += ['--db', os.environ['TEST_ODEV_PATH_CONFIG']]\n"
+                          "    os.execv(sys.executable, [sys.executable, *args])\n")
         python.chmod(0o755)
         self.env["PATH"] = self.temp.name + os.pathsep + os.environ["PATH"]
         cases = {
@@ -320,7 +335,7 @@ else:
         checkout = Path(self.temp.name) / "cli"
         (checkout / "src").mkdir(parents=True)
         shutil.copy(ROOT / "odev.sh", checkout / "odev.sh")
-        for name in ["is_server.sh", "read_yml.py", "booking_is_server.py", "cmdb_get.py"]:
+        for name in ["is_server.sh", "read_yml.py", "booking_is_server.py", "cmdb_get.py", "odev_path.py"]:
             (checkout / "src" / name).symlink_to(ROOT / "src" / name)
         descriptions = "\n".join(name + "=Description" for name in
             ["build", "get", "ifconfig", "new", "program", "run", "set", "update", "validate", "examine", "gh_description"])

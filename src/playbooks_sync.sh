@@ -24,10 +24,7 @@ fi
 
 # constants
 PLAYBOOKS_TEMPLATE_PATH="$ODEV_PATH/templates/playbooks"
-PLAYBOOKS_USER_PATH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)"
-PLAYBOOKS_USER_PATH="${PLAYBOOKS_USER_PATH//\$\{HOME\}/$HOME}"
-PLAYBOOKS_USER_PATH="${PLAYBOOKS_USER_PATH//\$HOME/$HOME}"
-PLAYBOOKS_USER_PATH="${PLAYBOOKS_USER_PATH/#\~/$HOME}"
+PLAYBOOKS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" playbooks)" || exit 1
 GITHUB_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_playbooks)"
 
 # get the existing fork when this user has no local checkout

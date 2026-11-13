@@ -16,8 +16,8 @@ normal=$(tput sgr0)
 
 # constants
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths cmdb)")"
-PLAYBOOKS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths playbooks)")"
-WORKFLOWS_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths workflows)")"
+PLAYBOOKS_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" playbooks)" || exit 1
+WORKFLOWS_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit 1
 
 # command descriptions
 command_descriptions="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "ALL")"
