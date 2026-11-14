@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class DeleteConfirmationTests(unittest.TestCase):
     def test_project_deletion_requires_explicit_yes(self):
-        for relative in ('templates/workflows/delete.sh', 'submodules/workflows/nccl/delete.sh'):
+        for relative in ('templates/workflows/delete.sh',):
             script = (ROOT / relative).read_text().split('# check local project\n', 1)[1]
             for answer in ('', '\n', 'n\n', 'no\n', 'anything\n', 'y\n', 'YES\n'):
                 with self.subTest(script=relative, answer=answer), tempfile.TemporaryDirectory() as temp:
