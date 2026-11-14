@@ -257,6 +257,9 @@ else
   cp "$WORKFLOWS_TEMPLATE_PATH"/delete.sh .
 fi
 
+# Credit the creator of this new workflow, including when using a template.
+printf '%s\n' "$github_user" > "$WORKFLOWS_USER_PATH/$name/GITHUB_USERNAME" || exit 1
+
 # Older workflow templates locate their specification through the shared link.
 for script in new build program run validate delete; do
   sed -i 's|^CLI_NAME=.*|CLI_NAME="odev"|' "$WORKFLOWS_USER_PATH/$name/$script.sh"
@@ -302,6 +305,7 @@ sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" 
 #fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
 cd "$WORKFLOWS_USER_PATH"
 #if [ "$fork" = "1" ]; then
+  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "GITHUB_USERNAME" --comment "First commit"
   "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "build.sh" --comment "First commit"
   "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
   "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "delete.sh" --comment "First commit"

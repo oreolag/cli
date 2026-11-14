@@ -157,3 +157,22 @@ done
 echo ""
 echo "${bold}INHERITED FLAGS:${normal}"
 echo "  -h, --help      Show this help"
+
+
+# Resolve the same command as the CLI so personal and community workflows
+# display the credit stored beside their actual scripts.
+case "$COMMAND" in
+  new|build|program|run|delete|validate)
+    help_odev_path="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    if workflow_script="$(bash "$help_odev_path/src/workflow_command_path.sh" "$help_odev_path" "$COMMAND" "$SUBCOMMAND" 2>/dev/null)" &&
+       workflow_target="$(readlink -f "$workflow_script" 2>/dev/null)"; then
+      author_file="$(dirname "$workflow_target")/GITHUB_USERNAME"
+      if [[ -f "$author_file" ]]; then
+        author="$(head -n 1 "$author_file")"
+        if [[ -n "$author" ]]; then
+          printf '\nCreated by %s%s%s\n' "$bold" "$author" "$normal"
+        fi
+      fi
+    fi
+    ;;
+esac
