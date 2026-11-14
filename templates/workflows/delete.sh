@@ -88,6 +88,14 @@ if [[ ! -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
   exit 1
 fi
 
+# Confirm before deleting the project.
+printf "Delete project '%s'? [y/N]: " "$name"
+IFS= read -r answer || exit 0
+case "$answer" in
+  [yY]|[yY][eE][sS]) ;;
+  *) exit 0 ;;
+esac
+
 # get push option
 push=$(cat "$PROJECTS_PATH/$SUBCOMMAND/$name/GITHUB_PUSH")
 remote_deleted="0"

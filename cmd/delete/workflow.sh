@@ -121,6 +121,14 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
       done
     done
 
+    # Confirm before deleting the workflow.
+    printf "Delete workflow '%s'? [y/N]: " "$name"
+    IFS= read -r answer || exit 0
+    case "$answer" in
+      [yY]|[yY][eE][sS]) ;;
+      *) exit 0 ;;
+    esac
+
     # delete locally
     rm -rf -- "$WORKFLOWS_USER_PATH/$name" || exit 1
 
