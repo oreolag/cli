@@ -215,12 +215,8 @@ def main():
                        "--local-only", "--cancel", args.cancel, "--cancel-stage"]
             booking = json.loads(run_remote_booking(root, peers, command + ["preview"],
                                                    "preview cancellation", capture=True, plain_error=True))
-        zone = ZoneInfo(booking["timezone"])
-        start = datetime.fromtimestamp(booking["start_time"], zone).strftime("%Y-%m-%d %H:%M")
-        end = datetime.fromtimestamp(booking["end_time"], zone).strftime("%Y-%m-%d %H:%M")
-        print(f"{booking['booking_id']}: {booking['server']} | {start} - {end} ({booking['timezone']})")
         try:
-            answer = input("Cancel booking? [y/N]: ")
+            answer = input(f"Cancel booking '{booking['booking_id']}'? [y/N]: ")
         except EOFError:
             return
         if answer.strip().lower() not in ["y", "yes"]:

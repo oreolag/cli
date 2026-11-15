@@ -51,8 +51,10 @@ class BookingCancelTest(unittest.TestCase):
         for answer in ["", "n", "y"]:
             with self.subTest(answer=answer), patch.object(sys, "argv", args), \
                     patch.object(client, "local_cancellation", return_value=booking) as request, \
-                    patch("builtins.input", return_value=answer), redirect_stdout(io.StringIO()) as output:
+                    patch("builtins.input", return_value=answer) as prompt, redirect_stdout(io.StringIO()) as output:
                 client.main()
+                prompt.assert_called_once_with("Cancel booking '01-0001'? [y/N]: ")
+                self.assertNotIn("incus-01", output.getvalue())
                 self.assertEqual(request.call_count, 2 if answer == "y" else 1)
                 self.assertEqual("Booking cancelled:" in output.getvalue(), answer == "y")
 
