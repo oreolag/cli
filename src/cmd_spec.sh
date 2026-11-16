@@ -164,7 +164,7 @@ RUN_PLAYBOOK_FLAGS=(
   "hosts,,Target host or group,-,local"
   "inventory,i,Use a custom inventory path,-,-"
   "remote,r,Also run on booked remote hosts when set to 1,0|1,0"
-  "vars,v,Extra variables (example: \"src=true value=10\"),-,-"
+  "vars,v,Extra variables (example: \"force=true value=10\"),-,-"
 )
 RUN_PLAYBOOK_FLAGS_MANDATORY="name"
 

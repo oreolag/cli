@@ -16,7 +16,9 @@
           - "Operating system: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
           - "Connection: {{ ansible_connection | default('ssh') }}"
 
-    - name: Show optional settings
+    # For known names, use {{ a }} or {{ b }} directly in your tasks.
+    # lookup() lets this example show any names supplied through --vars.
+    - name: Parsing variables passed with --vars
       ansible.builtin.debug:
-        msg: "IP: {{ ip }}; value: {{ value }}"
-      when: src | default(false) | bool
+        msg: "{{ item }} = {{ lookup('ansible.builtin.vars', item) }}"
+      loop: "{{ odev_extra_var_names | default([]) }}"

@@ -115,6 +115,9 @@ fi
 args=()
 if [[ "$vars" != "-" ]]; then
   args+=(--extra-vars "$vars")
+  # Supply the example task with names; Ansible still parses the original values.
+  var_names="$(python3 "$ODEV_PATH/src/playbook_var_names.py" "$vars")" || exit 1
+  args+=(--extra-vars "$var_names")
 fi
 
 # run the playbook on the selected hosts
