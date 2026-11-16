@@ -1,5 +1,5 @@
 <p align="right">
-<a href="https://oreol.ch">Oreol</a> <a href="https://oreolag.github.io/docs/cli/">Docs</a> <a href="https://github.com/oreolag/mgmt">MGMT</a> <a href="https://github.com/oreolag/playbooks">Playbooks</a> <a href="https://github.com/oreolag/workflows">Workflows</a>
+<a href="https://oreol.ch">Oreol</a> <a href="https://oreolag.github.io/docs/cli/">Docs</a> <a href="https://github.com/oreolag/playbooks">Playbooks</a> <a href="https://github.com/oreolag/workflows">Workflows</a>
 </p>
 
 <p align="center" style="margin-bottom: 0px;">
@@ -35,9 +35,9 @@ curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo b
 
 ## Install with Oreol Management
 
-Alternatively, use `omgmt` to install `odev` across your managed cluster. [See the Oreol Management installation guide.](https://oreolag.github.io/docs/mgmt/odev/installation/)
+Alternatively, use `omgmt` to install `odev` across your managed cluster. See the [Oreol Management installation guide.](https://oreolag.github.io/docs/mgmt/odev/installation/)
 
-### Supported Platforms
+## Supported Platforms
 `odev` currently supports Ubuntu-based Linux distributions. Validated environments include:
 
 - Ubuntu
