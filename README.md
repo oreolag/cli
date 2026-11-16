@@ -1,5 +1,5 @@
 <p align="right">
-<a href="https://oreol.ch">Oreol</a> <a href="https://github.com/oreolag/playbooks">Playbooks</a> <a href="https://github.com/oreolag/workflows">Workflows</a>
+<a href="https://oreol.ch">Oreol</a> <a href="https://oreolag.github.io/docs/cli/">Docs</a> <a href="https://github.com/oreolag/playbooks">Playbooks</a> <a href="https://github.com/oreolag/workflows">Workflows</a>
 </p>
 
 <p align="center" style="margin-bottom: 0px;">
