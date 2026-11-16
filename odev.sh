@@ -204,7 +204,7 @@ print_help() {
   echo ""
   echo "${bold}LEARN MORE${normal}"
   echo "  Use ${bold}odev <command> <subcommand> --help${normal} for more information about a command."
-  echo "  Read the manual at https://oreolag.github.io/cli"
+  echo "  Read the manual at https://oreolag.github.io/docs/cli/"
 }
 
 print_version() {
