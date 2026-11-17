@@ -24,5 +24,6 @@ paths:
   booking: /opt/booking.yml
   booking_db: /var/lib/odev-booking/booking.db
   cmdb: /opt
+  inventory: /tmp
   mgmt: /opt/mgmt
   tmp: /tmp

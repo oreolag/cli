@@ -20,7 +20,7 @@ normal=$(tput sgr0)
 PLAYBOOKS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" playbooks)" || exit 1
 
 MGMT_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths mgmt)")"
-TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"
+INVENTORY_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths inventory)")"
 
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
@@ -69,13 +69,7 @@ for field in "" ${mandatory_flags//,/ }; do
   name=${V[name]:--}
   hosts=${V[hosts]:-local}
   inventory=${V[inventory]:--}
-  remote=${V[remote]:-0}
   vars=${V[vars]:--}
-
-  if [[ "$remote" == "1" && ( "$hosts" != "local" || "$inventory" != "-" ) ]]; then
-    echo "Invalid flags: --remote requires local and the generated inventory" >&2
-    exit 1
-  fi
 
   if [[ "$name" != "-" ]]; then
     # check on name
@@ -108,7 +102,8 @@ if [[ "$inventory" != "-" ]]; then
   inventory_file="$inventory"
   [[ "$inventory_file" == /* ]] || inventory_file="$PWD/$inventory_file"
 else
-  inventory_file="$TMP_PATH/hosts_$(id -un)"
+  "$ODEV_PATH/src/get_ansible_hosts.sh" "$(id -un)" || exit 1
+  inventory_file="$INVENTORY_PATH/hosts_$(id -un)"
 fi
 
 # extra variables override the playbook defaults
@@ -121,14 +116,6 @@ if [[ "$vars" != "-" ]]; then
 fi
 
 # run the playbook on the selected hosts
-if [[ "$remote" == "1" ]]; then
-  "$ODEV_PATH/src/ansible_remote_preflight.sh" "$inventory_file" || exit 1
-  "$MGMT_PATH/ansible-play.sh" "$playbook" local \
-    -i "$inventory_file" "${args[@]}" --limit local || exit 1
-  exec "$MGMT_PATH/ansible-play.sh" "$playbook" my_hosts \
-    -i "$inventory_file" "${args[@]}" --limit my_hosts
-fi
-
 if [[ -f "$inventory_file" || -d "$inventory_file" ]]; then
   exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts" -i "$inventory_file" "${args[@]}"
 else

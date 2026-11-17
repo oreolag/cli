@@ -68,14 +68,25 @@ permissions, with the appropriate access configured for the target servers.
 ```bash
 odev run playbook --help
 odev run playbook --name my_playbook
+odev run playbook --name my_playbook --hosts remote
+odev run playbook --name my_playbook --hosts all
 odev run playbook --name my_playbook --hosts incus-01
 odev run playbook --name my_playbook --hosts incus_hosts --inventory ~/my_oreol_mgmt/hosts
 odev run playbook --name my_playbook --vars "value=10"
 ```
 
-The default target is `local`. `--hosts` accepts an inventory host or group;
-`--inventory` selects a custom inventory. Without it, `odev` uses the user's
-generated inventory when available, otherwise the management runner's inventory.
+The default target is `local` (localhost). `--hosts remote` selects only booked
+remote hosts; `--hosts all` selects localhost and booked remotes. `all` is a
+built-in Ansible group and needs no explicit inventory section. An empty
+`remote` group is valid and contains no targets.
+
+`--hosts` also accepts other inventory hosts or groups. `--inventory` selects a
+custom inventory. Without it, `odev` refreshes and uses the user's generated
+inventory before running the playbook. Generated inventories are stored as
+`hosts_<username>` in `paths.inventory` from `vars.yml` (default: `/tmp`).
+The configured directory must already exist and be writable by the invoking user.
+The `--remote` flag has been removed;
+use `--hosts remote` or `--hosts all` instead.
 
 `--vars` overrides values from the companion file. Missing required flags open
 the usual dialog. Running playbooks requires `odev-developers` membership and the

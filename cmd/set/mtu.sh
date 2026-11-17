@@ -25,7 +25,7 @@ IPV6_HEADER_SIZE=40
 MGMT_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths mgmt)")"
 PAYLOAD_MULTIPLES=64
 TEMPLATES_PATH="$ODEV_PATH/templates"
-TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"
+INVENTORY_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths inventory)")"
 
 # functions
 calculate_closest_mtu() {
@@ -123,7 +123,7 @@ mtu=$(calculate_closest_mtu $mtu $IPV6_HEADER_SIZE $PAYLOAD_MULTIPLES)
 
 # set inventory
 username="$(id -un)"
-inventory_file="$TMP_PATH/hosts_$username"
+inventory_file="$INVENTORY_PATH/hosts_$username"
 
 # check remote access before changing any interface
 if [[ "$remote" == "1" ]]; then

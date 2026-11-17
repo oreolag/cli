@@ -15,6 +15,7 @@ WORKFLOWS_REPO="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github
 PLAYBOOKS_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_playbooks)"
 PLAYBOOKS_REPO="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github playbooks_repo)"
 WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || return 1
+INVENTORY_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths inventory)")"
 
 #if [[ -f "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH" ]]; then
 #  WORKFLOWS_PUSH_BRANCH="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")"
@@ -162,9 +163,8 @@ RUN_PLAYBOOK_DESCRIPTION="Runs a playbook on the selected hosts"
 RUN_PLAYBOOK_FLAGS=(
   "name,n,Playbook name,-,-"
   "hosts,,Target host or group,-,local"
-  "inventory,i,Use a custom inventory path,-,-"
-  "remote,r,Also run on booked remote hosts when set to 1,0|1,0"
-  "vars,v,Extra variables (example: \"force=true value=10\"),-,-"
+  "inventory,i,Use a custom inventory different from ${bold}$INVENTORY_PATH/hosts_$USER${normal},-,-"
+  "vars,v,Extra variables (example: \"${bold}force=true value=10${normal}\"),-,-"
 )
 RUN_PLAYBOOK_FLAGS_MANDATORY="name"
 

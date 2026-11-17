@@ -13,6 +13,7 @@ if [[ "$EUID" != 0 && "$username" != "$(id -un)" ]]; then
 fi
 
 TMP_PATH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)"
+INVENTORY_PATH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths inventory)"
 temp_dir="$(mktemp -d "$TMP_PATH/.odev-hosts.XXXXXXXX")"
 trap 'rm -rf -- "$temp_dir"' EXIT
 inventory="$temp_dir/hosts"
@@ -59,7 +60,7 @@ fi
 if [[ "$EUID" == 0 ]]; then
   chown "$username" "$inventory"
 fi
-mv -fT -- "$inventory" "$TMP_PATH/hosts_$username"
+mv -fT -- "$inventory" "$INVENTORY_PATH/hosts_$username"
 if [[ "$status" != 0 ]]; then
   echo "Could not retrieve booked hosts for $username" >&2
 fi

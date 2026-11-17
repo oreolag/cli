@@ -24,7 +24,7 @@ normal=$(tput sgr0)
 CMDB_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths cmdb)")"
 MGMT_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths mgmt)")"
 PROJECTS_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" projects)" || exit 1
-TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths tmp)")"
+INVENTORY_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths inventory)")"
 WORKFLOWS_PATH="$ODEV_PATH/submodules/workflows"
 WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit 1
 
@@ -116,7 +116,7 @@ if [[ ! -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
 fi
 
 # set inventory
-inventory_file="$TMP_PATH/hosts_$(id -un)"
+inventory_file="$INVENTORY_PATH/hosts_$(id -un)"
 playbook="$WORKFLOWS_USER_PATH/$SUBCOMMAND/program.yml"
 
 # check remote access before programming any device
