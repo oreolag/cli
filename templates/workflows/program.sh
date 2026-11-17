@@ -72,7 +72,7 @@ fi
 # assign flags
 devices=${V[devices]}
 name=${V[name]}
-remote=${V[remote]}
+hosts=${V[hosts]:-local}
 
 # replace spaces with "_"
 name="${name// /_}"
@@ -115,18 +115,10 @@ if [[ ! -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
   exit 1
 fi
 
-# set inventory
+# refresh and use the user's generated inventory
+"$ODEV_PATH/src/get_ansible_hosts.sh" "$(id -un)" || exit 1
 inventory_file="$INVENTORY_PATH/hosts_$(id -un)"
 playbook="$WORKFLOWS_USER_PATH/$SUBCOMMAND/program.yml"
 
-# check remote access before programming any device
-if [[ "$remote" == "1" ]]; then
-  "$ODEV_PATH/src/ansible_remote_preflight.sh" "$inventory_file" || exit 1
-fi
-
-# call the playbook (add your code here!)
-"$MGMT_PATH/ansible-play.sh" "$playbook" local -i "$inventory_file" --limit local || exit 1
-
-if [[ "$remote" == "1" ]]; then
-  "$MGMT_PATH/ansible-play.sh" "$playbook" my_hosts -i "$inventory_file" --limit my_hosts
-fi
+# run the playbook on the selected hosts (add your code here!)
+exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts" -i "$inventory_file"

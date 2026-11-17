@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# constants
+INVENTORY_PATH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" paths inventory)"
+
 # helpers
 lower() {
   printf '%s' "${1,,}"
@@ -28,7 +31,7 @@ PROGRAM_WFNAME_DESCRIPTION="Program device description"
 PROGRAM_WFNAME_FLAGS=(
   "devices,d,Comma-separated list of device indices,-,-"
   "name,n,Project name,-,-"
-  "remote,r,Also configure remote devices when set to 1,0|1,0"
+  "hosts,,Target host or group from ${bold:-}$INVENTORY_PATH/hosts_$USER${normal:-} (default: local),-,local"
 )
 PROGRAM_WFNAME_FLAGS_MANDATORY="devices,name"
 

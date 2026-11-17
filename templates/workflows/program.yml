@@ -17,4 +17,4 @@
       ansible.builtin.debug:
         msg:
           - "This is intended to program firmware based devices, so you can use Ansible modules to perform actions like flashing firmware, configuring settings, etc."
-          - "You can also use it to manage remote devices, but make sure to set the 'remote' flag to 1 when running odev program WFNAME."
+          - "To manage remote devices, run odev program WFNAME with --hosts remote (booked remotes), --hosts all (local and booked remotes), or --hosts HOSTNAME (a booked host's short name)."
