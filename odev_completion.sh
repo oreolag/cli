@@ -175,6 +175,15 @@ _odev_completions() {
     fi
   fi
 
+  # Generated inventory groups for playbooks, MTU and workflow programming.
+  if [[ $cword -ge 3 && "$prev" == "--hosts" &&
+        ( ( "${words[1]}" == "run" && "${words[2]}" == "playbook" ) ||
+          ( "${words[1]}" == "set" && "${words[2]}" == "mtu" ) ||
+          "${words[1]}" == "program" ) ]]; then
+    COMPREPLY=( $(compgen -W "local remote all" -- "$cur") )
+    return 0
+  fi
+
   # Playbook names from the user's configured checkout.
   if [[ $cword -ge 3 && "${words[1]}" == "run" && "${words[2]}" == "playbook" &&
         ( "$prev" == "--name" || "$prev" == "-n" ) ]]; then
