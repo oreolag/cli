@@ -29,12 +29,12 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # booking (action scripts currently echo parameters only)
+BOOKING_DESCRIPTION="Add, cancel, list or share bookings" # (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
 # Metadata readers set KEY; unrelated commands do not need booking defaults.
 if [[ "${KEY:-BOOKING}" == BOOKING* ]]; then
   if [[ -z "${BOOKING_TIMEZONE:-}" ]]; then
     BOOKING_TIMEZONE="$(bash "$ODEV_PATH/src/booking_timezone.sh" "$ODEV_PATH" 2>/dev/null)" || BOOKING_TIMEZONE="UTC"
   fi
-  BOOKING_DESCRIPTION="Add, cancel, list or share bookings" # (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
   BOOKING_FLAGS=()
   # list
   BOOKING_LIST_DESCRIPTION="List server availability and bookings" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
