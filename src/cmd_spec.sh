@@ -179,9 +179,9 @@ if [[ "${KEY:-SET_MTU}" == SET_MTU ]]; then
   mtu_default="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" constants mtu_default)"
 fi
 SET_MTU_FLAGS=(
+  "hosts,,Target host or group from ${bold}$INVENTORY_PATH/hosts_$USER${normal} (default: local),-,local"
   "interface,i,Interface index (endata),-,-"
   "port,p,Interface port index,-,0"
-  "remote,r,Also configure remote hosts when set to 1,0|1,0"
   "value,v,MTU value,${mtu_min:-1500}-${mtu_max:-9000},${mtu_default:-1500}"
 )
 SET_MTU_FLAGS_MANDATORY="interface,value"

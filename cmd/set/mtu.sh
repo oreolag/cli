@@ -90,7 +90,7 @@ for field in "" ${mandatory_flags//,/ }; do
   interface=${V[interface]:--}
   port=${V[port]:--}
   mtu=${V[value]:--}
-  remote=${V[remote]:--}
+  hosts=${V[hosts]:-local}
 
   # check on interface and port when the interface is known
   if [[ ! "$port" =~ ^[0-9]+$ ]]; then
@@ -121,27 +121,16 @@ interface_name_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface name $port)
 # calculate closest MTU
 mtu=$(calculate_closest_mtu $mtu $IPV6_HEADER_SIZE $PAYLOAD_MULTIPLES)
 
-# set inventory
+# refresh and use the user's generated inventory
 username="$(id -un)"
+"$ODEV_PATH/src/get_ansible_hosts.sh" "$username" || exit 1
 inventory_file="$INVENTORY_PATH/hosts_$username"
-
-# check remote access before changing any interface
-if [[ "$remote" == "1" ]]; then
-  "$ODEV_PATH/src/ansible_remote_preflight.sh" "$inventory_file" || exit 1
-fi
 
 # set mtu_vars
 mtu_vars="$(python3 -c 'import json, sys; print(json.dumps({"interface_name": sys.argv[1], "mtu_value": sys.argv[2]}))' "$interface_name_cmdb" "$mtu")" || exit 1
 
-# call the playbook (local)
-"$MGMT_PATH/ansible-play.sh" "$ODEV_PATH/cmd/set/mtu.yml" "local" \
-  -i "$inventory_file" --extra-vars "$mtu_vars" || exit 1
-
-# check on remote
-if [[ "$remote" == "1" ]]; then
-  # call the playbook (my_hosts)
-  "$MGMT_PATH/ansible-play.sh" "$ODEV_PATH/cmd/set/mtu.yml" "my_hosts" \
-    -i "$inventory_file" --extra-vars "$mtu_vars" || exit 1
-fi
+# run the playbook on the selected hosts
+exec "$MGMT_PATH/ansible-play.sh" "$ODEV_PATH/cmd/set/mtu.yml" "$hosts" \
+  -i "$inventory_file" --extra-vars "$mtu_vars"
 
 # author: https://github.com/jmoya82
