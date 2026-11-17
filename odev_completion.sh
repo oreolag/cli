@@ -199,6 +199,25 @@ _odev_completions() {
     return 0
   fi
 
+  # Existing project names for workflow actions.
+  if [[ $cword -ge 3 && ( "$prev" == "--name" || "$prev" == "-n" ) &&
+        "${words[2]}" != "playbook" && "${words[2]}" != "workflow" ]]; then
+    case "${words[1]}" in
+      run|build|program|validate|delete)
+        local projects_path candidate name
+        COMPREPLY=()
+        projects_path="$(python3 "$base/src/odev_path.py" projects 2>/dev/null)" || return 0
+        for candidate in "$projects_path/${words[2]}/"*/; do
+          [[ -d "$candidate" ]] || continue
+          name="${candidate%/}"
+          name="${name##*/}"
+          [[ "$name" == "$cur"* ]] && COMPREPLY+=("$name")
+        done
+        return 0
+        ;;
+    esac
+  fi
+
   # -----------------------------
   # Subcommand flags (odev <cmd> <subcmd> --<TAB>)
   # -----------------------------
