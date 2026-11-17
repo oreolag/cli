@@ -71,7 +71,6 @@ odev run playbook --name my_playbook
 odev run playbook --name my_playbook --hosts remote
 odev run playbook --name my_playbook --hosts all
 odev run playbook --name my_playbook --hosts incus-01
-odev run playbook --name my_playbook --hosts incus_hosts --inventory ~/my_oreol_mgmt/hosts
 odev run playbook --name my_playbook --vars "value=10"
 ```
 
@@ -80,9 +79,10 @@ remote hosts; `--hosts all` selects localhost and booked remotes. `all` is a
 built-in Ansible group and needs no explicit inventory section. An empty
 `remote` group is valid and contains no targets.
 
-`--hosts` also accepts other inventory hosts or groups. `--inventory` selects a
-custom inventory. Without it, `odev` refreshes and uses the user's generated
-inventory before running the playbook. Generated inventories are stored as
+`--hosts` also accepts a booked host's short name, such as `incus-01`. Each remote
+host appears once in the inventory, with its full MagicDNS address assigned to
+`ansible_host`. `odev` always refreshes and uses the user's generated inventory
+before running the playbook. Generated inventories are stored as
 `hosts_<username>` in `paths.inventory` from `vars.yml` (default: `/tmp`).
 The configured directory must already exist and be writable by the invoking user.
 The `--remote` flag has been removed;

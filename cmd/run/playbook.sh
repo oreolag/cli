@@ -68,7 +68,6 @@ for field in "" ${mandatory_flags//,/ }; do
   # assign flags
   name=${V[name]:--}
   hosts=${V[hosts]:-local}
-  inventory=${V[inventory]:--}
   vars=${V[vars]:--}
 
   if [[ "$name" != "-" ]]; then
@@ -86,25 +85,11 @@ for field in "" ${mandatory_flags//,/ }; do
     fi
   fi
 
-  # check on inventory
-  if [[ "$inventory" != "-" && ! -f "$inventory" && ! -d "$inventory" ]]; then
-    echo "Inventory does not exist: $inventory" >&2
-    exit 1
-  fi
 done
 
-# use an explicit inventory before the user's generated inventory
-if [[ "$inventory" != "-" ]]; then
-  if [[ ! -f "$inventory" && ! -d "$inventory" ]]; then
-    echo "Inventory does not exist: $inventory"
-    exit 1
-  fi
-  inventory_file="$inventory"
-  [[ "$inventory_file" == /* ]] || inventory_file="$PWD/$inventory_file"
-else
-  "$ODEV_PATH/src/get_ansible_hosts.sh" "$(id -un)" || exit 1
-  inventory_file="$INVENTORY_PATH/hosts_$(id -un)"
-fi
+# refresh and use the user's generated inventory
+"$ODEV_PATH/src/get_ansible_hosts.sh" "$(id -un)" || exit 1
+inventory_file="$INVENTORY_PATH/hosts_$(id -un)"
 
 # extra variables override the playbook defaults
 args=()
@@ -116,10 +101,6 @@ if [[ "$vars" != "-" ]]; then
 fi
 
 # run the playbook on the selected hosts
-if [[ -f "$inventory_file" || -d "$inventory_file" ]]; then
-  exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts" -i "$inventory_file" "${args[@]}"
-else
-  exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts" "${args[@]}"
-fi
+exec "$MGMT_PATH/ansible-play.sh" "$playbook" "$hosts" -i "$inventory_file" "${args[@]}"
 
 # author: https://github.com/jmoya82

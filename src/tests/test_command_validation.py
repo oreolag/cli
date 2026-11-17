@@ -179,7 +179,7 @@ fi''')
             ("booking/share", ["--add", "missing"], "Invalid user: missing", ["booking:"]),
             ("booking/share", ["--add", "tester", "--remove", "tester"], "Invalid flags", ["booking:"]),
             ("booking/list", ["--history", "bad"], "Invalid booking date", []),
-            ("run/playbook", ["--inventory", str(self.root / "missing")], "Inventory does not exist", ["name:"]),
+            ("run/playbook", ["--inventory", str(self.root / "missing")], "Unknown flag: --inventory", ["name:"]),
             ("run/playbook", ["--name", "missing"], "Playbook does not exist", []),
             ("delete/playbook", ["--name", "missing"], "Playbook does not exist", []),
             ("delete/workflow", ["--name", "missing"], "Workflow does not exist", []),

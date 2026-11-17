@@ -42,10 +42,11 @@ suffix = (tailnet.get("MagicDNSSuffix") or status.get("MagicDNSSuffix") or "").r
 peers = {peer.get("DNSName", "").rstrip(".").lower() for peer in (status.get("Peer") or {}).values()}
 hosts = []
 for host in sys.argv[1].splitlines():
-    name = f"{host.lower()}.{suffix}"
+    alias = host.lower()
+    name = f"{alias}.{suffix}"
     if not suffix or not re.fullmatch(r"[a-z0-9][a-z0-9.-]*", name) or name not in peers:
         sys.exit(f"No MagicDNS peer found for {host}")
-    hosts.append(name)
+    hosts.append(f"{alias} ansible_host={name}")
 print("\n".join(hosts))
 ' "$booked_hosts"); then
       printf '%s\n' "$magicdns_hosts" >> "$inventory"
