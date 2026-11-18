@@ -138,6 +138,34 @@ class BookingListTest(unittest.TestCase):
         self.assertNotIn("Free", output.getvalue())
         self.assertNotIn("Upcoming", output.getvalue())
 
+    def test_active_listing_includes_owned_and_shared_only(self):
+        self.insert("01-0001", "2026-10-25 13:00", "2026-10-25 14:00")
+        self.insert("01-0002", "2026-10-25 13:00", "2026-10-25 14:00")
+        self.insert("01-0003", "2026-10-25 13:00", "2026-10-25 14:00")
+        self.insert("01-0004", "2026-10-25 14:00", "2026-10-25 15:00")
+        self.insert("01-0005", "2026-10-25 13:00", "2026-10-25 14:00", cancelled=True)
+        with sqlite3.connect(self.database) as db:
+            db.execute("UPDATE bookings SET owner = 'jmoya82' WHERE booking_id = '01-0002'")
+            for booking_id in ("01-0001", "01-0004", "01-0005"):
+                db.execute("INSERT INTO booking_shares VALUES (?, 'jmoya82', 1)", (booking_id,))
+        path = self.root / "api.sock"
+        server = api.start_api(self.root, path, group=None)
+        self.addCleanup(api.stop_api, server)
+        now = self.stamp("2026-10-25 13:30")
+        with patch.object(api, "peer_user", return_value="jmoya82"), patch("api.time.time", return_value=now):
+            result = client.local_listing(None, path)
+        self.assertEqual([row["booking_id"] for row in result["bookings"]], ["01-0001", "01-0002"])
+        self.assertEqual(result["servers"], ["incus-01"])
+        result.update(username="jmoya82", date="2026-10-25", timezone="Europe/Madrid")
+        output = io.StringIO()
+        with redirect_stdout(output), patch("table.time.time", return_value=now):
+            print_bookings(result, full_day=True)
+        lines = output.getvalue().splitlines()
+        self.assertIn("Owner", lines[3])
+        self.assertIn("Service", lines[3])
+        self.assertIn("javier", output.getvalue())
+        self.assertEqual(len(set(map(len, lines))), 1)
+
     def test_http_listing_and_client(self):
         self.insert("01-0001", "2026-10-25 13:00", "2026-10-25 14:00")
         path = self.root / "api.sock"

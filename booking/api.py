@@ -102,8 +102,9 @@ class Handler(BaseHTTPRequestHandler):
                 active = [row for row in result["bookings"] if row["start_time"] <= now < row["end_time"]]
                 hosts = {row["server"] for row in active
                          if row["owner"] == username or username in row["shared"]}
-                owned = [dict(row, service=result["service"]) for row in active if row["owner"] == username]
-                self.reply(200, {"servers": sorted(hosts), "bookings": owned})
+                accessible = [dict(row, service=result["service"]) for row in active
+                              if row["owner"] == username or username in row["shared"]]
+                self.reply(200, {"servers": sorted(hosts), "bookings": accessible})
                 return
             if set(query) == {"booking"} and len(query["booking"]) == 1:
                 config = configuration(self.server.odev_path, socket.gethostname())

@@ -15,7 +15,7 @@ def print_bookings(result, full_day=False):
     headers = ["Booking ID", "Server", "Owner", "Start", "End", "Shared with", "Status"]
     own_active = "username" in result
     if own_active:
-        headers[2] = "Service"
+        headers.insert(2, "Service")
     rows = []
     def display_time(timestamp):
         value = datetime.fromtimestamp(timestamp, zone)
@@ -33,11 +33,15 @@ def print_bookings(result, full_day=False):
             status = "Cancelled" if booking.get("cancelled_at") is not None else (
                 "Active" if booking["start_time"] <= now < booking["end_time"] else (
                     "Upcoming" if now < booking["start_time"] else "Expired"))
-            rows.append([booking["booking_id"], server, booking["service" if own_active else "owner"],
-                         display_time(booking["start_time"]), display_time(booking["end_time"]),
-                         ", ".join(booking["shared"]) or "-", status])
+            row = [booking["booking_id"], server, booking["owner"],
+                   display_time(booking["start_time"]), display_time(booking["end_time"]),
+                   ", ".join(booking["shared"]) or "-", status]
+            if own_active:
+                row.insert(2, booking["service"])
+            rows.append(row)
     minimum_widths = [10, 12, 12, 5, 5, 16, 9]
     if own_active:
+        minimum_widths.insert(2, 12)
         headers.pop()
         minimum_widths.pop()
         rows = [row[:-1] for row in rows]

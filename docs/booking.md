@@ -185,8 +185,8 @@ from the other services. Each service uses its own local date. Remote listing
 uses the caller's existing SSH access and requires Ansible on the machine
 running the command. Failed peers are reported by name.
 
-`--active` shows the bookings you own and that are active now across all
-services. The table uses the local or assigned service's timezone.
+`--active` shows bookings you own or that are shared with you and are active now
+across all services. The table includes both Service and Owner and uses the local or assigned service's timezone.
 Use it on its own.
 
 ## Add
