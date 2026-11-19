@@ -185,7 +185,7 @@ _odev_completions() {
   fi
 
   # Playbook names from the user's configured checkout.
-  if [[ $cword -ge 3 && "${words[1]}" == "run" && "${words[2]}" == "playbook" &&
+  if [[ $cword -ge 3 && ( "${words[1]}" == "run" || "${words[1]}" == "delete" ) && "${words[2]}" == "playbook" &&
         ( "$prev" == "--name" || "$prev" == "-n" ) ]]; then
     local candidate name
     COMPREPLY=()
@@ -194,6 +194,20 @@ _odev_completions() {
       name="${candidate##*/}"
       [[ "$name" == *_vars.yml ]] && continue
       name="${name%.yml}"
+      [[ "$name" == "$cur"* ]] && COMPREPLY+=("$name")
+    done
+    return 0
+  fi
+
+  # Workflow names from the user's configured checkout.
+  if [[ $cword -ge 3 && "${words[1]}" == "delete" && "${words[2]}" == "workflow" &&
+        ( "$prev" == "--name" || "$prev" == "-n" ) ]]; then
+    local candidate name
+    COMPREPLY=()
+    for candidate in "$WORKFLOWS_USER_PATH/"*/; do
+      [[ -d "$candidate" ]] || continue
+      name="${candidate%/}"
+      name="${name##*/}"
       [[ "$name" == "$cur"* ]] && COMPREPLY+=("$name")
     done
     return 0
