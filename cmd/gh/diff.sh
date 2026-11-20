@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev gh diff --workflow fft --file run.sh
+# example: odev gh diff --repository workflows
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -33,9 +33,10 @@ KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 # read command description and command flags
 command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
+mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
 
 # (maybe) print help
-print_range="0"
+print_range="1"
 print_default="0"
 print_both="0"
 "$ODEV_PATH/src/cmd_help_print.sh" --maybe \
@@ -45,46 +46,20 @@ print_both="0"
 
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
+parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
 declare -A V
 while IFS='=' read -r k v; do
   [[ -n "$k" ]] && V["$k"]="$v"
 done <<< "$parsed_flags"
 
-# select exactly one workflow or playbook
-workflow=${V[workflow]:-}
-playbook=${V[playbook]:-}
-if [[ -n "$workflow" && -z "${V[playbook]+set}" ]]; then
-  repository="workflow"
-  name="$workflow"
-elif [[ -n "$playbook" && -z "${V[workflow]+set}" ]]; then
-  repository="playbook"
-  name="$playbook"
-else
-  echo "Specify exactly one of --workflow or --playbook with a name"
-  exit 1
-fi
-if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
-  echo "Invalid $repository name: $name"
-  exit 1
-fi
-
-# use the selected repository's helper
-if [[ "$repository" == "workflow" ]]; then
+# run Git's diff in the selected repository
+if [[ "${V[repository]}" == "workflows" ]]; then
   repository_path="$WORKFLOWS_USER_PATH"
 else
   repository_path="$PLAYBOOKS_USER_PATH"
 fi
-file=${V[file]:--}
-args=("--$repository" "$name")
-if [[ "$file" != "-" && -n "$file" ]]; then
-  if [[ "$repository" != "workflow" ]]; then
-    echo "--file is only supported with --workflow"
-    exit 1
-  fi
-  args+=(--file "$file")
-fi
 cd "$repository_path" || exit 1
-exec "$repository_path/git_diff.sh" "${args[@]}"
+exec git diff
 
 # author: https://github.com/jmoya82

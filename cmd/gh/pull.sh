@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev gh pull --workflows
+# example: odev gh pull --repository workflows
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -40,9 +40,10 @@ KEY="$(printf '%s_%s' "$COMMAND" "$SUBCOMMAND" | tr '[:lower:]' '[:upper:]')"
 # read command description, command flags
 command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
 mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
+mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
 
 # (maybe) print help
-print_range="0"
+print_range="1"
 print_default="0"
 print_both="0"
 "$ODEV_PATH/src/cmd_help_print.sh" --maybe \
@@ -50,25 +51,15 @@ print_both="0"
   "$print_range" "$print_default" "$print_both" \
   "${flags[@]}" -- "$@" && exit 0 || true
 
-# select one repository (these flags take no value)
-repository=""
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --workflows|-w) selected="workflow" ;;
-    --playbooks|-p) selected="playbook" ;;
-    *) echo "Unknown option: $1"; exit 1 ;;
-  esac
-  if [[ -n "$repository" ]]; then
-    echo "Specify exactly one of --workflows or --playbooks"
-    exit 1
-  fi
-  repository="$selected"
-  shift
-done
-if [[ -z "$repository" ]]; then
-  echo "Specify exactly one of --workflows or --playbooks"
-  exit 1
-fi
+# parse flags and prompt for the selected repository
+parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
+parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+
+declare -A V
+while IFS='=' read -r k v; do
+  [[ -n "$k" ]] && V["$k"]="$v"
+done <<< "$parsed_flags"
+repository="${V[repository]%s}"
 
 # use the selected repository's helper
 if [[ "$repository" == "workflow" ]]; then

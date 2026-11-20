@@ -110,10 +110,18 @@ repository named `my_workflow-my_project`. This is separate from the workflow fo
 
 ## Share
 
+Select `--repository workflows` or `--repository playbooks`. The repository is
+required for every `odev gh` action. Missing required values use the usual dialog. `diff` shows standard `git diff` output for the whole
+repository (unstaged tracked changes). `pull` updates the whole repository.
+`push` uploads existing commits on the current branch to `origin`; it does not
+stage or commit changes. `pr` proposes all pushed commits on the current branch
+to the configured community repository's `main` branch, using the commits to fill
+the title and description. None of these commands takes a name.
+
 ```bash
-odev gh diff --workflow my_workflow
-odev gh push --workflow my_workflow
-odev gh pr --workflow my_workflow
+odev gh diff --repository workflows
+odev gh push --repository workflows
+odev gh pr --repository workflows
 ```
 
 Review your changes, commit/push them to your fork, and optionally open a pull
@@ -122,5 +130,5 @@ request to `oreolag/workflows`.
 To bring upstream updates into your workflow checkout:
 
 ```bash
-odev gh pull --workflows
+odev gh pull --repository workflows
 ```

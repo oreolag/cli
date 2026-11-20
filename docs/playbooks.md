@@ -99,7 +99,7 @@ Press Tab to complete flags and existing playbook names:
 ```text
 odev run playbook --<TAB>
 odev run playbook --name <TAB>
-odev gh diff --playbook <TAB>
+odev gh diff --repository <TAB>
 ```
 
 Playbook-name completion reads your checkout and excludes companion `_vars.yml`
@@ -107,10 +107,18 @@ files. `odev new playbook --name` takes a new name rather than an existing one.
 
 ## Share
 
+Select `--repository workflows` or `--repository playbooks`. The repository is
+required for every `odev gh` action. Missing required values use the usual dialog. `diff` shows standard `git diff` output for the whole
+repository (unstaged tracked changes). `pull` updates the whole repository.
+`push` uploads existing commits on the current branch to `origin`; it does not
+stage or commit changes. `pr` proposes all pushed commits on the current branch
+to the configured community repository's `main` branch, using the commits to fill
+the title and description. None of these commands takes a name.
+
 ```bash
-odev gh diff --playbook my_playbook
-odev gh push --playbook my_playbook
-odev gh pr --playbook my_playbook
+odev gh diff --repository playbooks
+odev gh push --repository playbooks
+odev gh pr --repository playbooks
 ```
 
 Review your changes, commit/push the playbook and its companion variables file to
@@ -119,7 +127,7 @@ your fork, and optionally open a pull request to `oreolag/playbooks`.
 To bring fork and community updates into your checkout:
 
 ```bash
-odev gh pull --playbooks
+odev gh pull --repository playbooks
 ```
 
 ## Delete
