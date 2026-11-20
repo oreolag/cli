@@ -36,7 +36,7 @@ mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
 mandatory_flags="$("$ODEV_PATH/src/cmd_mandatory_flags_read.sh" "$ODEV_PATH" "$KEY")"
 
 # (maybe) print help
-print_range="1"
+print_range="0"
 print_default="0"
 print_both="0"
 "$ODEV_PATH/src/cmd_help_print.sh" --maybe \

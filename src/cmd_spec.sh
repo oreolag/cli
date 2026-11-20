@@ -213,28 +213,34 @@ VALIDATE_FLAGS=(
 GH_DESCRIPTION="GitHub support for workflows and playbooks"
 GH_FLAGS=(
 )
+# status
+GH_STATUS_DESCRIPTION="Fetches origin and shows Git status for the selected repository"
+GH_STATUS_FLAGS=(
+  "repository,r,Community repo name (playbooks or workflows),playbooks|workflows,-"
+)
+GH_STATUS_FLAGS_MANDATORY="repository"
 # push
 GH_PUSH_DESCRIPTION="Pushes the selected repository's current branch to your GitHub fork"
 GH_PUSH_FLAGS=(
-  "repository,r,Repository,playbooks|workflows,-"
+  "repository,r,Community repo name (playbooks or workflows),playbooks|workflows,-"
 )
 GH_PUSH_FLAGS_MANDATORY="repository"
 # pull
 GH_PULL_DESCRIPTION="Fetches and merges community main and fork branches locally"
 GH_PULL_FLAGS=(
-  "repository,r,Repository,playbooks|workflows,-"
+  "repository,r,Community repo name (playbooks or workflows),playbooks|workflows,-"
 )
 GH_PULL_FLAGS_MANDATORY="repository"
 # pr
 GH_PR_DESCRIPTION="Proposes the selected repository's current branch to the community repository"
 GH_PR_FLAGS=(
-  "repository,r,Repository,playbooks|workflows,-"
+  "repository,r,Community repo name (playbooks or workflows),playbooks|workflows,-"
 )
 GH_PR_FLAGS_MANDATORY="repository"
 # diff
 GH_DIFF_DESCRIPTION="Shows uncommitted changes in the selected repository"
 GH_DIFF_FLAGS=(
-  "repository,r,Repository,playbooks|workflows,-"
+  "repository,r,Community repo name (playbooks or workflows),playbooks|workflows,-"
 )
 GH_DIFF_FLAGS_MANDATORY="repository"
 

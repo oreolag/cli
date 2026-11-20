@@ -150,7 +150,7 @@ _odev_completions() {
     return 0
   fi
 
-  # Repository and artifact names for Git operations.
+  # Repository names for Git operations.
   if [[ $cword -ge 3 && "${words[1]}" == "gh" ]]; then
     if [[ "$prev" == "--repository" || "$prev" == "-r" ]]; then
       COMPREPLY=( $(compgen -W "playbooks workflows" -- "$cur") )
