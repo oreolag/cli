@@ -61,7 +61,7 @@ print_both="0"
 # check on GitHub CLI
 logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
 if [[ "$logged_in" == "0" ]]; then
-  echo "Login failed: use gh auth login"
+  echo "Login failed: gh"
   exit 1
 fi
 
