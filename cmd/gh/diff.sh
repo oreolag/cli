@@ -60,6 +60,6 @@ else
   repository_path="$PLAYBOOKS_USER_PATH"
 fi
 cd "$repository_path" || exit 1
-exec git diff
+ODEV_PATH="$ODEV_PATH" exec "$ODEV_PATH/src/${V[repository]}_git_diff.sh"
 
 # author: https://github.com/jmoya82

@@ -154,7 +154,7 @@ fi
 # copy missing helper scripts
 for script in git_diff.sh github_pr.sh github_push.sh github_pull.sh; do
   if [[ ! -e "$PLAYBOOKS_USER_PATH/$script" && ! -L "$PLAYBOOKS_USER_PATH/$script" ]]; then
-    cp "$PLAYBOOKS_TEMPLATE_PATH/$script" "$PLAYBOOKS_USER_PATH/" || exit 1
+    cp "$ODEV_PATH/src/playbooks_$script" "$PLAYBOOKS_USER_PATH/" || exit 1
   fi
 done
 

@@ -49,7 +49,7 @@ fi
 # copy missing helper scripts
 for script in git_diff.sh github_pr.sh github_push.sh github_pull.sh; do
   if [[ ! -e "$WORKFLOWS_USER_PATH/$script" && ! -L "$WORKFLOWS_USER_PATH/$script" ]]; then
-    cp "$WORKFLOWS_TEMPLATE_PATH/$script" "$WORKFLOWS_USER_PATH/" || exit 1
+    cp "$ODEV_PATH/src/workflows_$script" "$WORKFLOWS_USER_PATH/" || exit 1
   fi
 done
 

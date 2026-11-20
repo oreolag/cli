@@ -67,19 +67,7 @@ if [[ "$repository" == "workflows" ]]; then
 else
   repository_path="$PLAYBOOKS_USER_PATH"
 fi
-community_repository="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github "${repository}_repo")" || exit 1
 cd "$repository_path" || exit 1
-
-# check on GitHub CLI
-logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
-if [[ "$logged_in" == "0" ]]; then
-  echo "Login failed: use gh auth login"
-  exit 1
-fi
-
-branch="$(git symbolic-ref --quiet --short HEAD)" || exit 1
-origin="$(git remote get-url origin)" || exit 1
-owner="$(gh repo view "$origin" --json owner --jq '.owner.login')" || exit 1
-exec gh pr create --repo "$community_repository" --base main --head "$owner:$branch" --fill
+ODEV_PATH="$ODEV_PATH" exec "$ODEV_PATH/src/${V[repository]}_github_pr.sh"
 
 # author: https://github.com/jmoya82

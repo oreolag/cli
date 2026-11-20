@@ -1,8 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ODEV_PATH="${ODEV_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+
+# With no internal selectors, push existing commits on the current branch.
+if [[ $# == 0 ]]; then
+  logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
+  if [[ "$logged_in" == "0" ]]; then
+    echo "Login failed: use gh auth login"
+    exit 1
+  fi
+  
+  gh_path="$(command -v gh)" || exit 1
+  branch="$(git symbolic-ref --quiet --short HEAD)" || exit 1
+  exec git -c credential.helper= \
+    -c "credential.https://github.com.helper=!\"$gh_path\" auth git-credential" \
+    push -u origin "HEAD:refs/heads/$branch"
+fi
+
+
 msg="Update"
-playbook=""
+workflow=""
+file=""
 
 # format
 bold=$(tput bold)
@@ -10,13 +29,14 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 print_help() {
-  echo "Commit and push git changes for a playbook."
+  echo "Commit and push git changes for a workflow."
   echo
   echo "${bold}USAGE:${normal}"
   echo "  github_push.sh [flags]"
   echo
   echo "${bold}FLAGS:${normal}"
-  echo "    --playbook   Playbook to commit (omit to push existing commits only)"
+  echo "    --workflow   Workflow to commit (omit to push existing commits only)"
+  echo "    --file       Workflow file name (optional; if omitted, the whole workflow is staged)"
   echo "    --comment    Commit subject"
   echo
   echo "${bold}INHERITED FLAGS:${normal}"
@@ -26,8 +46,12 @@ print_help() {
 # parse flags
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --playbook)
-      playbook="${2:-}"
+    --workflow)
+      workflow="${2:-}"
+      shift 2
+      ;;
+    --file)
+      file="${2:-}"
       shift 2
       ;;
     --comment)
@@ -61,7 +85,7 @@ fi
 # get GITHUB_PUSH_BRANCH
 github_branch="$(cat "./GITHUB_PUSH_BRANCH")"
 
-# select the configured playbook branch
+# select the configured workflow branch
 if [[ "$(git branch --show-current)" != "$github_branch" ]]; then
   if git show-ref --verify --quiet "refs/heads/$github_branch"; then
     git checkout "$github_branch"
@@ -72,23 +96,29 @@ if [[ "$(git branch --show-current)" != "$github_branch" ]]; then
   fi
 fi
 
-# without a playbook selection, upload existing commits only
-if [[ -z "$playbook" ]]; then
+# without a workflow selection, upload existing commits only
+if [[ -z "$workflow" ]]; then
   git push -u origin "$github_branch"
   exit 0
 fi
 
-# set target
-if [[ ! "$playbook" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
-  echo "Invalid playbook name: $playbook"
+# validate workflow
+if [[ ! -d "$workflow" ]] && ! git ls-files --error-unmatch "$workflow" >/dev/null 2>&1; then
+  echo "Workflow not found: $workflow"
   exit 1
 fi
-target="$playbook.yml"
 
-# validate file (existing or tracked-for-deletion)
-if [[ ! -f "$target" ]] && ! git ls-files --error-unmatch -- "$target" >/dev/null 2>&1; then
-  echo "Playbook not found: $playbook"
-  exit 1
+# set target
+if [[ -n "$file" ]]; then
+  target="$workflow/$file"
+
+  # validate file (existing or tracked-for-deletion)
+  if [[ ! -f "$target" ]] && ! git ls-files --error-unmatch "$target" >/dev/null 2>&1; then
+    echo "File not found: $target"
+    exit 1
+  fi
+else
+  target="$workflow"
 fi
 
 # configure git identity if missing
@@ -100,20 +130,14 @@ if ! git config user.email >/dev/null; then
   git config user.email "$(gh api user --jq .login)@users.noreply.github.com"
 fi
 
-# include new, changed, or deleted companion variables
-targets=("$target")
-if [[ -e "${playbook}_vars.yml" ]] || git ls-files --error-unmatch -- "${playbook}_vars.yml" >/dev/null 2>&1; then
-  targets+=("${playbook}_vars.yml")
-fi
-
 # stage and commit only the selected changes
-git add -A -- "${targets[@]}"
-if ! git diff --cached --quiet -- "${targets[@]}"; then
+git add -A -- "$target"
+if ! git diff --cached --quiet -- "$target"; then
   if [[ "$msg" == "Update" ]]; then
     printf "comment: " > /dev/tty
     read -r msg < /dev/tty
   fi
-  git commit --only -m "$msg" -- "${targets[@]}"
+  git commit --only -m "$msg" -- "$target"
 fi
 
 # also push commits created by github_pull.sh when no new commit is needed

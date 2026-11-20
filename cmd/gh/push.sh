@@ -67,18 +67,6 @@ else
   repository_path="$PLAYBOOKS_USER_PATH"
 fi
 cd "$repository_path" || exit 1
-
-# check on GitHub CLI
-logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
-if [[ "$logged_in" == "0" ]]; then
-  echo "Login failed: use gh auth login"
-  exit 1
-fi
-
-gh_path="$(command -v gh)" || exit 1
-branch="$(git symbolic-ref --quiet --short HEAD)" || exit 1
-exec git -c credential.helper= \
-  -c "credential.https://github.com.helper=!\"$gh_path\" auth git-credential" \
-  push -u origin "HEAD:refs/heads/$branch"
+ODEV_PATH="$ODEV_PATH" exec "$ODEV_PATH/src/${V[repository]}_github_push.sh"
 
 # author: https://github.com/jmoya82

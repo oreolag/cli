@@ -198,7 +198,7 @@ fi
 # copy missing helper scripts
 for script in git_diff.sh github_pr.sh github_push.sh github_pull.sh; do
   if [[ ! -e "$WORKFLOWS_USER_PATH/$script" && ! -L "$WORKFLOWS_USER_PATH/$script" ]]; then
-    cp "$WORKFLOWS_TEMPLATE_PATH/$script" "$WORKFLOWS_USER_PATH/" || exit 1
+    cp "$ODEV_PATH/src/workflows_$script" "$WORKFLOWS_USER_PATH/" || exit 1
   fi
 done
 
@@ -305,15 +305,15 @@ sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" 
 #fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
 cd "$WORKFLOWS_USER_PATH"
 #if [ "$fork" = "1" ]; then
-  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "GITHUB_USERNAME" --comment "First commit"
-  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "build.sh" --comment "First commit"
-  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
-  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "delete.sh" --comment "First commit"
-  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "new.sh" --comment "First commit"
-  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "program.sh" --comment "First commit"
-  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "program.yml" --comment "First commit"
-  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "run.sh" --comment "First commit"
-  "$WORKFLOWS_USER_PATH/github_push.sh" --workflow "$name" --file "validate.sh" --comment "First commit"
+  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "GITHUB_USERNAME" --comment "First commit"
+  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "build.sh" --comment "First commit"
+  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
+  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "delete.sh" --comment "First commit"
+  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "new.sh" --comment "First commit"
+  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "program.sh" --comment "First commit"
+  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "program.yml" --comment "First commit"
+  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "run.sh" --comment "First commit"
+  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "validate.sh" --comment "First commit"
 #fi
 
 # print

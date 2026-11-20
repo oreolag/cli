@@ -68,6 +68,6 @@ else
   repository_path="$PLAYBOOKS_USER_PATH"
 fi
 cd "$repository_path" || exit 1
-ODEV_PATH="$ODEV_PATH" exec "$repository_path/github_pull.sh"
+ODEV_PATH="$ODEV_PATH" exec "$ODEV_PATH/src/${V[repository]}_github_pull.sh"
 
 # author: https://github.com/jmoya82
