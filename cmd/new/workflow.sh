@@ -189,18 +189,8 @@ if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
   fi
   git push -u origin "$GITHUB_PUSH_BRANCH" || true
 
-  # save branch and fork
-  echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
-  #echo "$fork" > "GITHUB_FORK"
 
 fi
-
-# copy missing helper scripts
-for script in git_diff.sh github_pr.sh github_push.sh github_pull.sh; do
-  if [[ ! -e "$WORKFLOWS_USER_PATH/$script" && ! -L "$WORKFLOWS_USER_PATH/$script" ]]; then
-    cp "$ODEV_PATH/src/workflows_$script" "$WORKFLOWS_USER_PATH/" || exit 1
-  fi
-done
 
 # recreate symlinks when possible
 scripts=(new build program run validate delete)
@@ -291,18 +281,7 @@ sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/run.sh" "$W
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/validate.sh" "$WORKFLOW_COMMAND_PATH/validate/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/delete.sh" "$WORKFLOW_COMMAND_PATH/delete/$name.sh"
 
-# copy helper scripts
-#cd "$WORKFLOWS_USER_PATH"
-#if [[ ! -e "./git_diff.sh" ]]; then
-#  cp "$WORKFLOWS_TEMPLATE_PATH"/git_diff.sh .
-#  if [ "$fork" = "1" ]; then
-#    cp "$WORKFLOWS_TEMPLATE_PATH"/github_pr.sh .
-#    cp "$WORKFLOWS_TEMPLATE_PATH"/github_push.sh .
-#  fi
-#fi
-
-# commit cmd_spec.sh
-#fork=$(cat $WORKFLOWS_USER_PATH/GITHUB_FORK)
+# commit the new workflow files
 cd "$WORKFLOWS_USER_PATH"
 #if [ "$fork" = "1" ]; then
   ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "GITHUB_USERNAME" --comment "First commit"

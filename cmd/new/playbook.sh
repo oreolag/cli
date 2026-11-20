@@ -140,7 +140,6 @@ if [[ ! -e "$PLAYBOOKS_USER_PATH" ]]; then
     git checkout -b "$GITHUB_PUSH_BRANCH" || exit 1
   fi
   git push -u origin "$GITHUB_PUSH_BRANCH" || exit 1
-  echo "$GITHUB_PUSH_BRANCH" > GITHUB_PUSH_BRANCH
 fi
 
 # check on checkout and branch
@@ -150,13 +149,6 @@ if [[ "$(git branch --show-current)" != "$GITHUB_PUSH_BRANCH" ]]; then
   echo "Switch to the playbook branch before creating: $GITHUB_PUSH_BRANCH"
   exit 1
 fi
-
-# copy missing helper scripts
-for script in git_diff.sh github_pr.sh github_push.sh github_pull.sh; do
-  if [[ ! -e "$PLAYBOOKS_USER_PATH/$script" && ! -L "$PLAYBOOKS_USER_PATH/$script" ]]; then
-    cp "$ODEV_PATH/src/playbooks_$script" "$PLAYBOOKS_USER_PATH/" || exit 1
-  fi
-done
 
 # check if playbook name exists (fork configured branch)
 files="$(gh api "repos/$github_user/playbooks/contents?ref=$GITHUB_PUSH_BRANCH" \

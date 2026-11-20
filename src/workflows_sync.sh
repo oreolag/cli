@@ -23,7 +23,6 @@ if [ "$logged_in" != "1" ]; then
 fi
 
 # constants
-WORKFLOWS_TEMPLATE_PATH="$ODEV_PATH/templates/workflows"
 WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit 1
 GITHUB_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)"
 
@@ -41,30 +40,15 @@ if [[ ! -e "$WORKFLOWS_USER_PATH" && ! -L "$WORKFLOWS_USER_PATH" ]]; then
     --branch "$GITHUB_PUSH_BRANCH" \
     "https://github.com/$github_user/workflows.git" "$WORKFLOWS_USER_PATH" || exit 0
   git -C "$WORKFLOWS_USER_PATH" remote add upstream https://github.com/oreolag/workflows.git
-  echo "$GITHUB_PUSH_BRANCH" > "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH"
 fi
 
 # check on local checkout and branch
 [[ -d "$WORKFLOWS_USER_PATH/.git" ]] || exit 0
-# copy missing helper scripts
-for script in git_diff.sh github_pr.sh github_push.sh github_pull.sh; do
-  if [[ ! -e "$WORKFLOWS_USER_PATH/$script" && ! -L "$WORKFLOWS_USER_PATH/$script" ]]; then
-    cp "$ODEV_PATH/src/workflows_$script" "$WORKFLOWS_USER_PATH/" || exit 1
-  fi
-done
-
 cd "$WORKFLOWS_USER_PATH"
 [[ "$(git branch --show-current)" == "$GITHUB_PUSH_BRANCH" ]] || exit 0
 
-# Creation installs these local files; other uncommitted files block syncing.
+# Uncommitted files block syncing.
 changes="$(git status --porcelain --untracked-files=all)"
-changes="$(printf '%s\n' "$changes" | sed \
-  -e '/^?? GITHUB_PUSH_BRANCH$/d' \
-  -e '/^?? git_diff\.sh$/d' \
-  -e '/^?? github_pr\.sh$/d' \
-  -e '/^?? github_push\.sh$/d' \
-  -e '/^?? github_sync\.sh$/d' \
-  -e '/^?? github_pull\.sh$/d')"
 [[ -z "$changes" ]] || exit 0
 
 # Bound network waits at login. Never reset, stash, commit or push user work.
