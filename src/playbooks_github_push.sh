@@ -76,8 +76,8 @@ if ! gh auth status >/dev/null 2>&1; then
   gh auth login
 fi
 
-# get GITHUB_PUSH_BRANCH
-github_branch="$(cat "./GITHUB_PUSH_BRANCH")"
+# get the configured branch
+github_branch="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_playbooks)"
 
 # select the configured playbook branch
 if [[ "$(git branch --show-current)" != "$github_branch" ]]; then

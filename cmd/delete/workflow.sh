@@ -103,7 +103,7 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
     # delete workflow and push
     cd "$WORKFLOWS_USER_PATH" || exit 1
 
-    github_branch="$(cat "$WORKFLOWS_USER_PATH/GITHUB_PUSH_BRANCH")" || exit 1
+    github_branch="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)" || exit 1
     current_branch="$(git branch --show-current)" || exit 1
     if [[ -z "$github_branch" || "$current_branch" != "$github_branch" ]]; then
       echo "Switch to the workflow branch before deleting: $github_branch" >&2

@@ -34,7 +34,7 @@ done
 
 # get repository and branch
 cd "$(git rev-parse --show-toplevel)"
-GITHUB_PUSH_BRANCH="$(cat ./GITHUB_PUSH_BRANCH)"
+GITHUB_PUSH_BRANCH="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_playbooks)"
 
 # preserve local edits; Git reports differences or an unfinished merge
 git diff --exit-code HEAD --
