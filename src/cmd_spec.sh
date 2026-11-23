@@ -122,7 +122,7 @@ GET_MAC_FLAGS=(
 GET_MAC_FLAGS_MANDATORY="numa,device" #"numa,type,device,port"
 
 # hosts
-GET_HOSTS_DESCRIPTION="Get Ansible inventory hosts for your reserved servers"
+GET_HOSTS_DESCRIPTION="Show the Ansible inventory for your booked servers"
 GET_HOSTS_FLAGS=(
 )
 GET_HOSTS_FLAGS_MANDATORY=""
