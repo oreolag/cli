@@ -63,7 +63,7 @@ print_both="0"
 # check on users
 is_odev_developers=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developers" = "0" ]; then
-  echo "Permission denied: $USER"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error permission_denied -- "$USER"
   exit 1
 fi
 
@@ -94,7 +94,7 @@ for field in "" ${mandatory_flags//,/ }; do
 
   # check on interface and port when the interface is known
   if [[ ! "$port" =~ ^[0-9]+$ ]]; then
-    echo "Invalid port: $port" >&2
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_port -- "$port"
     exit 1
   fi
   if [[ "$interface" != "-" ]]; then
@@ -102,14 +102,14 @@ for field in "" ${mandatory_flags//,/ }; do
     interface_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface)
     interface_name_cmdb=""
     if [[ ! "$interface" =~ ^[0-9]+$ ]] || [ "$interface_cmdb" = "" ]; then
-      echo "Invalid interface: $interface" >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_interface -- "$interface"
       exit 1
     fi
 
     # check on port
     port_cmdb=$($ODEV_PATH/src/cmdb_get.py endata $interface ip_address $port)
     if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$port_cmdb" = "" ]; then
-      echo "Invalid port: $port" >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_port -- "$port"
       exit 1
     fi
   fi
