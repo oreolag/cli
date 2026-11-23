@@ -120,7 +120,6 @@ GET_MAC_FLAGS=(
   "type,t,Device type,accel|endata,endata"
 )
 GET_MAC_FLAGS_MANDATORY="numa,device" #"numa,type,device,port"
-
 # hosts
 GET_HOSTS_DESCRIPTION="Show the Ansible inventory for your booked servers"
 GET_HOSTS_FLAGS=(
