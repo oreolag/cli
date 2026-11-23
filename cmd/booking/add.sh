@@ -44,7 +44,7 @@ validate_start_time() {
   local date="$1" start="$2" start_timestamp now
   # validate start time (from flags or the interactive prompt)
   if [[ ! "$start" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
-    echo "Invalid value for --start: '$start' (expected HH:MM from 00:00 to 23:59)" >&2
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_start_value -- "$start"
     return 1
   fi
   [[ -n "$date" ]] || return 0
@@ -52,12 +52,12 @@ validate_start_time() {
   # validate the combined date and time in the booking timezone (odev targets Ubuntu)
   if [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
      ! start_timestamp=$(TZ="$BOOKING_TIMEZONE" date -d "$date $start" +%s 2>/dev/null); then
-    echo "Invalid start time: $date $start" >&2
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_start_time -- "$date" "$start"
     return 1
   fi
   now=$(date +%s)
   if (( start_timestamp < now - now % 60 )); then
-    echo "Invalid start time: $date $start" >&2
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_start_time -- "$date" "$start"
     return 1
   fi
 }
@@ -134,7 +134,7 @@ for field in "" ${mandatory_flags//,/ }; do
     BOOKING_TIMEZONE="$(python3 "$ODEV_PATH/src/booking_is_server.py" --db "$booking_db" \
       --participant --server="$server" --duration="$duration" --timezone)" || exit 1
   elif [[ ! "$duration" =~ ^0*[1-9][0-9]*[mh]$ ]]; then
-    echo "Invalid duration: $duration" >&2
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_duration -- "$duration"
     exit 1
   fi
   date="$(resolve_booking_date "$supplied_date")" || exit 1
@@ -144,7 +144,7 @@ for field in "" ${mandatory_flags//,/ }; do
      ! booking_day=$(TZ="$BOOKING_TIMEZONE" date -d "$date" +%F 2>/dev/null) ||
      [[ "$booking_day" != "$date" ]] ||
      [[ "$server" != "-" && "$date" < "$(TZ="$BOOKING_TIMEZONE" date +%F)" ]]; then
-    echo "Invalid booking date: $date" >&2
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_booking_date -- "$date"
     exit 1
   fi
 
@@ -158,7 +158,7 @@ for field in "" ${mandatory_flags//,/ }; do
     IFS=',' read -r -a shared_users <<< "$shared"
     # read drops a trailing empty field.
     if [[ "$shared" == *, ]]; then
-      echo "Invalid user: " >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_user ""
       exit 1
     fi
     for user in "${shared_users[@]}"; do
@@ -167,7 +167,7 @@ for field in "" ${mandatory_flags//,/ }; do
       if [[ -z "$user" || "$user" == -* || "$user" == *[[:space:]]* ]] ||
          ! groups=$(id -nG -- "$user" 2>/dev/null) ||
          [[ " $groups " != *" odev-users "* ]]; then
-        echo "Invalid user: $user" >&2
+        python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_user -- "$user"
         exit 1
       fi
     done

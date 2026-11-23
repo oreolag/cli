@@ -62,7 +62,7 @@ date=${V[history]}
 list_args=(--list)
 if [[ "${V[active]}" == "1" ]]; then
   if [[ "$history_supplied" == true ]]; then
-    echo "Invalid flags: --active and --history" >&2
+    python3 "$ODEV_PATH/src/odev_messages.py" --error conflicting_flags -- --active --history
     exit 1
   fi
   list_args+=(--active)
@@ -71,7 +71,7 @@ if [[ "$history_supplied" == true ]]; then
   if [[ "$date" != today && "$date" != yesterday && "$date" != tomorrow ]] &&
      { [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
        ! booking_day=$(date -d "$date" +%F 2>/dev/null) || [[ "$booking_day" != "$date" ]]; }; then
-    echo "Invalid booking date: $date" >&2
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_booking_date -- "$date"
     exit 1
   fi
   list_args+=(--date "$date")

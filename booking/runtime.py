@@ -35,7 +35,7 @@ def signature(config):
 
 def validate_database(connection, service_id):
     if connection.execute("PRAGMA user_version").fetchone()[0] != 1:
-        raise ValueError("unsupported booking database schema version")
+        raise ValueError('Unsupported booking database schema version')
     columns = {
         "booking_metadata": {"singleton", "service_id", "last_sequence"},
         "bookings": {"booking_id", "server", "owner", "start_time", "end_time", "created_at",
@@ -48,7 +48,7 @@ def validate_database(connection, service_id):
             raise ValueError(f"invalid booking database table: {table}")
     metadata = connection.execute("SELECT singleton, service_id, last_sequence FROM booking_metadata").fetchall()
     if len(metadata) != 1 or metadata[0][0] != 1 or metadata[0][1] != service_id:
-        raise ValueError("booking database service ID does not match booking.yml")
+        raise ValueError('Booking database service ID does not match booking.yml')
     if not isinstance(metadata[0][2], int) or metadata[0][2] < 0:
         raise ValueError("invalid booking sequence")
     if connection.execute("PRAGMA quick_check").fetchall() != [("ok",)]:

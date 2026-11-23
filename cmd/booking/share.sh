@@ -38,7 +38,7 @@ validate_user() {
   if [[ -z "$user" || "$user" == *,* || "$user" == *[[:space:]]* || "$user" == -* ]] ||
      ! groups=$(id -nG -- "$user" 2>/dev/null) ||
      [[ " $groups " != *" odev-users "* ]]; then
-    echo "Invalid user: $user" >&2
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_user -- "$user"
     return 1
   fi
 }
@@ -52,7 +52,7 @@ while IFS='=' read -r k v; do
   esac
 done <<< "$parsed_flags"
 if [[ "$has_add" == true && "$has_remove" == true ]]; then
-  echo "Invalid flags: --add and --remove" >&2
+  python3 "$ODEV_PATH/src/odev_messages.py" --error conflicting_flags -- --add --remove
   exit 1
 fi
 if [[ "$has_remove" == true ]]; then

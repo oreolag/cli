@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Shared CLI messages, usable from Python or Bash."""
+"""Messages for CLI users, usable from Python or Bash.
+
+Keep internal service, configuration, and database diagnostics in their modules."""
 
 import argparse
 import sys
@@ -35,6 +37,27 @@ MESSAGES = {
     "workflow_delete_branch_required": "Switch to the workflow branch before deleting: {0}",
     "deleted_playbook": "Playbook deleted: {0}",
     "deleted_workflow": "Workflow deleted: {0}",
+    # Booking command validation and results.
+    "invalid_duration": "Invalid duration: {0}",
+    "invalid_booking_date": "Invalid booking date: {0}",
+    "invalid_start_time": "Invalid start time: {0} {1}",
+    "invalid_start_value": "Invalid value for --start: '{0}' (expected HH:MM from 00:00 to 23:59)",
+    "invalid_user": "Invalid user: {0}",
+    "invalid_server": "Invalid server: {0}",
+    "invalid_booking": "Invalid booking: {0}",
+    "invalid_collaborator": "Invalid collaborator: {0}",
+    "conflicting_flags": "Conflicting flags: {0} and {1}",
+    "command_not_available": "Command not available: {0}",
+    "booking_request_failed": "Booking request failed",
+    "invalid_shared_users": "Invalid shared users",
+    "booking_service_unavailable": "Booking service unavailable",
+    "booking_already_cancelled": "Booking already cancelled: {0}",
+    "booking_cancelled": "Booking cancelled: {0}",
+    "booking_expired": "Booking expired: {0}",
+    "created_booking": "Booking created: {0}",
+    "booking_share_updated": "Share {0}: {1} ({2})",
+    "server_already_booked": "Server already booked: {0} ({1})",
+    "booking_start_required": "Booking date and start time are required",
 }
 
 

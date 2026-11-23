@@ -11,6 +11,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import yaml
 
+from odev_messages import message
+
 
 def validate_timezone(timezone):
     if not isinstance(timezone, str) or not timezone:
@@ -31,7 +33,7 @@ def duration_seconds(value, maximum_hours):
             raise ValueError()
         return seconds
     except (DecimalException, ValueError, OverflowError):
-        raise ValueError(f"Invalid duration: {value}") from None
+        raise ValueError(message("invalid_duration", value)) from None
 
 
 def booking_timezone(path, hostname=None):
@@ -116,14 +118,14 @@ def main():
             if entry is None and args.participant:
                 entry = next((item for item in data["servers"] if local in item["managed_servers"]), None)
             if entry is None:
-                raise ValueError("Command not available: odev booking")
+                raise ValueError(message("command_not_available", "odev booking"))
             if args.default_server:
                 print("-" if entry["name"] == local else local)
                 return 0
             if args.server is not None:
                 entry = next((item for item in data["servers"] if args.server in item["managed_servers"]), None)
                 if entry is None:
-                    print(f"Invalid server: {args.server}", file=sys.stderr)
+                    print(message("invalid_server", args.server), file=sys.stderr)
                     return 1
             if args.duration is not None:
                 duration_seconds(args.duration, entry["maximum_duration_hours"])

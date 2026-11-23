@@ -18,6 +18,8 @@ from urllib.parse import parse_qs, urlsplit
 from runtime import configuration
 from storage import BookingConflict, booking_access_allowed, booking_access_users, booking_availability, cancel_booking, create_booking, list_bookings, share_booking
 
+from odev_messages import message
+
 SOCKET_PATH = "/run/odev-booking/api.sock"
 ACCESS_ACCOUNT = "odev-booking-check"
 
@@ -29,7 +31,7 @@ def require_user(username):
         if group.gr_gid not in os.getgrouplist(username, user.pw_gid):
             raise KeyError(username)
     except (KeyError, TypeError):
-        raise ValueError(f"Invalid user: {username}") from None
+        raise ValueError(message("invalid_user", username)) from None
 
 
 def peer_identity(connection):
@@ -42,11 +44,11 @@ def peer_user(connection):
     try:
         username = peer_identity(connection)
         if username == ACCESS_ACCOUNT:
-            raise PermissionError("Permission denied: booking access")
+            raise PermissionError(message("permission_denied", "booking access"))
         require_user(username)
         return username
     except (KeyError, ValueError):
-        raise PermissionError("Permission denied: booking access") from None
+        raise PermissionError(message("permission_denied", "booking access")) from None
 
 
 def is_administrator(username):
@@ -73,7 +75,7 @@ class Handler(BaseHTTPRequestHandler):
             query = parse_qs(url.query, keep_blank_values=True)
             if url.path == "/access":
                 if peer_identity(self.connection) != ACCESS_ACCOUNT:
-                    raise PermissionError("Permission denied: booking access")
+                    raise PermissionError(message("permission_denied", "booking access"))
                 if set(query) not in [{"server"}, {"server", "user"}] or any(len(values) != 1 or not values[0] for values in query.values()):
                     raise ValueError("Invalid booking access request")
                 config = configuration(self.server.odev_path, socket.gethostname())
@@ -85,7 +87,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             username = peer_user(self.connection)
             if url.path != "/bookings":
-                self.reply(404, {"error": "Command not found: booking API"})
+                self.reply(404, {"error": f"Command not found: {'booking API'}"})
                 return
             if query == {"availability": ["1"]}:
                 config = configuration(self.server.odev_path, socket.gethostname())
@@ -94,7 +96,7 @@ class Handler(BaseHTTPRequestHandler):
             if query == {"active": ["1"]}:
                 config = configuration(self.server.odev_path, socket.gethostname())
                 if config["server"] is None:
-                    self.reply(503, {"error": "Booking service unavailable"})
+                    self.reply(503, {"error": message("booking_service_unavailable")})
                     return
                 now = int(time.time())
                 day = datetime.fromtimestamp(now, ZoneInfo(config["timezone"])).date().isoformat()
@@ -117,7 +119,7 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("Invalid booking request")
             config = configuration(self.server.odev_path, socket.gethostname())
             if config["server"] is None:
-                self.reply(503, {"error": "Booking service unavailable"})
+                self.reply(503, {"error": message("booking_service_unavailable")})
                 return
             self.reply(200, list_bookings(config, query["date"][0], history=query.get("history", ["0"])[0] == "1"))
         except PermissionError as error:
@@ -126,14 +128,14 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(400, {"error": str(error)})
         except Exception as error:
             print(f"ERROR: {error}", file=sys.stderr, flush=True)
-            self.reply(503, {"error": "Booking service unavailable"})
+            self.reply(503, {"error": message("booking_service_unavailable")})
 
     def do_POST(self):
         try:
             self.connection.settimeout(10)
             owner = peer_user(self.connection)
             if self.path not in ["/bookings", "/bookings/cancel", "/bookings/share"]:
-                self.reply(404, {"error": "Command not found: booking API"})
+                self.reply(404, {"error": f"Command not found: {'booking API'}"})
                 return
             size = int(self.headers.get("Content-Length", "0"))
             if not 0 < size <= 16384:
@@ -161,13 +163,13 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("Invalid booking request")
             shared = request.get("shared", [])
             if not isinstance(shared, list):
-                raise ValueError("Invalid shared users")
+                raise ValueError(message("invalid_shared_users"))
             for user in shared:
                 require_user(user)
             # Re-read configuration for every request, including role changes.
             config = configuration(self.server.odev_path, socket.gethostname())
             if config["server"] is None:
-                self.reply(503, {"error": "Booking service unavailable"})
+                self.reply(503, {"error": message("booking_service_unavailable")})
                 return
             booking_id = create_booking(config, owner, request)
             self.reply(201, {"booking_id": booking_id})
@@ -179,7 +181,7 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(400, {"error": str(error)})
         except Exception as error:
             print(f"ERROR: {error}", file=sys.stderr, flush=True)
-            self.reply(503, {"error": "Booking service unavailable"})
+            self.reply(503, {"error": message("booking_service_unavailable")})
 
     def log_message(self, *_):
         pass

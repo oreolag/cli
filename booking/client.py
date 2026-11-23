@@ -20,6 +20,8 @@ from api import SOCKET_PATH
 from runtime import booking_timezone, load_inventory
 from table import print_bookings
 
+from odev_messages import message
+
 
 class Connection(http.client.HTTPConnection):
     def connect(self):
@@ -36,8 +38,8 @@ def local_request(request, path=SOCKET_PATH, endpoint="/bookings", expected_stat
         response = connection.getresponse()
         value = json.loads(response.read(16384))
         if response.status != expected_status:
-            raise ValueError(value.get("error", "Booking request failed"))
-        return value["booking_id"]
+            raise ValueError(value.get("error", message("booking_request_failed")))
+        return value['booking_id']
     finally:
         connection.close()
 
@@ -52,7 +54,7 @@ def local_listing(day, path=SOCKET_PATH, history=False, availability=False):
         response = connection.getresponse()
         value = json.loads(response.read())
         if response.status != 200:
-            raise ValueError(value.get("error", "Booking request failed"))
+            raise ValueError(value.get("error", message("booking_request_failed")))
         return value
     finally:
         connection.close()
@@ -69,7 +71,7 @@ def local_cancellation(booking, confirm=False, path=SOCKET_PATH):
         response = connection.getresponse()
         value = json.loads(response.read())
         if response.status != 200:
-            raise ValueError(value.get("error", "Booking request failed"))
+            raise ValueError(value.get("error", message("booking_request_failed")))
         return value
     finally:
         connection.close()
@@ -88,7 +90,7 @@ def run_remote_booking(root, peers, command, operation, capture=False, plain_err
         return
     status = subprocess.run([str(root / "src/tailscale_auth_status.sh")], capture_output=True, text=True)
     if status.returncode or status.stdout.strip() != "1":
-        raise ValueError("Login failed: tailscale")
+        raise ValueError(message("login_failed", "tailscale"))
     sys.stdout.flush()
     for peer in peers:
         try:
@@ -96,9 +98,9 @@ def run_remote_booking(root, peers, command, operation, capture=False, plain_err
                 ["ssh", "-n", "-T", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "--", peer, "true"],
                 stdout=subprocess.DEVNULL, timeout=20)
         except subprocess.TimeoutExpired:
-            raise ValueError(f"Login failed: {peer}") from None
+            raise ValueError(message("login_failed", peer)) from None
         if login.returncode:
-            raise ValueError(f"Login failed: {peer}")
+            raise ValueError(message("login_failed", peer))
     with tempfile.TemporaryDirectory(prefix="odev-booking-") as directory:
         inventory = Path(directory) / "inventory.yml"
         results = Path(directory) / "results.json"
@@ -166,13 +168,13 @@ def main():
     entry = next((entry for entry in inventory["servers"] if entry["name"] == local), None)
     if args.availability:
         if entry is None:
-            raise ValueError("Command not available: odev booking")
+            raise ValueError(message("command_not_available", "odev booking"))
         result = local_listing(None, availability=True)
         free = result["free"]
         print(result["total"], len(free), free[0] if len(free) == 1 else "", sep="\t")
         return
     if entry is None and args.local_only:
-        raise ValueError("Command not available: odev booking")
+        raise ValueError(message("command_not_available", "odev booking"))
     if args.booked_hosts:
         hosts = set(local_listing(None)["servers"]) if entry is not None else set()
         if not args.local_only:
@@ -188,7 +190,7 @@ def main():
     if entry is None:
         assigned = next((item for item in inventory["servers"] if local in item["managed_servers"]), None)
         if assigned is None:
-            raise ValueError("Command not available: odev booking")
+            raise ValueError(message("command_not_available", "odev booking"))
     if args.share:
         booking, action, user = args.share
         if assigned is not None:
@@ -198,7 +200,7 @@ def main():
             return
         local_request({"booking": booking, "action": action, "user": user},
                       endpoint="/bookings/share", expected_status=200)
-        print(f"Share {action}: {user} ({booking})")
+        print(message("booking_share_updated", action, user, booking))
         return
     if args.cancel:
         if args.cancel_stage:
@@ -226,12 +228,12 @@ def main():
         else:
             run_remote_booking(root, peers, command + ["confirm"], "cancel booking",
                                capture=True, plain_error=True)
-        print(f"Booking cancelled: {args.cancel}")
+        print(message("booking_cancelled", args.cancel))
         return
     if args.list:
         if args.active:
             if args.date is not None:
-                raise ValueError("Invalid flags: --active and --history")
+                raise ValueError(message("conflicting_flags", "--active", "--history"))
             bookings = local_listing(None)["bookings"] if entry is not None else []
             if args.local_only:
                 print(json.dumps(bookings))
@@ -267,10 +269,10 @@ def main():
         return
     service = next((item for item in inventory["servers"] if args.server in item["managed_servers"]), None)
     if service is None or (args.local_only and service["name"] != local):
-        raise ValueError(f"Invalid server: {args.server}")
+        raise ValueError(message("invalid_server", args.server))
     if service["name"] != local:
         if args.date is None or args.start is None:
-            raise ValueError("Booking date and start time are required")
+            raise ValueError(message("booking_start_required"))
         command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
                    "--local-only", "--server", args.server, "--date", args.date, "--start", args.start,
                    "--duration", args.duration, "--shared", args.shared]
@@ -280,7 +282,7 @@ def main():
     request = {"server": args.server, "date": args.date, "start": args.start,
                "duration": args.duration, "shared": shared}
     booking_id = local_request(request)
-    print(f"Booking created: {booking_id}")
+    print(message("created_booking", booking_id))
 
 
 if __name__ == "__main__":

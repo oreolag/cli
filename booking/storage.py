@@ -8,6 +8,8 @@ from zoneinfo import ZoneInfo
 
 from booking_is_server import duration_seconds
 
+from odev_messages import message
+
 
 class BookingConflict(ValueError):
     pass
@@ -16,11 +18,11 @@ class BookingConflict(ValueError):
 def booking_access_allowed(config, server, username):
     entry = config["server"]
     if entry is None or server not in entry["managed_servers"]:
-        raise ValueError(f"Invalid server: {server}")
+        raise ValueError(message("invalid_server", server))
     connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=ro", uri=True, timeout=2)
     try:
         metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
-        if metadata is None or metadata[0] != entry["id"]:
+        if metadata is None or metadata[0] != entry['id']:
             raise ValueError("Booking database service ID does not match booking.yml")
         now = int(time.time())
         row = connection.execute(
@@ -36,12 +38,12 @@ def booking_access_allowed(config, server, username):
 def booking_access_users(config, server):
     entry = config["server"]
     if entry is None or server not in entry["managed_servers"]:
-        raise ValueError(f"Invalid server: {server}")
+        raise ValueError(message("invalid_server", server))
     connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=ro", uri=True, timeout=2)
     try:
         connection.execute("BEGIN")
         metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
-        if metadata is None or metadata[0] != entry["id"]:
+        if metadata is None or metadata[0] != entry['id']:
             raise ValueError("Booking database service ID does not match booking.yml")
         now = int(time.time())
         rows = connection.execute(
@@ -57,11 +59,11 @@ def booking_access_users(config, server):
 def booking_availability(config):
     entry = config["server"]
     if entry is None:
-        raise ValueError("Booking service unavailable")
+        raise ValueError(message("booking_service_unavailable"))
     connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=ro", uri=True, timeout=2)
     try:
         metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
-        if metadata is None or metadata[0] != entry["id"]:
+        if metadata is None or metadata[0] != entry['id']:
             raise ValueError("Booking database service ID does not match booking.yml")
         now = int(time.time())
         booked = {row[0] for row in connection.execute(
@@ -76,15 +78,15 @@ def booking_availability(config):
 def list_bookings(config, day, history=False):
     zone = ZoneInfo(config["timezone"])
     if not isinstance(day, str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", day):
-        raise ValueError(f"Invalid booking date: {day}")
+        raise ValueError(message("invalid_booking_date", day))
     try:
         beginning = datetime.strptime(day, "%Y-%m-%d").replace(tzinfo=zone)
         ending = beginning + timedelta(days=1)
     except (ValueError, OverflowError):
-        raise ValueError(f"Invalid booking date: {day}") from None
+        raise ValueError(message("invalid_booking_date", day)) from None
     entry = config["server"]
     if entry is None:
-        raise ValueError("Booking service unavailable")
+        raise ValueError(message("booking_service_unavailable"))
     connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=ro", uri=True, timeout=10)
     connection.row_factory = sqlite3.Row
     try:
@@ -92,7 +94,7 @@ def list_bookings(config, day, history=False):
         if connection.execute("PRAGMA user_version").fetchone()[0] != 1:
             raise ValueError("Unsupported booking database schema version")
         metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
-        if metadata is None or metadata[0] != entry["id"]:
+        if metadata is None or metadata[0] != entry['id']:
             raise ValueError("Booking database service ID does not match booking.yml")
         rows = connection.execute(
             "SELECT booking_id, server, owner, start_time, end_time, cancelled_at FROM bookings "
@@ -115,24 +117,24 @@ def list_bookings(config, day, history=False):
 def cancel_booking(config, username, booking_id, administrator=False, confirm=False):
     entry = config["server"]
     if entry is None:
-        raise ValueError("Booking service unavailable")
+        raise ValueError(message("booking_service_unavailable"))
     connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=rw", uri=True, timeout=10)
     connection.row_factory = sqlite3.Row
     try:
         connection.execute("BEGIN IMMEDIATE" if confirm else "BEGIN")
         metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
-        if metadata is None or metadata[0] != entry["id"]:
+        if metadata is None or metadata[0] != entry['id']:
             raise ValueError("Booking database service ID does not match booking.yml")
         row = connection.execute("SELECT * FROM bookings WHERE booking_id = ?", (booking_id,)).fetchone()
         if row is None:
-            raise ValueError(f"Invalid booking: {booking_id}")
+            raise ValueError(message("invalid_booking", booking_id))
         if row["owner"] != username and not administrator:
-            raise PermissionError(f"Permission denied: {booking_id}")
+            raise PermissionError(message("permission_denied", booking_id))
         if row["cancelled_at"] is not None:
-            raise ValueError(f"Booking already cancelled: {booking_id}")
+            raise ValueError(message("booking_already_cancelled", booking_id))
         now = int(time.time())
         if row["end_time"] <= now:
-            raise ValueError(f"Booking expired: {booking_id}")
+            raise ValueError(message("booking_expired", booking_id))
         if confirm:
             connection.execute("UPDATE bookings SET cancelled_at = ?, cancelled_by = ? WHERE booking_id = ?",
                                (now, username, booking_id))
@@ -146,27 +148,27 @@ def cancel_booking(config, username, booking_id, administrator=False, confirm=Fa
 def share_booking(config, owner, booking_id, action, username):
     entry = config["server"]
     if entry is None:
-        raise ValueError("Booking service unavailable")
+        raise ValueError(message("booking_service_unavailable"))
     connection = sqlite3.connect(Path(config["database"]).as_uri() + "?mode=rw", uri=True, timeout=10)
     try:
         connection.execute("BEGIN IMMEDIATE")
         metadata = connection.execute("SELECT service_id FROM booking_metadata WHERE singleton = 1").fetchone()
-        if metadata is None or metadata[0] != entry["id"]:
+        if metadata is None or metadata[0] != entry['id']:
             raise ValueError("Booking database service ID does not match booking.yml")
         row = connection.execute("SELECT owner, end_time, cancelled_at FROM bookings WHERE booking_id = ?",
                                  (booking_id,)).fetchone()
         if row is None:
-            raise ValueError(f"Invalid booking: {booking_id}")
+            raise ValueError(message("invalid_booking", booking_id))
         booking_owner, end_time, cancelled_at = row
         if booking_owner != owner:
-            raise PermissionError(f"Permission denied: {booking_id}")
+            raise PermissionError(message("permission_denied", booking_id))
         now = int(time.time())
         if cancelled_at is not None:
-            raise ValueError(f"Booking cancelled: {booking_id}")
+            raise ValueError(message("booking_cancelled", booking_id))
         if end_time <= now:
-            raise ValueError(f"Booking expired: {booking_id}")
+            raise ValueError(message("booking_expired", booking_id))
         if username == owner:
-            raise ValueError(f"Invalid collaborator: {username}")
+            raise ValueError(message("invalid_collaborator", username))
         if action == "add":
             connection.execute("INSERT INTO booking_shares (booking_id, username, added_at) VALUES (?, ?, ?) "
                                "ON CONFLICT (booking_id, username) DO NOTHING", (booking_id, username, now))
@@ -184,11 +186,11 @@ def create_booking(config, owner, request):
     entry = config["server"]
     server = request.get("server")
     if entry is None or server not in entry["managed_servers"]:
-        raise ValueError(f"Invalid server: {server}")
+        raise ValueError(message("invalid_server", server))
     day, start = request.get("date", ""), request.get("start", "")
     if not isinstance(day, str) or not isinstance(start, str) or not re.fullmatch(
             r"[0-9]{4}-[0-9]{2}-[0-9]{2} ([01][0-9]|2[0-3]):[0-5][0-9]", f"{day} {start}"):
-        raise ValueError(f"Invalid start time: {day} {start}")
+        raise ValueError(message("invalid_start_time", day, start))
     zone = ZoneInfo(config["timezone"])
     try:
         local = datetime.strptime(f"{day} {start}", "%Y-%m-%d %H:%M").replace(tzinfo=zone)
@@ -198,11 +200,11 @@ def create_booking(config, owner, request):
             raise ValueError()
         start_time = int(local.timestamp())
     except (ValueError, OverflowError):
-        raise ValueError(f"Invalid start time: {day} {start}") from None
+        raise ValueError(message("invalid_start_time", day, start)) from None
     end_time = start_time + duration_seconds(request.get("duration"), entry["maximum_duration_hours"])
     shared = request.get("shared", [])
     if not isinstance(shared, list) or any(not isinstance(user, str) or not user for user in shared):
-        raise ValueError("Invalid shared users")
+        raise ValueError(message("invalid_shared_users"))
     shared = sorted(set(shared) - {owner})
     path = Path(config["database"])
     connection = sqlite3.connect(path.as_uri() + "?mode=rw", uri=True, timeout=10)
@@ -213,16 +215,16 @@ def create_booking(config, owner, request):
             raise ValueError("Unsupported booking database schema version")
         now = int(time.time())
         if start_time < now - now % 60:
-            raise ValueError(f"Invalid start time: {day} {start}")
+            raise ValueError(message("invalid_start_time", day, start))
         metadata = connection.execute(
             "SELECT service_id, last_sequence FROM booking_metadata WHERE singleton = 1").fetchone()
-        if metadata is None or metadata[0] != entry["id"]:
+        if metadata is None or metadata[0] != entry['id']:
             raise ValueError("Booking database service ID does not match booking.yml")
         conflict = connection.execute(
             "SELECT booking_id FROM bookings WHERE server = ? AND cancelled_at IS NULL "
             "AND start_time < ? AND end_time > ? LIMIT 1", (server, end_time, start_time)).fetchone()
         if conflict:
-            raise BookingConflict(f"Server already booked: {server} ({conflict[0]})")
+            raise BookingConflict(message("server_already_booked", server, conflict[0]))
         sequence = metadata[1] + 1
         booking_id = f"{entry['id']}-{sequence:04d}"
         connection.execute("UPDATE booking_metadata SET last_sequence = ? WHERE singleton = 1", (sequence,))

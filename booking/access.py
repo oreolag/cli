@@ -19,6 +19,8 @@ from api import ACCESS_ACCOUNT, SOCKET_PATH, is_administrator
 from client import Connection
 from runtime import load_inventory
 
+from odev_messages import message
+
 
 ACCESS_PATH = Path("/etc/odev/booking-access")
 
@@ -83,7 +85,7 @@ def check(root, username, service=None):
     if decision == "allow":
         print(f"Access allowed: {username}")
         return 0
-    print(f"Access denied: {username}", file=sys.stderr)
+    print(message("permission_denied", username), file=sys.stderr)
     return 1
 
 
