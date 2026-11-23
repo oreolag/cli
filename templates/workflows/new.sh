@@ -64,16 +64,27 @@ print_both="0"
 # parse flags
 parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
 
-# run interactive prompt
-parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
+# check supplied values first, then check each answer before the next question
+declare -A V=()
+for field in "" ${mandatory_flags//,/ }; do
+  if [[ -n "$field" && "${V[$field]:--}" != "-" ]]; then
+    continue
+  fi
+  parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --field "$field" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 
-# read flags
-if [[ -n "$parsed_flags" ]]; then
-  declare -A V
-  while IFS='=' read -r k v; do
-    V["$k"]="$v"
-  done <<< "$parsed_flags"
-fi
+  if [[ -n "$parsed_flags" ]]; then
+    while IFS='=' read -r k v; do
+      V["$k"]="$v"
+    done <<< "$parsed_flags"
+  fi
+
+  name=${V[name]:--}
+  name="${name// /_}"
+  if [[ "$name" != "-" && -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
+    python3 "$ODEV_PATH/src/odev_messages.py" --error project_already_exists -- "$SUBCOMMAND/$name"
+    exit 1
+  fi
+done
 
 # assign flags
 name=${V[name]}
