@@ -57,7 +57,7 @@ print_both="0"
 
 # check on CMDB
 if [[ ! -f "$CMDB_PATH/$hostname.yml" ]]; then
-    echo "Missing file: $CMDB_PATH/$hostname.yml"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error file_not_found -- "$CMDB_PATH/$hostname.yml"
     exit 1
 fi
 

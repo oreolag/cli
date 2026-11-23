@@ -280,7 +280,7 @@ fi''')
     def test_parser_rejects_missing_values_before_dialog(self):
         for args in (["--numa"], ["--numa", ""], ["--numa", "--device", "0"]):
             with self.subTest(args=args):
-                self.assert_early("get/ip", args, "Missing value for --numa", ["device:", "numa:"])
+                self.assert_early("get/ip", args, "Missing value: --numa", ["device:", "numa:"])
         self.assert_early("get/ip", ["--numa", "-1"], "Invalid NUMA: -1", ["device:"])
 
     def test_upstream_duplicate_is_read_only(self):

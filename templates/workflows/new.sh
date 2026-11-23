@@ -101,7 +101,7 @@ fi
 
 # check if exists
 if [[ -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
-  echo "Project already exists: $SUBCOMMAND/$name"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error project_already_exists -- "$SUBCOMMAND/$name"
   exit 1
 fi
 
@@ -130,7 +130,7 @@ if [ "$push" = "1" ]; then
 
   # check if repository already exists in the account
   if gh repo view "${github_user}/$github_name" >/dev/null 2>&1; then
-    echo "Project already exists: $github_user/$github_name"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error project_already_exists -- "$github_user/$github_name"
     # remove locally
     rm -rf "$PROJECTS_PATH/$SUBCOMMAND/$name"
     exit 1

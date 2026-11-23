@@ -30,21 +30,21 @@ TMP_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml"
 # check on users
 is_odev_admins=$($ODEV_PATH/src/is_member.sh $USER odev-admins)
 if [ "$is_odev_admins" = "0" ]; then
-  echo "Permission denied: $USER"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error permission_denied -- "$USER"
   exit 1
 fi
 
 # check on tools
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 if [[ "$installed" == "0" ]]; then
-  echo "Missing tool: gh"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error missing_tool gh
   exit 1
 fi
 
 # check on GitHub CLI
 logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
 if [[ "$logged_in" == "0" ]]; then
-  echo "Login failed: gh"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error login_failed gh
   exit 1
 fi
 
@@ -69,7 +69,7 @@ flag="${1:-}"
 
 # check on flags
 if [[ -n "$flag" && "$flag" != "--main" && "$flag" != "-m" ]]; then
-    echo "Unknown flag: $flag"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error unknown_flag -- "$flag"
     exit 1
 fi
 

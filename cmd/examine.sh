@@ -52,7 +52,7 @@ flag=$1
 
 # check on flags
 if [[ -n "$flag" && "$flag" != "--tools" && "$flag" != "-t" && "$flag" != "--servers" && "$flag" != "-s" ]]; then
-    echo "Unknown flag: $flag"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error unknown_flag -- "$flag"
     exit 1
 fi
 
@@ -73,7 +73,7 @@ fi
 
 # check on CMDB
 if [[ ! -f "$CMDB_PATH/$hostname.yml" ]]; then
-    echo "Missing file: $CMDB_PATH/$hostname.yml"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error file_not_found -- "$CMDB_PATH/$hostname.yml"
     exit 1
 fi
 

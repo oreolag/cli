@@ -6,19 +6,19 @@ username="$(id -un)"
 inventory_file="$1"
 
 if [[ "$("$ODEV_PATH/src/tailscale_auth_status.sh")" != 1 ]]; then
-  echo "Login failed: tailscale" >&2
+  python3 "$ODEV_PATH/src/odev_messages.py" --error login_failed tailscale
   exit 1
 fi
 
 "$ODEV_PATH/src/get_ansible_hosts.sh" "$username" || exit 1
 if [[ ! -f "$inventory_file" ]] ||
    ! inventory_json="$(ANSIBLE_INVENTORY_ANY_UNPARSED_IS_FAILED=true ansible-inventory -i "$inventory_file" --list)"; then
-  echo "Invalid inventory: $inventory_file" >&2
+  python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_inventory -- "$inventory_file"
   exit 1
 fi
 hosts="$(python3 -c 'import json, sys; print("\n".join(json.load(sys.stdin).get("my_hosts", {}).get("hosts", [])))' <<< "$inventory_json")"
 if [[ -z "$hosts" ]]; then
-  echo "No booked remote hosts: $username" >&2
+  python3 "$ODEV_PATH/src/odev_messages.py" --error no_booked_remote_hosts -- "$username"
   exit 1
 fi
 
@@ -28,9 +28,9 @@ while IFS= read -r host; do
   else
     status=$?
     if [[ "$status" == 124 ]]; then
-      echo "SSH check timed out: $host" >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error ssh_check_timed_out -- "$host"
     else
-      echo "SSH check failed: $host" >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error ssh_check_failed -- "$host"
     fi
     exit 1
   fi

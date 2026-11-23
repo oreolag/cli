@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ODEV_PATH="${ODEV_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+
 # Usage:
 #   cmd_prompt.sh --required "name,type" --params "${FLAGS[@]}" -- "$parsed_flags"
 # Optional: --field NAME asks only for NAME; --field "" only fills optional defaults.
@@ -130,7 +132,7 @@ for name in "${REQUIRED[@]}"; do
 
     # Require a terminal only when a question is needed.
     if ! { exec 3<>/dev/tty; } 2>/dev/null; then
-      echo "cmd_prompt: missing required --$name (not interactive)" >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error missing_required_flag -- "--$name"
       exit 1
     fi
     printf '%s' "$prompt" >&3

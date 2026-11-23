@@ -8,6 +8,22 @@ import sys
 
 
 MESSAGES = {
+    "command_not_found": "Command not found: {0}",
+    "unknown_flag": "Unknown flag: {0}",
+    "missing_value": "Missing value: {0}",
+    "missing_required_flag": "Missing required flag: {0}",
+    "invalid_value": "Invalid value for {0}: '{1}' (expected: {2})",
+    "invalid_playbook_variables": "Invalid playbook variables: {0}",
+    "project_already_exists": "Project already exists: {0}",
+    "invalid_devices_format": "Invalid devices format: {0}",
+    "invalid_device_index": "Invalid device index: {0}",
+    "no_booked_remote_hosts": "No booked remote hosts: {0}",
+    "ssh_check_failed": "SSH check failed: {0}",
+    "ssh_check_timed_out": "SSH check timed out: {0}",
+    "booked_hosts_lookup_failed": "Could not retrieve booked hosts for {0}",
+    "invalid_inventory": "Invalid inventory: {0}",
+    "missing_prerequisite": "Missing prerequisite: {0}",
+
     "invalid_numa": "Invalid NUMA: {0}",
     "invalid_device": "Invalid device: {0}",
     "invalid_port": "Invalid port: {0}",

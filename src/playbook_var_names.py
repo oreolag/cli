@@ -5,6 +5,8 @@ import json
 import shlex
 import sys
 
+from odev_messages import print_message
+
 
 def main():
     supplied = sys.argv[1]
@@ -34,4 +36,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (ValueError, OSError) as error:
+        print_message("invalid_playbook_variables", str(error), error=True)
+        sys.exit(1)

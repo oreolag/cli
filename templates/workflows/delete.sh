@@ -32,7 +32,7 @@ WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit
 # check on tools
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 if [[ "$installed" == "0" ]]; then
-  echo "Missing tool: $tool"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error missing_tool gh
 fi
 
 # set KEY
@@ -84,7 +84,7 @@ name=${V[name]}
 
 # check local project
 if [[ ! -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
-  echo "Project does not exist: $SUBCOMMAND/$name"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error project_not_found -- "$SUBCOMMAND/$name"
   exit 1
 fi
 
@@ -114,7 +114,7 @@ if [ "$push" = "1" ]; then
 
   # check remote repository
   if ! gh repo view "${github_user}/${github_name}" >/dev/null 2>&1; then
-    echo "Project does not exist: ${github_user}/${github_name}"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error project_not_found -- "${github_user}/${github_name}"
     exit 1
   fi
 
@@ -127,7 +127,7 @@ if [ "$push" = "1" ]; then
     if gh repo delete "${github_user}/${github_name}" --yes >/dev/null 2>&1; then
       remote_deleted="1"
     else
-      echo "Permission denied: ${github_user}/${github_name}"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error permission_denied -- "${github_user}/${github_name}"
       exit 1
     fi
   fi

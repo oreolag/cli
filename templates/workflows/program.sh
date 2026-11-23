@@ -82,7 +82,7 @@ name="${name// /_}"
 
 # check on devices
 if [[ ! "$devices" =~ ^[0-9]+(,\ ?[0-9]+)*$ ]]; then
-    echo "Invalid devices format: $devices"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_devices_format -- "$devices"
     exit 1
 fi
 
@@ -98,7 +98,7 @@ for d in "${devices_array[@]}"; do
   name_system="A"
   name_cmdb="A"
   if [[ "$name_system" != "$name_cmdb" ]]; then
-    echo "Invalid device index: $d"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_device_index -- "$d"
     exit 1
   fi
 done
@@ -111,7 +111,7 @@ done
 
 # check if exists
 if [[ ! -d "$PROJECTS_PATH/$SUBCOMMAND/$name" ]]; then
-  echo "Project does not exist: $name"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error project_not_found -- "$name"
   exit 1
 fi
 

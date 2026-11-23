@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# These helpers are also copied into project directories.
+ODEV_PATH="${ODEV_PATH:-/opt/odev}"
+
 msg="Update"
 workflow=""
 project=""
@@ -51,7 +54,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     *)
-      echo "Unknown option: $1"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error unknown_option -- "$1"
       exit 1
       ;;
   esac
@@ -81,13 +84,13 @@ fi
 
 # validate workflow
 if [[ ! -d "$workflow" ]]; then
-  echo "Workflow not found: $workflow"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error workflow_not_found -- "$workflow"
   exit 1
 fi
 
 # validate project
 if [[ ! -d "$workflow/$project" ]]; then
-  echo "Project not found: $workflow/$project"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error project_not_found -- "$workflow/$project"
   exit 1
 fi
 
@@ -95,7 +98,7 @@ fi
 repo="$workflow/$project"
 
 if [[ ! -d "$repo/.git" ]]; then
-  echo "Error: not inside a git repository: $repo"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_git_repository -- "$repo"
   exit 1
 fi
 
@@ -112,7 +115,7 @@ if [[ -n "$file" ]]; then
 
   # validate file (existing or tracked-for-deletion)
   if [[ ! -f "$target" ]] && ! git ls-files --error-unmatch "$target" >/dev/null 2>&1; then
-    echo "File not found: $target"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error file_not_found -- "$target"
     exit 1
   fi
 else

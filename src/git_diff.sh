@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# These helpers are also copied into project directories.
+ODEV_PATH="${ODEV_PATH:-/opt/odev}"
+
 workflow=""
 project=""
 file=""
@@ -47,7 +50,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     *)
-      echo "Unknown option: $1"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error unknown_option -- "$1"
       exit 1
       ;;
   esac
@@ -75,7 +78,7 @@ fi
 # Validate workflow
 # -----------------------------
 if [[ ! -d "$workflow" ]]; then
-  echo "Workflow not found: $workflow"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error workflow_not_found -- "$workflow"
   exit 1
 fi
 
@@ -83,7 +86,7 @@ fi
 # Validate project
 # -----------------------------
 if [[ ! -d "$workflow/$project" ]]; then
-  echo "Project not found: $workflow/$project"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error project_not_found -- "$workflow/$project"
   exit 1
 fi
 
@@ -93,7 +96,7 @@ fi
 repo="$workflow/$project"
 
 if [[ ! -d "$repo/.git" ]]; then
-  echo "Error: not inside a git repository: $repo"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_git_repository -- "$repo"
   exit 1
 fi
 
@@ -105,7 +108,7 @@ cd "$repo"
 if [[ -n "$file" ]]; then
 
   if [[ ! -f "$file" ]] && ! git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
-    echo "File not found: $file"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error file_not_found -- "$file"
     exit 1
   fi
 
@@ -118,7 +121,7 @@ if [[ -n "$file" ]]; then
     fi
 
   else
-    echo "Error: use git_push.sh first"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error missing_prerequisite github_push.sh
     exit 1
   fi
 
@@ -133,7 +136,7 @@ else
         changed=1
       fi
     else
-      echo "Error: use git_push.sh first"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error missing_prerequisite github_push.sh
       exit 1
     fi
   done < <(find . -type f)

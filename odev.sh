@@ -266,7 +266,7 @@ else
 fi
 
 if [[ ! -x "$script" ]]; then
-  echo "Command not found: ${cmd} ${subcmd:-}"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error command_not_found -- "${cmd}${subcmd:+ $subcmd}"
   exit 1
 fi
 

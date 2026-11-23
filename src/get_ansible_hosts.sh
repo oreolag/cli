@@ -4,11 +4,11 @@ set -euo pipefail
 ODEV_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 username="$1"
 if [[ ! "$username" =~ ^[a-zA-Z_][a-zA-Z0-9_.-]*$ ]] || ! id -u -- "$username" >/dev/null 2>&1; then
-  echo "Invalid user: $username" >&2
+  python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_user -- "$username"
   exit 1
 fi
 if [[ "$EUID" != 0 && "$username" != "$(id -un)" ]]; then
-  echo "Permission denied: $username" >&2
+  python3 "$ODEV_PATH/src/odev_messages.py" --error permission_denied -- "$username"
   exit 1
 fi
 
@@ -63,6 +63,6 @@ if [[ "$EUID" == 0 ]]; then
 fi
 mv -fT -- "$inventory" "$INVENTORY_PATH/hosts_$username"
 if [[ "$status" != 0 ]]; then
-  echo "Could not retrieve booked hosts for $username" >&2
+  python3 "$ODEV_PATH/src/odev_messages.py" --error booked_hosts_lookup_failed -- "$username"
 fi
 exit "$status"
