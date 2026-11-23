@@ -23,7 +23,6 @@ MESSAGES = {
     "booked_hosts_lookup_failed": "Could not retrieve booked hosts for {0}",
     "invalid_inventory": "Invalid inventory: {0}",
     "missing_prerequisite": "Missing prerequisite: {0}",
-
     "invalid_numa": "Invalid NUMA: {0}",
     "invalid_device": "Invalid device: {0}",
     "invalid_port": "Invalid port: {0}",
