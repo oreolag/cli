@@ -53,7 +53,7 @@ esac
             ("add=javier", None, "booking,add"),
             ("remove=quico", None, "booking,remove"),
             ("", None, "booking,add"),
-            ("add=javier\nremove=quico", "Invalid flags: --add and --remove", None),
+            ("add=javier\nremove=quico", "Conflicting flags: --add and --remove", None),
             ("add=javier,quico", "Invalid user: javier,quico", None),
             ("remove=outsider", "Invalid user: outsider", None),
             ("add=missing", "Invalid user: missing", None),
@@ -193,7 +193,7 @@ else:
         for timezone, values, error in timezone_cases:
             with self.subTest(values=values):
                 result = subprocess.run(
-                    ["bash", "-c", validation + '\npython3() { echo "$BOOKING_TIMEZONE"; }\n'
+                    ["bash", "-c", validation + '\npython3() { if [[ "$1" == */booking_is_server.py ]]; then echo "$BOOKING_TIMEZONE"; else command python3 "$@"; fi; }\n'
                      'parsed_flags="$1"\nbooking_db=unused\n' + early + '\necho DIALOG\n',
                      "test", "server=incus-01\n" + values],
                     env={**self.env, "TZ": "UTC", "BOOKING_TIMEZONE": timezone,
@@ -276,7 +276,8 @@ else:
                     continue
                 result = self.run_command(*args, script=script)
                 self.assertNotEqual(result.returncode, 0)
-                self.assertEqual(result.stdout, "Command not available: odev booking\n")
+                self.assertEqual(result.stdout, "")
+                self.assertEqual(result.stderr, "Command not available: odev booking\n")
 
     def test_invalid_or_missing_inventory(self):
         for content in [None, "servers: [", "servers: invalid"]:
