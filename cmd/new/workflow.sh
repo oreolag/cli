@@ -31,14 +31,14 @@ WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developer" = "0" ]; then
-  echo "Permission denied: $USER"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error permission_denied "$USER"
   exit 1
 fi
 
 # check on tools
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 if [[ "$installed" == "0" ]]; then
-  echo "Missing tool: gh"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error missing_tool gh
 fi
 
 # check on GitHub CLI
@@ -73,7 +73,7 @@ print_both="0"
 # check on GitHub CLI
 logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
 if [[ "$logged_in" == "0" ]]; then
-  echo "Login failed: gh"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error login_failed gh
   exit 1
 fi
 
@@ -112,7 +112,7 @@ for field in "" ${mandatory_flags//,/ }; do
       template_path="$WORKFLOWS_PATH/$template"
     else
       # this is in fact an existing workflow
-      echo "Template does not exist: $template"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error template_not_found "$template"
       exit 1
     fi
   fi
@@ -120,7 +120,7 @@ for field in "" ${mandatory_flags//,/ }; do
   if [[ "$name" != "-" ]]; then
     # check on name
     if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
-      echo "Invalid workflow name: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_workflow_name "$name"
       exit 1
     fi
 
@@ -130,7 +130,7 @@ for field in "" ${mandatory_flags//,/ }; do
        [[ -d "$WORKFLOWS_USER_PATH/$name" ]] || \
        [[ -e "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]] || \
        [[ -L "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]]; then
-      echo "Workflow already exists: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error workflow_already_exists "$name"
       exit 1
     fi
 
@@ -141,7 +141,7 @@ for field in "" ${mandatory_flags//,/ }; do
     folders="$(gh api repos/oreolag/workflows/contents --jq '.[] | select(.type == "dir") | .name')" || exit 1
 
     if grep -Fxq -- "$name" <<< "$folders"; then
-      echo "Workflow already exists: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error workflow_already_exists "$name"
       exit 1
     fi
   fi
@@ -165,7 +165,7 @@ if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
         --jq '.fork and .parent.full_name == "oreolag/workflows"' | grep -q true; then
       :  # valid fork → continue
     else
-      echo "Repository already exists: $github_user/workflows"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error repository_already_exists "$github_user/workflows"
       exit 1
     fi
   else
@@ -207,7 +207,7 @@ for d in "$WORKFLOWS_USER_PATH"/*; do
 
     if [[ ! -e "$dst" && ! -L "$dst" ]]; then
       sudo -n "$ODEV_PATH/src/ln_s.sh" "$ODEV_PATH" "$src" "$dst" || {
-        echo "Could not create workflow link: $dst" >&2
+        python3 "$ODEV_PATH/src/odev_messages.py" --error link_creation_failed "$dst"
         exit 1
       }
     fi
@@ -219,7 +219,7 @@ folders="$(gh api "repos/$github_user/workflows/contents?ref=$GITHUB_PUSH_BRANCH
   --jq '.[] | select(.type == "dir") | .name')" || exit 1
 
 if grep -Fxq -- "$name" <<< "$folders"; then
-  echo "Workflow already exists: $name"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error workflow_already_exists "$name"
   exit 1
 fi
 
@@ -296,6 +296,6 @@ cd "$WORKFLOWS_USER_PATH"
 #fi
 
 # print
-echo "Workflow created: $name"
+python3 "$ODEV_PATH/src/odev_messages.py" --success created_workflow "$name"
 
 # author: https://github.com/jmoya82

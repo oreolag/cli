@@ -30,14 +30,14 @@ PLAYBOOKS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" playbooks)" || exit
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developer" = "0" ]; then
-  echo "Permission denied: $USER"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error permission_denied "$USER"
   exit 1
 fi
 
 # check on tools
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 if [[ "$installed" == "0" ]]; then
-  echo "Missing tool: gh"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error missing_tool gh
   exit 1
 fi
 
@@ -61,7 +61,7 @@ print_both="0"
 # check on GitHub CLI
 logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
 if [[ "$logged_in" == "0" ]]; then
-  echo "Login failed: gh"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error login_failed gh
   exit 1
 fi
 
@@ -93,7 +93,7 @@ for field in "" ${mandatory_flags//,/ }; do
   if [[ "$name" != "-" ]]; then
     # check on name
     if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ || "$name" == *_vars ]]; then
-      echo "Invalid playbook name: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_playbook_name "$name"
       exit 1
     fi
 
@@ -102,7 +102,7 @@ for field in "" ${mandatory_flags//,/ }; do
           -e "$PLAYBOOKS_PATH/${name}_vars.yml" || -L "$PLAYBOOKS_PATH/${name}_vars.yml" ||
           -e "$PLAYBOOKS_USER_PATH/${name}_vars.yml" || -L "$PLAYBOOKS_USER_PATH/${name}_vars.yml" ||
           -e "$PLAYBOOKS_USER_PATH/$name.yml" || -L "$PLAYBOOKS_USER_PATH/$name.yml" ]]; then
-      echo "Playbook already exists: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error playbook_already_exists "$name"
       exit 1
     fi
 
@@ -112,7 +112,7 @@ for field in "" ${mandatory_flags//,/ }; do
     # check if playbook name exists (oreolag/playbooks default branch)
     files="$(gh api repos/oreolag/playbooks/contents --jq '.[] | select(.type == "file") | .name')" || exit 1
     if grep -Fxq -e "$name.yml" -e "${name}_vars.yml" <<< "$files"; then
-      echo "Playbook already exists: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error playbook_already_exists "$name"
       exit 1
     fi
   fi
@@ -124,7 +124,7 @@ if [[ ! -e "$PLAYBOOKS_USER_PATH" ]]; then
   if gh repo view "$github_user/playbooks" >/dev/null 2>&1; then
     if ! gh api "repos/$github_user/playbooks" \
         --jq '.fork and .parent.full_name == "oreolag/playbooks"' | grep -qx true; then
-      echo "Repository already exists: $github_user/playbooks"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error repository_already_exists "$github_user/playbooks"
       exit 1
     fi
   else
@@ -146,7 +146,7 @@ fi
 cd "$PLAYBOOKS_USER_PATH" || exit 1
 git rev-parse --is-inside-work-tree >/dev/null || exit 1
 if [[ "$(git branch --show-current)" != "$GITHUB_PUSH_BRANCH" ]]; then
-  echo "Switch to the playbook branch before creating: $GITHUB_PUSH_BRANCH"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error playbook_branch_required "$GITHUB_PUSH_BRANCH"
   exit 1
 fi
 
@@ -154,7 +154,7 @@ fi
 files="$(gh api "repos/$github_user/playbooks/contents?ref=$GITHUB_PUSH_BRANCH" \
   --jq '.[] | select(.type == "file") | .name')" || exit 1
 if grep -Fxq -e "$name.yml" -e "${name}_vars.yml" <<< "$files"; then
-  echo "Playbook already exists: $name"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error playbook_already_exists "$name"
   exit 1
 fi
 
@@ -178,6 +178,6 @@ git commit --only -m "First commit" -- "$name.yml" "${name}_vars.yml" || exit 1
 git push -u origin "$GITHUB_PUSH_BRANCH" || exit 1
 
 # print
-echo "Playbook created: $name"
+python3 "$ODEV_PATH/src/odev_messages.py" --success created_playbook "$name"
 
 # author: https://github.com/jmoya82
