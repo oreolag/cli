@@ -98,7 +98,6 @@ elif [ "$SUBCOMMAND" = "ifconfig" ]; then
   echo "  $CLI_NAME $SUBCOMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
-  echo "  This command has no flags."
 elif [ ! "$COMMAND" = "" ] && [ "$SUBCOMMAND" = "-" ]; then
   # cmd/new.sh
   #usage="${CLI_NAME} ${COMMAND}"
@@ -113,8 +112,13 @@ elif [ ! "$COMMAND" = "" ] && [ ! "$SUBCOMMAND" = "" ]; then
   echo "${bold}FLAGS:${normal}"
 fi
 
+# Empty flag lists share the same message; command groups list commands instead.
+if [[ "$SUBCOMMAND" != "-" && ${#PARAMS[@]} -eq 0 ]]; then
+  echo "  This command has no flags."
+fi
+
 # print commands or flags
-for p in "${PARAMS[@]}"; do
+for p in ${PARAMS[@]+"${PARAMS[@]}"}; do
   IFS=',' read -r name short desc range def <<< "$p"
 
   [[ "$range" == "-" ]] && range=""
