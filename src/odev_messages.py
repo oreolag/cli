@@ -6,6 +6,12 @@ import sys
 
 
 MESSAGES = {
+    "invalid_numa": "Invalid NUMA: {0}",
+    "invalid_device": "Invalid device: {0}",
+    "invalid_port": "Invalid port: {0}",
+    "unknown_option": "Unknown option: {0}",
+    "invalid_git_repository": "Invalid Git repository: {0}",
+    "file_not_found": "File not found: {0}",
     "permission_denied": "Permission denied: {0}",
     "missing_tool": "Missing tool: {0}",
     "login_failed": "Login failed: {0}",

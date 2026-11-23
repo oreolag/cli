@@ -26,7 +26,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     *)
-      echo "Unknown option: $1"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error unknown_option -- "$1"
       exit 1
       ;;
   esac

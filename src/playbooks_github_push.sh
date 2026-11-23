@@ -7,7 +7,7 @@ ODEV_PATH="${ODEV_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 if [[ $# == 0 ]]; then
   logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
   if [[ "$logged_in" == "0" ]]; then
-    echo "Login failed: gh"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error login_failed gh
     exit 1
   fi
   
@@ -57,7 +57,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     *)
-      echo "Unknown option: $1"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error unknown_option -- "$1"
       exit 1
       ;;
   esac
@@ -65,7 +65,7 @@ done
 
 # ensure we are inside a git repository
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
-  echo "Error: not inside a git repository"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_git_repository -- "$PWD"
   exit 1
 }
 
@@ -98,14 +98,14 @@ fi
 
 # set target
 if [[ ! "$playbook" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
-  echo "Invalid playbook name: $playbook"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_playbook_name -- "$playbook"
   exit 1
 fi
 target="$playbook.yml"
 
 # validate file (existing or tracked-for-deletion)
 if [[ ! -f "$target" ]] && ! git ls-files --error-unmatch -- "$target" >/dev/null 2>&1; then
-  echo "Playbook not found: $playbook"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error playbook_not_found -- "$playbook"
   exit 1
 fi
 

@@ -166,8 +166,8 @@ fi''')
 
     def test_invalid_supplied_values_never_open_dialog_or_act(self):
         cases = [
-            ("get/ip", ["--numa", "1"], "Invalid numa: 1", ["device:"]),
-            ("get/mac", ["--numa", "1"], "Invalid numa: 1", ["device:"]),
+            ("get/ip", ["--numa", "1"], "Invalid NUMA: 1", ["device:"]),
+            ("get/mac", ["--numa", "1"], "Invalid NUMA: 1", ["device:"]),
             ("get/ip", ["--device", "99"], "Invalid device: 99", ["numa:"]),
             ("get/mac", ["--device", "0", "--port", "9"], "Invalid port: 9", ["numa:"]),
             ("set/mtu", ["--interface", "99"], "Invalid interface: 99", ["value ("]),
@@ -220,7 +220,7 @@ fi''')
     def test_invalid_answer_stops_before_next_question(self):
         status, output = self.dialog("get/ip", [], [("numa: ", "1")])
         self.assertNotEqual(status, 0, output)
-        self.assertIn("Invalid numa: 1", output)
+        self.assertIn("Invalid NUMA: 1", output)
         self.assertNotIn("device:", output)
         self.assertFalse(self.marker.exists())
 
@@ -281,7 +281,7 @@ fi''')
         for args in (["--numa"], ["--numa", ""], ["--numa", "--device", "0"]):
             with self.subTest(args=args):
                 self.assert_early("get/ip", args, "Missing value for --numa", ["device:", "numa:"])
-        self.assert_early("get/ip", ["--numa", "-1"], "Invalid numa: -1", ["device:"])
+        self.assert_early("get/ip", ["--numa", "-1"], "Invalid NUMA: -1", ["device:"])
 
     def test_upstream_duplicate_is_read_only(self):
         self.env["UPSTREAM_NAMES"] = "taken\n"

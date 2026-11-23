@@ -7,7 +7,7 @@ community_repository="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" 
 
 logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
 if [[ "$logged_in" == "0" ]]; then
-  echo "Login failed: gh"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error login_failed gh
   exit 1
 fi
 

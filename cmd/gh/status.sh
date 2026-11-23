@@ -23,14 +23,14 @@ WORKFLOWS_USER_PATH="$(python3 "$ODEV_PATH/src/odev_path.py" workflows)" || exit
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developer" = "0" ]; then
-  echo "Permission denied: $USER"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error permission_denied -- "$USER"
   exit 1
 fi
 
 # check on tools
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 if [[ "$installed" == "0" ]]; then
-  echo "Missing tool: gh"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error missing_tool gh
   exit 1
 fi
 

@@ -83,7 +83,7 @@ for field in "" ${mandatory_flags//,/ }; do
   if [[ "$numa" != "-" ]]; then
     numa_devices=$($ODEV_PATH/src/cmdb_get.py cpu numa $numa $type)
     if [[ ! "$numa" =~ ^[0-9]+$ ]] || [ "$numa_devices" = "" ]; then
-      echo "Invalid numa: $numa" >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_numa -- "$numa"
       exit 1
     fi
   fi
@@ -92,7 +92,7 @@ for field in "" ${mandatory_flags//,/ }; do
   if [[ "$device" != "-" ]]; then
     device_cmdb=$("$ODEV_PATH/src/cmdb_get.py" "$type" "$device")
     if [[ ! "$device" =~ ^[0-9]+$ || -z "$device_cmdb" ]]; then
-      echo "Invalid device: $device" >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_device -- "$device"
       exit 1
     fi
   fi
@@ -115,20 +115,20 @@ for field in "" ${mandatory_flags//,/ }; do
 
     # print error
     if [[ "$found" == "0" ]]; then
-      echo "Invalid device: $device" >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_device -- "$device"
       exit 1
     fi
   fi
 
   # check on port
   if [[ ! "$port" =~ ^[0-9]+$ ]]; then
-    echo "Invalid port: $port" >&2
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_port -- "$port"
     exit 1
   fi
   if [[ "$device" != "-" ]]; then
     name_cmdb=$($ODEV_PATH/src/cmdb_get.py $type $device name $port)
     if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$name_cmdb" = "" ]; then
-      echo "Invalid port: $port" >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_port -- "$port"
       exit 1
     fi
   fi

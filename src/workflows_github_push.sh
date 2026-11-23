@@ -7,7 +7,7 @@ ODEV_PATH="${ODEV_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 if [[ $# == 0 ]]; then
   logged_in="$("$ODEV_PATH/src/gh_auth_status.sh")"
   if [[ "$logged_in" == "0" ]]; then
-    echo "Login failed: gh"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error login_failed gh
     exit 1
   fi
   
@@ -63,7 +63,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     *)
-      echo "Unknown option: $1"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error unknown_option -- "$1"
       exit 1
       ;;
   esac
@@ -71,7 +71,7 @@ done
 
 # ensure we are inside a git repository
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
-  echo "Error: not inside a git repository"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_git_repository -- "$PWD"
   exit 1
 }
 
@@ -104,7 +104,7 @@ fi
 
 # validate workflow
 if [[ ! -d "$workflow" ]] && ! git ls-files --error-unmatch "$workflow" >/dev/null 2>&1; then
-  echo "Workflow not found: $workflow"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error workflow_not_found -- "$workflow"
   exit 1
 fi
 
@@ -114,7 +114,7 @@ if [[ -n "$file" ]]; then
 
   # validate file (existing or tracked-for-deletion)
   if [[ ! -f "$target" ]] && ! git ls-files --error-unmatch "$target" >/dev/null 2>&1; then
-    echo "File not found: $target"
+    python3 "$ODEV_PATH/src/odev_messages.py" --error file_not_found -- "$target"
     exit 1
   fi
 else
