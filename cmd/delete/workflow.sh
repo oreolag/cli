@@ -28,14 +28,14 @@ WORKFLOW_COMMAND_PATH="$ODEV_PATH/users/$(id -un)/workflows"
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developer" = "0" ]; then
-  echo "Permission denied: $USER"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error permission_denied "$USER"
   exit 1
 fi
 
 # check on tools
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 if [[ "$installed" == "0" ]]; then
-  echo "Missing tool: $tool"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error missing_tool gh
 fi
 
 # set KEY
@@ -89,7 +89,7 @@ for field in "" ${mandatory_flags//,/ }; do
 
     # check if exists
     if [[ ! -d "$WORKFLOWS_USER_PATH/$name" ]]; then
-      echo "Workflow does not exist: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error workflow_not_found "$name"
       exit 1
     fi
   fi
@@ -106,7 +106,7 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
     github_branch="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_workflows)" || exit 1
     current_branch="$(git branch --show-current)" || exit 1
     if [[ -z "$github_branch" || "$current_branch" != "$github_branch" ]]; then
-      echo "Switch to the workflow branch before deleting: $github_branch" >&2
+      python3 "$ODEV_PATH/src/odev_messages.py" --error workflow_delete_branch_required "$github_branch"
       exit 1
     fi
 
@@ -159,10 +159,10 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
     git add -A -- "$name" || exit 1
     git commit --only -m "Delete workflow $name" -- "$name" || exit 1
     git push origin "$github_branch" || exit 1
-    echo "Workflow deleted: $name"
+    python3 "$ODEV_PATH/src/odev_messages.py" --success deleted_workflow "$name"
   fi
   exit 0
 else
-  echo "Workflow cannot be deleted: $name"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error workflow_cannot_be_deleted "$name"
   exit 1
 fi

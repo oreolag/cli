@@ -28,14 +28,14 @@ PLAYBOOKS_PATH="$ODEV_PATH/submodules/playbooks"
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developer" = "0" ]; then
-  echo "Permission denied: $USER"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error permission_denied "$USER"
   exit 1
 fi
 
 # check on tools
 installed="$("$ODEV_PATH/src/required_tools_print.sh" "$ODEV_PATH" "gh")"
 if [[ "$installed" == "0" ]]; then
-  echo "Missing tool: gh"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error missing_tool gh
   exit 1
 fi
 
@@ -81,19 +81,19 @@ for field in "" ${mandatory_flags//,/ }; do
   if [[ "$name" != "-" ]]; then
     # check on name
     if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
-      echo "Invalid playbook name: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_playbook_name "$name"
       exit 1
     fi
 
     # check if exists
     if [[ ! -f "$PLAYBOOKS_USER_PATH/$name.yml" && ! -L "$PLAYBOOKS_USER_PATH/$name.yml" ]]; then
-      echo "Playbook does not exist: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error playbook_not_found "$name"
       exit 1
     fi
 
     # protect community playbooks
     if [[ -e "$PLAYBOOKS_PATH/$name.yml" || -L "$PLAYBOOKS_PATH/$name.yml" ]]; then
-      echo "Playbook cannot be deleted: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error playbook_cannot_be_deleted "$name"
       exit 1
     fi
   fi
@@ -104,7 +104,7 @@ cd "$PLAYBOOKS_USER_PATH" || exit 1
 github_branch="$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/vars.yml" github push_branch_playbooks)" || exit 1
 current_branch="$(git branch --show-current)" || exit 1
 if [[ -z "$github_branch" || "$current_branch" != "$github_branch" ]]; then
-  echo "Switch to the playbook branch before deleting: $github_branch" >&2
+  python3 "$ODEV_PATH/src/odev_messages.py" --error playbook_delete_branch_required "$github_branch"
   exit 1
 fi
 
@@ -135,6 +135,6 @@ git commit --only -m "Delete playbook $name" -- "${targets[@]}" || exit 1
 git push origin "$github_branch" || exit 1
 
 # print
-echo "Playbook deleted: $name"
+python3 "$ODEV_PATH/src/odev_messages.py" --success deleted_playbook "$name"
 
 # author: https://github.com/jmoya82

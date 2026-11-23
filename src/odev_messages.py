@@ -21,6 +21,13 @@ MESSAGES = {
     "invalid_playbook_name": "Invalid playbook name: {0}",
     "playbook_branch_required": "Switch to the playbook branch before creating: {0}",
     "created_playbook": "Playbook created: {0}",
+    "workflow_not_found": "Workflow not found: {0}",
+    "playbook_cannot_be_deleted": "Playbook cannot be deleted: {0}",
+    "workflow_cannot_be_deleted": "Workflow cannot be deleted: {0}",
+    "playbook_delete_branch_required": "Switch to the playbook branch before deleting: {0}",
+    "workflow_delete_branch_required": "Switch to the workflow branch before deleting: {0}",
+    "deleted_playbook": "Playbook deleted: {0}",
+    "deleted_workflow": "Workflow deleted: {0}",
 }
 
 
