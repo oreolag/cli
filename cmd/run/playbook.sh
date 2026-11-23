@@ -25,7 +25,7 @@ INVENTORY_PATH="$(eval echo "$("$ODEV_PATH/src/read_yml.py" --db "$ODEV_PATH/var
 # check on users
 is_odev_developer=$($ODEV_PATH/src/is_member.sh $USER odev-developers)
 if [ "$is_odev_developer" = "0" ]; then
-  echo "Permission denied: $USER"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error permission_denied "$USER"
   exit 1
 fi
 
@@ -73,14 +73,14 @@ for field in "" ${mandatory_flags//,/ }; do
   if [[ "$name" != "-" ]]; then
     # check on name
     if [[ ! "$name" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]]; then
-      echo "Invalid playbook name: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_playbook_name "$name"
       exit 1
     fi
 
     # check if exists
     playbook="$PLAYBOOKS_USER_PATH/$name.yml"
     if [[ ! -f "$playbook" ]]; then
-      echo "Playbook does not exist: $name"
+      python3 "$ODEV_PATH/src/odev_messages.py" --error playbook_not_found "$name"
       exit 1
     fi
   fi
