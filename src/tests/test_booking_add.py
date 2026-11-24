@@ -146,7 +146,7 @@ class BookingAddTest(unittest.TestCase):
         self.entry["name"] = "booking-host"
         other = {**self.entry, "name": "other-booking", "id": "02", "managed_servers": ["incus-02"]}
         self.inventory.write_text(yaml.safe_dump({"servers": [self.entry, other]}))
-        cases = [("unassigned", "incus-01", "Command not available: odev booking"),
+        cases = [("unassigned", "incus-01", "Command not available: odev reserve"),
                  ("incus-01", "incus-99", "Invalid server: incus-99"),
                  ("booking-host", "incus-99", "Invalid server: incus-99")]
         for hostname, target, error in cases:

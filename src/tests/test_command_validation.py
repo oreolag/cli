@@ -172,13 +172,13 @@ fi''')
             ("get/mac", ["--device", "0", "--port", "9"], "Invalid port: 9", ["numa:"]),
             ("set/mtu", ["--interface", "99"], "Invalid interface: 99", ["value ("]),
             ("set/mtu", ["--interface", "0", "--port", "9"], "Invalid port: 9", ["value ("]),
-            ("booking/add", ["--server", "incus-05"], "Invalid server: incus-05", ["start ["]),
-            ("booking/add", ["--duration", "6"], "Invalid duration: 6", ["server:", "start ["]),
-            ("booking/add", ["--date", "2027-02-30"], "Invalid booking date", ["server:", "start ["]),
-            ("booking/add", ["--shared", "missing"], "Invalid user: missing", ["server:", "start ["]),
-            ("booking/share", ["--add", "missing"], "Invalid user: missing", ["booking:"]),
-            ("booking/share", ["--add", "tester", "--remove", "tester"], "Invalid flags", ["booking:"]),
-            ("booking/list", ["--history", "bad"], "Invalid booking date", []),
+            ("reserve/add", ["--server", "incus-05"], "Invalid server: incus-05", ["start ["]),
+            ("reserve/add", ["--duration", "6"], "Invalid duration: 6", ["server:", "start ["]),
+            ("reserve/add", ["--date", "2027-02-30"], "Invalid booking date", ["server:", "start ["]),
+            ("reserve/add", ["--shared", "missing"], "Invalid user: missing", ["server:", "start ["]),
+            ("reserve/share", ["--add", "missing"], "Invalid user: missing", ["booking:"]),
+            ("reserve/share", ["--add", "tester", "--remove", "tester"], "Invalid flags", ["booking:"]),
+            ("reserve/list", ["--history", "bad"], "Invalid booking date", []),
             ("run/playbook", ["--inventory", str(self.root / "missing")], "Unknown flag: --inventory", ["name:"]),
             ("run/playbook", ["--name", "missing"], "Playbook does not exist", []),
             ("delete/playbook", ["--name", "missing"], "Playbook does not exist", []),
@@ -232,14 +232,14 @@ fi''')
         self.assertEqual(self.marker.read_text(), "ifconfig\n")
 
     def test_booking_answers_are_checked_before_advancing(self):
-        status, output = self.dialog("booking/add", ["--date", "2099-01-01"], [("server: ", "incus-05")])
+        status, output = self.dialog("reserve/add", ["--date", "2099-01-01"], [("server: ", "incus-05")])
         self.assertNotEqual(status, 0, output)
         self.assertIn("Invalid server: incus-05", output)
         self.assertNotIn("start [", output)
         self.assertFalse(self.marker.exists())
 
     def test_valid_booking_partial_request(self):
-        status, output = self.dialog("booking/add", ["--date", "2099-01-01", "--server", "incus-01"],
+        status, output = self.dialog("reserve/add", ["--date", "2099-01-01", "--server", "incus-01"],
                                      [("start [", "14:00")])
         self.assertEqual(status, 0, output)
         self.assertIn("BOOKING EXECUTED", output)
@@ -260,10 +260,10 @@ fi''')
             ("get/mac", ["--numa", "0", "--device", "0"], "aa:bb:cc:dd:ee:ff"),
             ("set/mtu", ["--interface", "0", "--value", "1500"], "EXECUTED"),
             ("run/playbook", ["--name", "demo"], "EXECUTED"),
-            ("booking/add", ["--server", "incus-01", "--date", "2099-01-01", "--start", "14:00"], "BOOKING EXECUTED"),
-            ("booking/list", ["--history", "2099-01-01"], "BOOKING EXECUTED"),
-            ("booking/share", ["--booking", "391", "--add", "tester"], "tester\n391\n-"),
-            ("booking/cancel", ["--booking", "391"], "391"),
+            ("reserve/add", ["--server", "incus-01", "--date", "2099-01-01", "--start", "14:00"], "BOOKING EXECUTED"),
+            ("reserve/list", ["--history", "2099-01-01"], "BOOKING EXECUTED"),
+            ("reserve/share", ["--booking", "391", "--add", "tester"], "tester\n391\n-"),
+            ("reserve/cancel", ["--booking", "391"], "391"),
         ]:
             with self.subTest(name=name):
                 result = self.run_command(name, *args)
@@ -272,7 +272,7 @@ fi''')
                 self.assertNotIn("not interactive", result.stderr)
 
     def test_booking_share_asks_only_for_selected_action(self):
-        status, output = self.dialog("booking/share", ["--remove", "tester"], [("booking: ", "391")])
+        status, output = self.dialog("reserve/share", ["--remove", "tester"], [("booking: ", "391")])
         self.assertEqual(status, 0, output)
         self.assertNotIn("add:", output)
         self.assertNotIn("remove:", output)

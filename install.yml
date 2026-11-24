@@ -11,7 +11,6 @@
     cli_repository: "https://github.com/oreolag/cli.git"
     # control variables
     all : false
-    booking: false
     build: false
     create: false
     delete: false
@@ -21,6 +20,7 @@
     install: false
     main: false
     program: false
+    reserve: false
     run: false
     set: false
     src: false
@@ -45,16 +45,16 @@
       ansible.builtin.debug:
         msg:
           - "all={{ all }}"
-          - "booking={{ booking }}"
           - "build={{ build }}"
+          - "create={{ create }}"
           - "delete={{ delete }}"
           - "examine={{ examine }}"
           - "get={{ get }}"
           - "ifconfig={{ ifconfig }}"
           - "install={{ install }}"
           - "main={{ main }}"
-          - "create={{ create }}"
           - "program={{ program }}"
+          - "reserve={{ reserve }}"
           - "run={{ run }}"
           - "set={{ set }}"
           - "src={{ src }}"
@@ -75,34 +75,34 @@
       run_once: true
       delegate_to: localhost
     
-    # booking
+    # reserve
     - block:
-        - name: Copy booking.sh script
+        - name: Copy reserve.sh script
           ansible.builtin.copy:
-            src: "{{ cli.local_path }}/cmd/booking.sh"
-            dest: "{{ cli_remote_path }}/odev/cmd/booking.sh"
+            src: "{{ cli.local_path }}/cmd/reserve.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/reserve.sh"
             owner: root
             group: root
             mode: "0755"
-        - name: Copy cmd/booking directory from local path (preserve symlinks)
+        - name: Copy cmd/reserve directory from local path (preserve symlinks)
           ansible.posix.synchronize:
-            src: "{{ cli.local_path }}/cmd/booking/"
-            dest: "{{ cli_remote_path }}/odev/cmd/booking/"
+            src: "{{ cli.local_path }}/cmd/reserve/"
+            dest: "{{ cli_remote_path }}/odev/cmd/reserve/"
             use_ssh_args: true
             recursive: true
             archive: true
             links: true
             copy_links: false
-        - name: Set ownership on booking folder
+        - name: Set ownership on reserve folder
           ansible.builtin.file:
-            path: "{{ cli_remote_path }}/odev/cmd/booking/"
+            path: "{{ cli_remote_path }}/odev/cmd/reserve/"
             owner: root
             group: root
             recurse: true
         - name: Configure booking service on every server
           ansible.builtin.include_tasks: "{{ cli.local_path | default(playbook_dir) }}/booking/install.yml"
       when:
-        - (booking or all) | bool
+        - (reserve or all) | bool
         - cli.local_path is defined
         - not (repo | bool)
 

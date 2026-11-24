@@ -38,7 +38,7 @@ class BookingCommandsTest(unittest.TestCase):
                     self.assertIn("ERROR:", result.stderr)
 
     def test_share_user_validation_before_prompt(self):
-        source = (ROOT / "cmd/booking/share.sh").read_text()
+        source = (ROOT / "cmd/reserve/share.sh").read_text()
         checks = source.split("# validate supplied users before asking for missing fields\n", 1)[1].split("# check supplied values first", 1)[0]
         identity = Path(self.temp.name) / "id"
         identity.write_text('''#!/bin/bash
@@ -102,17 +102,18 @@ esac
             self.assertEqual(result.returncode, 0, result.stderr)
             return result.stdout
         batch = metadata("cmd_description_read.sh", "ALL")
-        self.assertEqual(len(batch.splitlines()), 11)
+        self.assertEqual(len(batch.splitlines()), 13)
         self.assertEqual((checkout / "spec_reads").read_text().splitlines(), ["source"])
         self.assertFalse((checkout / "timezone_reads").exists())
         names = dict(line.split("=", 1) for line in batch.splitlines())
+        self.assertIn("reserve", names)
         for key, name in [("BUILD", "build"), ("CREATE", "create"), ("GH", "gh_description")]:
             self.assertEqual(metadata("cmd_description_read.sh", key).strip(), names[name])
         self.assertFalse((checkout / "timezone_reads").exists())
-        self.assertIn("Reserve a server for a specific time", metadata("cmd_description_read.sh", "BOOKING_ADD"))
+        self.assertIn("Reserve a server for a specific time", metadata("cmd_description_read.sh", "RESERVE_ADD"))
         self.assertEqual((checkout / "timezone_reads").read_text().splitlines(), ["read"])
-        self.assertIn("start,,", metadata("cmd_flags_read.sh", "BOOKING_ADD"))
-        self.assertEqual(metadata("cmd_mandatory_flags_read.sh", "BOOKING_ADD").strip(), "server,start")
+        self.assertIn("start,,", metadata("cmd_flags_read.sh", "RESERVE_ADD"))
+        self.assertEqual(metadata("cmd_mandatory_flags_read.sh", "RESERVE_ADD").strip(), "server,start")
 
     def test_shared_booking_timezone(self):
         self.db.write_text("timezone: Europe/Madrid\nservers: []\n")
@@ -142,18 +143,18 @@ print(now.astimezone(ZoneInfo(os.environ.get('TZ', 'UTC'))).strftime(sys.argv[1]
         clock.chmod(0o755)
         source = (ROOT / "src/cmd_spec.sh").read_text()
         spec = Path(self.temp.name) / "spec.sh"
-        spec.write_text(source.split("# booking (", 1)[1].split("# build", 1)[0].split("\n", 1)[1])
-        result = subprocess.run(["bash", "-c", 'source "$1"; printf "%s\\n" "${BOOKING_ADD_FLAGS[@]}"', "test", str(spec)],
+        spec.write_text(source.split("# reserve (", 1)[1].split("# build", 1)[0].split("\n", 1)[1])
+        result = subprocess.run(["bash", "-c", 'source "$1"; printf "%s\\n" "${RESERVE_ADD_FLAGS[@]}"', "test", str(spec)],
             env={**self.env, "TZ": "UTC", "BOOKING_TIMEZONE": "",
                  "PATH": self.temp.name + os.pathsep + os.environ["PATH"]},
             capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("start,,Start time (HH:MM),-,13:45", result.stdout)
-        self.assertIn("date,d,Booking date (YYYY-MM-DD),-,2026-10-20", result.stdout)
+        self.assertIn("date,d,Booking date (YYYY-MM-DD or today/tomorrow),-,2026-10-20", result.stdout)
 
     def test_booking_add_validates_supplied_start_before_prompt(self):
         # Exercise the command's actual validation blocks with a fixed clock.
-        source = (ROOT / "cmd/booking/add.sh").read_text()
+        source = (ROOT / "cmd/reserve/add.sh").read_text()
         validation = source.split("# validate supplied or completed start values\n", 1)[1].split("# parse flags", 1)[0]
         early = source.split("# validate supplied input before asking for missing fields\n", 1)[1].split("# check supplied values first", 1)[0]
         clock = Path(self.temp.name) / "date"
@@ -230,7 +231,7 @@ else:
             "maximum_duration_hours": 5, "terminate_jobs": True,
         }]}))
 
-    def run_command(self, *args, script="cmd/booking.sh"):
+    def run_command(self, *args, script="cmd/reserve.sh"):
         return subprocess.run(["bash", str(ROOT / script), *args],
                               env=self.env, capture_output=True, text=True)
 
@@ -259,7 +260,7 @@ else:
             for action in ["share"]:
                 with self.subTest(host=name, action=action):
                     args, values = cases[action]
-                    result = self.run_command(*args, script=f"cmd/booking/{action}.sh")
+                    result = self.run_command(*args, script=f"cmd/reserve/{action}.sh")
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(result.stdout, "\n".join(values) + "\n")
 
@@ -269,15 +270,15 @@ else:
                      {"servers": [{"name": "other-booking", "id": "01",
                       "managed_servers": [self.local], "maximum_duration_hours": 5}]}]:
             self.db.write_text(yaml.safe_dump(data))
-            for script, args in [("cmd/booking.sh", []),
-                                 *[(f"cmd/booking/{action}.sh", []) for action in ["add", "list", "share", "cancel"]]]:
+            for script, args in [("cmd/reserve.sh", []),
+                                 *[(f"cmd/reserve/{action}.sh", []) for action in ["add", "list", "share", "cancel"]]]:
                 if any(
                         self.local in entry["managed_servers"] for entry in data["servers"]):
                     continue
                 result = self.run_command(*args, script=script)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(result.stdout, "")
-                self.assertEqual(result.stderr, "Command not available: odev booking\n")
+                self.assertEqual(result.stderr, "Command not available: odev reserve\n")
 
     def test_invalid_or_missing_inventory(self):
         for content in [None, "servers: [", "servers: invalid"]:
@@ -286,7 +287,7 @@ else:
             result = self.run_command("add")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("ERROR:", result.stderr)
-            self.assertNotIn("odev booking add", result.stdout)
+            self.assertNotIn("odev reserve add", result.stdout)
 
     def test_help_and_unknown_action(self):
         self.inventory(self.local, [])
@@ -294,12 +295,12 @@ else:
         self.assertEqual(self.run_command("--help").returncode, 0)
         for action in ["list", "add", "share", "cancel"]:
             resolved = subprocess.run(
-                ["bash", str(ROOT / "src/workflow_command_path.sh"), str(ROOT), "booking", action],
+                ["bash", str(ROOT / "src/workflow_command_path.sh"), str(ROOT), "reserve", action],
                 env=self.env, capture_output=True, text=True)
             self.assertEqual(resolved.returncode, 0)
-            self.assertEqual(resolved.stdout.strip(), str(ROOT / f"cmd/booking/{action}.sh"))
+            self.assertEqual(resolved.stdout.strip(), str(ROOT / f"cmd/reserve/{action}.sh"))
         unknown = subprocess.run(
-            ["bash", str(ROOT / "src/workflow_command_path.sh"), str(ROOT), "booking", "new"],
+            ["bash", str(ROOT / "src/workflow_command_path.sh"), str(ROOT), "reserve", "new"],
             env=self.env, capture_output=True, text=True)
         self.assertNotEqual(unknown.returncode, 0)
 
@@ -314,18 +315,18 @@ else:
         # Isolate booking definitions from unrelated workflow discovery.
         spec = Path(self.temp.name) / "booking_spec.sh"
         source = (ROOT / "src/cmd_spec.sh").read_text()
-        spec.write_text(source.split("# booking (", 1)[1].split("# build", 1)[0].split("\n", 1)[1])
+        spec.write_text(source.split("# reserve (", 1)[1].split("# build", 1)[0].split("\n", 1)[1])
         for action, names in expected.items():
             with self.subTest(action=action):
                 flags = subprocess.run(
                     ["bash", str(ROOT / "src/cmd_flags_read.sh"), str(ROOT),
-                     "BOOKING_" + action.upper(), "--db", str(spec)],
+                     "RESERVE_" + action.upper(), "--db", str(spec)],
                     env={**self.env, "TERM": "xterm"}, capture_output=True, text=True)
                 self.assertEqual(flags.returncode, 0, flags.stderr)
                 self.assertCountEqual([line.split(",")[0] for line in flags.stdout.splitlines()], names)
                 mandatory = subprocess.run(
                     ["bash", str(ROOT / "src/cmd_mandatory_flags_read.sh"), str(ROOT),
-                     "BOOKING_" + action.upper(), "--db", str(spec)],
+                     "RESERVE_" + action.upper(), "--db", str(spec)],
                     env=self.env, capture_output=True, text=True)
                 self.assertEqual(mandatory.returncode, 0, mandatory.stderr)
                 expected_mandatory = {"list": "", "add": "server,start",
@@ -339,7 +340,7 @@ else:
         for name in ["is_server.sh", "read_yml.py", "booking_is_server.py", "cmdb_get.py", "odev_path.py"]:
             (checkout / "src" / name).symlink_to(ROOT / "src" / name)
         descriptions = "\n".join(name + "=Description" for name in
-            ["build", "get", "ifconfig", "create", "program", "run", "set", "update", "validate", "examine", "gh_description"])
+            ["build", "get", "ifconfig", "create", "program", "run", "set", "update", "validate", "examine", "gh_description", "delete", "reserve"])
         for name, output in [("is_member.sh", "1"), ("required_tools_print.sh", "0"),
                              ("cmd_description_read.sh", descriptions)]:
             helper = checkout / "src" / name
@@ -354,6 +355,7 @@ else:
                      "TERM": "xterm", "USER": "test-user"}, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("CORE COMMANDS", result.stdout)
+            self.assertIn("reserve:", result.stdout)
             self.assertNotIn("Is a directory", result.stderr)
 
     def test_legacy_vars_use_default_inventory_path(self):

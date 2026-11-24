@@ -51,7 +51,7 @@ Booking servers support all booking commands. Managed machines can also run
 all four booking subcommands using their assigned service over SSH.
 On a managed machine, the add prompt defaults to that machine and uses the
 assigned service's timezone. Machines listed
-nowhere return `Command not available: odev booking`.
+nowhere return `Command not available: odev reserve`.
 
 Service IDs are quoted positive numbers, unique across the inventory. Keep them
 unchanged when reordering entries or renaming hosts; never reuse an ID for another
@@ -95,7 +95,7 @@ Tailscale node. A disconnected node returns `Login failed: tailscale`.
 For example, on `incus-01`, this creates a booking through its remote service:
 
 ```bash
-odev booking add --server incus-01 --duration 5m
+odev reserve add --server incus-01 --duration 5m
 ```
 
 The same command on `odev-booking-01`, when it manages `incus-01`, uses its
@@ -169,9 +169,9 @@ Use the configured `paths.booking_db` if the default path was changed.
 ## List
 
 ```bash
-odev booking list
-odev booking list --history 2026-11-01
-odev booking list --active
+odev reserve list
+odev reserve list --history 2026-11-01
+odev reserve list --active
 ```
 
 The default view shows availability and active or upcoming reservations for
@@ -192,9 +192,9 @@ Use it on its own.
 ## Add
 
 ```bash
-odev booking add --server incus-01
-odev booking add --server incus-01 --date 2026-11-01 --start 14:15 --duration 2h
-odev booking add --server incus-01 --shared javier,quico
+odev reserve add --server incus-01
+odev reserve add --server incus-01 --date 2026-11-01 --start 14:15 --duration 2h
+odev reserve add --server incus-01 --shared javier,quico
 ```
 
 The authenticated user owns the reservation. Missing required values open the
@@ -212,11 +212,11 @@ Date and time inputs use that service's timezone. `booking/api.py` authenticates
 users against `odev-users`. `booking/storage.py` performs the SQLite transaction.
 The API repeats validation, including policy and conflict checks.
 
-For example, after deploying `booking=true` on all machines, run this on the
+For example, after deploying `reserve=true` on all machines, run this on the
 booking server to create a reservation with a future start time:
 
 ```bash
-odev booking add --server incus-01 --date 2026-11-01 --start 14:15 --duration 1h
+odev reserve add --server incus-01 --date 2026-11-01 --start 14:15 --duration 1h
 # Booking created: 01-0001
 ```
 
@@ -234,8 +234,8 @@ at 16:00 allows another to start at 16:00.
 ## Share
 
 ```bash
-odev booking share --booking 01-0001 --add javier
-odev booking share --booking 01-0001 --remove quico
+odev reserve share --booking 01-0001 --add javier
+odev reserve share --booking 01-0001 --remove quico
 ```
 
 Only the owner can change sharing on active or upcoming bookings. Add or remove one user per invocation; the flags
@@ -249,14 +249,14 @@ They cannot share or cancel the owner's booking.
 ## Cancel
 
 ```bash
-odev booking cancel --booking 01-0001
+odev reserve cancel --booking 01-0001
 ```
 
 Owners and administrators can cancel active or future bookings. Show the server,
 date and times before asking for confirmation, with No as the default. Keep
 cancelled bookings as history.
 Administrators are members of `odev-admins`. Cancellation preserves collaborators
-and the booking ID; `odev booking list --history YYYY-MM-DD` includes the cancelled record.
+and the booking ID; `odev reserve list --history YYYY-MM-DD` includes the cancelled record.
 Cancellation releases the reservation immediately. The next session expiry
 check disconnects users who have no other active owned or shared booking.
 

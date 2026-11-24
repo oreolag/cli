@@ -105,7 +105,7 @@ print_booking_status() {
   fi
 
   local availability total free server red="" strong="" reset=""
-  printf '\n%sBOOKING SYSTEM%s\n' "$bold" "$normal"
+  printf '\n%sRESERVATION SYSTEM%s\n' "$bold" "$normal"
   if [[ -t 1 && "${TERM:-dumb}" != "dumb" ]]; then
     strong="$bold"
     reset="$normal"
@@ -140,12 +140,12 @@ print_help() {
   echo "  odev <command> <subcommand> [flags]"
   echo ""
   echo "${bold}CORE COMMANDS${normal}"
-  echo "  booking:         $booking"
   echo "  delete:          $delete"
   echo "  examine:         $examine"
   echo "  get:             $get"
   echo "  gh:              $gh_description"
   echo "  ifconfig:        $ifconfig"
+  echo "  reserve:         $reserve"
   echo "  set:             $set"
   echo "  update:          $update"
   echo ""

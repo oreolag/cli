@@ -24,24 +24,24 @@ bold=$(tput bold)
 italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
-# booking (action scripts currently echo parameters only)
-BOOKING_DESCRIPTION="Add, cancel, list or share bookings" # (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
+# reserve (action scripts currently echo parameters only)
+RESERVE_DESCRIPTION="Add, cancel, list or share bookings" # (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
 # Metadata readers set KEY; unrelated commands do not need booking defaults.
-if [[ "${KEY:-BOOKING}" == BOOKING* ]]; then
+if [[ "${KEY:-RESERVE}" == RESERVE* ]]; then
   if [[ -z "${BOOKING_TIMEZONE:-}" ]]; then
     BOOKING_TIMEZONE="$(bash "$ODEV_PATH/src/booking_timezone.sh" "$ODEV_PATH" 2>/dev/null)" || BOOKING_TIMEZONE="UTC"
   fi
-  BOOKING_FLAGS=()
+  RESERVE_FLAGS=()
   # list
-  BOOKING_LIST_DESCRIPTION="List server availability and bookings" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
-  BOOKING_LIST_FLAGS=(
+  RESERVE_LIST_DESCRIPTION="List server availability and bookings" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
+  RESERVE_LIST_FLAGS=(
     "active,a,Show your active bookings across all services,0|1,0"
     "history,,Show booking history for date YYYY-MM-DD or today/yesterday/tomorrow,-,-"
   )
-  BOOKING_LIST_FLAGS_MANDATORY=""
+  RESERVE_LIST_FLAGS_MANDATORY=""
   # add
-  BOOKING_ADD_DESCRIPTION="Reserve a server for a specific time" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
-  BOOKING_ADD_FLAGS=(
+  RESERVE_ADD_DESCRIPTION="Reserve a server for a specific time" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
+  RESERVE_ADD_FLAGS=(
     "date,d,Booking date (YYYY-MM-DD or today/tomorrow),-,$(TZ="$BOOKING_TIMEZONE" date +%F)"
     "duration,,Duration (e.g. 5m or 1h),-,1h"
     "server,s,Server inventory name,-,-"
@@ -52,21 +52,21 @@ if [[ "${KEY:-BOOKING}" == BOOKING* ]]; then
       printf '%02d:%02d' "$(( next_minutes / 60 % 24 ))" "$(( next_minutes % 60 ))"
     )"
   )
-  BOOKING_ADD_FLAGS_MANDATORY="server,start"
+  RESERVE_ADD_FLAGS_MANDATORY="server,start"
   # cancel
-  BOOKING_CANCEL_DESCRIPTION="Cancel an active or future booking"
-  BOOKING_CANCEL_FLAGS=(
+  RESERVE_CANCEL_DESCRIPTION="Cancel an active or future booking"
+  RESERVE_CANCEL_FLAGS=(
     "booking,b,Booking ID to cancel,-,-"
   )
-  BOOKING_CANCEL_FLAGS_MANDATORY="booking"
+  RESERVE_CANCEL_FLAGS_MANDATORY="booking"
   # share
-  BOOKING_SHARE_DESCRIPTION="Share your booking with other users"
-  BOOKING_SHARE_FLAGS=(
+  RESERVE_SHARE_DESCRIPTION="Share your booking with other users"
+  RESERVE_SHARE_FLAGS=(
     "add,a,User to add to the booking,-,-"
     "booking,b,Booking ID to share,-,-"
     "remove,r,User to remove from the booking,-,-"
   )
-  BOOKING_SHARE_FLAGS_MANDATORY="booking"
+  RESERVE_SHARE_FLAGS_MANDATORY="booking"
 fi
 
 # build

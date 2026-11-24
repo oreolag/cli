@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# example: odev booking
+# example: odev reserve
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMAND="booking"
+COMMAND="reserve"
 
 # derive from SCRIPT_DIR
 CLI_NAME="$(basename "$(dirname "$SCRIPT_DIR")")"

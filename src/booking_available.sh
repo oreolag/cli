@@ -13,7 +13,7 @@ if [[ "$mode" == "--help-only" ]]; then
 fi
 is_booking=$(python3 "$ODEV_PATH/src/booking_is_server.py" --db "$booking_db" "${@:2}")
 if [[ "$is_booking" != 1 ]]; then
-  python3 "$ODEV_PATH/src/odev_messages.py" --error command_not_available "odev booking"
+  python3 "$ODEV_PATH/src/odev_messages.py" --error command_not_available "odev reserve"
   exit 1
 fi
 if [[ "$mode" == "--participant" ]]; then

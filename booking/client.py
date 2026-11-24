@@ -111,7 +111,7 @@ def run_remote_booking(root, peers, command, operation, capture=False, plain_err
         try:
             run = subprocess.run(["ansible-playbook", "-i", str(inventory), "--ssh-extra-args=-o BatchMode=yes",
                                   "--extra-vars", json.dumps(variables),
-                                  str(root / "cmd/booking/booking_list_all.yml")],
+                                  str(root / "cmd/reserve/booking_list_all.yml")],
                                  capture_output=True, text=True, timeout=60)
         except subprocess.TimeoutExpired as error:
             detail = error.stderr or b""
@@ -168,13 +168,13 @@ def main():
     entry = next((entry for entry in inventory["servers"] if entry["name"] == local), None)
     if args.availability:
         if entry is None:
-            raise ValueError(message("command_not_available", "odev booking"))
+            raise ValueError(message("command_not_available", "odev reserve"))
         result = local_listing(None, availability=True)
         free = result["free"]
         print(result["total"], len(free), free[0] if len(free) == 1 else "", sep="\t")
         return
     if entry is None and args.local_only:
-        raise ValueError(message("command_not_available", "odev booking"))
+        raise ValueError(message("command_not_available", "odev reserve"))
     if args.booked_hosts:
         hosts = set(local_listing(None)["servers"]) if entry is not None else set()
         if not args.local_only:
@@ -190,7 +190,7 @@ def main():
     if entry is None:
         assigned = next((item for item in inventory["servers"] if local in item["managed_servers"]), None)
         if assigned is None:
-            raise ValueError(message("command_not_available", "odev booking"))
+            raise ValueError(message("command_not_available", "odev reserve"))
     if args.share:
         booking, action, user = args.share
         if assigned is not None:

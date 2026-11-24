@@ -118,7 +118,7 @@ def main():
             if entry is None and args.participant:
                 entry = next((item for item in data["servers"] if local in item["managed_servers"]), None)
             if entry is None:
-                raise ValueError(message("command_not_available", "odev booking"))
+                raise ValueError(message("command_not_available", "odev reserve"))
             if args.default_server:
                 print("-" if entry["name"] == local else local)
                 return 0

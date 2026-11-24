@@ -36,9 +36,9 @@ done
 source "$CMD_SPEC"
 
 if [[ "$KEY" == "ALL" ]]; then
-  names=(build get ifconfig create program run set update validate examine gh_description delete booking)
+  names=(build get ifconfig create program run set update validate examine gh_description delete reserve)
   i=0
-  for key in BUILD GET IFCONFIG CREATE PROGRAM RUN SET UPDATE VALIDATE EXAMINE GH DELETE BOOKING; do
+  for key in BUILD GET IFCONFIG CREATE PROGRAM RUN SET UPDATE VALIDATE EXAMINE GH DELETE RESERVE; do
     desc_var="${key}_DESCRIPTION"
     echo "${names[$i]}=${!desc_var}"
     i=$((i + 1))
