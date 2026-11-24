@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev new workflow --name fft
+# example: odev create workflow --name fft
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -126,10 +126,10 @@ for field in "" ${mandatory_flags//,/ }; do
 
     # check if workflow name exists (local)
     if [[ -d "$WORKFLOWS_PATH/$name" ]] || \
-       [[ -f "$ODEV_PATH/cmd/new/$name.sh" && ! -L "$ODEV_PATH/cmd/new/$name.sh" ]] || \
+       [[ -f "$ODEV_PATH/cmd/create/$name.sh" && ! -L "$ODEV_PATH/cmd/create/$name.sh" ]] || \
        [[ -d "$WORKFLOWS_USER_PATH/$name" ]] || \
-       [[ -e "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]] || \
-       [[ -L "$WORKFLOW_COMMAND_PATH/new/$name.sh" ]]; then
+       [[ -e "$WORKFLOW_COMMAND_PATH/create/$name.sh" ]] || \
+       [[ -L "$WORKFLOW_COMMAND_PATH/create/$name.sh" ]]; then
       python3 "$ODEV_PATH/src/odev_messages.py" --error workflow_already_exists "$name"
       exit 1
     fi
@@ -193,7 +193,7 @@ if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
 fi
 
 # recreate symlinks when possible
-scripts=(new build program run validate delete)
+scripts=(create build program run validate delete)
 for d in "$WORKFLOWS_USER_PATH"/*; do
   [[ -d "$d" ]] || continue
   name_i="$(basename "$d")"
@@ -238,7 +238,7 @@ if [ ! "$template" = "-" ]; then
 else
   #cp -r "$WORKFLOWS_TEMPLATE_PATH"/* .
   cp "$WORKFLOWS_TEMPLATE_PATH"/cmd_spec.sh .
-  cp "$WORKFLOWS_TEMPLATE_PATH"/new.sh .
+  cp "$WORKFLOWS_TEMPLATE_PATH"/create.sh .
   cp "$WORKFLOWS_TEMPLATE_PATH"/build.sh .
   cp "$WORKFLOWS_TEMPLATE_PATH"/program.sh .
   cp "$WORKFLOWS_TEMPLATE_PATH"/program.yml .
@@ -251,15 +251,15 @@ fi
 printf '%s\n' "$github_user" > "$WORKFLOWS_USER_PATH/$name/GITHUB_USERNAME" || exit 1
 
 # Older workflow templates locate their specification through the shared link.
-for script in new build program run validate delete; do
+for script in create build program run validate delete; do
   sed -i 's|^CLI_NAME=.*|CLI_NAME="odev"|' "$WORKFLOWS_USER_PATH/$name/$script.sh"
   sed -i 's|readlink -f "$ODEV_PATH/cmd/$COMMAND/$SUBCOMMAND.sh"|readlink -f "${BASH_SOURCE[0]}"|g' "$WORKFLOWS_USER_PATH/$name/$script.sh"
 done
 
 # replace WFNAME (and _COMMAND_)
 sed -i "s/WFNAME/${name^^}/g" "$WORKFLOWS_USER_PATH/$name/cmd_spec.sh"
-sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
-sed -i "s/_COMMAND_/new/g" "$WORKFLOWS_USER_PATH/$name/new.sh"
+sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/create.sh"
+sed -i "s/_COMMAND_/create/g" "$WORKFLOWS_USER_PATH/$name/create.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
 sed -i "s/_COMMAND_/build/g" "$WORKFLOWS_USER_PATH/$name/build.sh"
 sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/program.sh"
@@ -274,7 +274,7 @@ sed -i "s/WFNAME/${name}/g" "$WORKFLOWS_USER_PATH/$name/delete.sh"
 sed -i "s/_COMMAND_/delete/g" "$WORKFLOWS_USER_PATH/$name/delete.sh"
 
 # create symlinks
-sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/new.sh" "$WORKFLOW_COMMAND_PATH/new/$name.sh"
+sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/create.sh" "$WORKFLOW_COMMAND_PATH/create/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/build.sh" "$WORKFLOW_COMMAND_PATH/build/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/program.sh" "$WORKFLOW_COMMAND_PATH/program/$name.sh"
 sudo $ODEV_PATH/src/ln_s.sh "$ODEV_PATH" "$WORKFLOWS_USER_PATH/$name/run.sh" "$WORKFLOW_COMMAND_PATH/run/$name.sh"
@@ -288,7 +288,7 @@ cd "$WORKFLOWS_USER_PATH"
   ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "build.sh" --comment "First commit"
   ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "cmd_spec.sh" --comment "First commit"
   ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "delete.sh" --comment "First commit"
-  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "new.sh" --comment "First commit"
+  ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "create.sh" --comment "First commit"
   ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "program.sh" --comment "First commit"
   ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "program.yml" --comment "First commit"
   ODEV_PATH="$ODEV_PATH" "$ODEV_PATH/src/workflows_github_push.sh" --workflow "$name" --file "run.sh" --comment "First commit"

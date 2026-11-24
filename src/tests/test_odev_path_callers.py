@@ -81,14 +81,14 @@ class PathCallerTests(unittest.TestCase):
         workflow = self.data / "workflows/example"
         workflow.mkdir(parents=True)
         (workflow / "cmd_spec.sh").write_text("USER_WORKFLOW_FOUND=yes\n")
-        command = ["bash", "-c", 'KEY=NEW\nsource "$ODEV_PATH/src/cmd_spec.sh" || exit 1\nprintf "%s\\n" "$WORKFLOWS_USER_PATH" "$PLAYBOOKS_USER_PATH" "$USER_WORKFLOW_FOUND"']
+        command = ["bash", "-c", 'KEY=CREATE\nsource "$ODEV_PATH/src/cmd_spec.sh" || exit 1\nprintf "%s\\n" "$WORKFLOWS_USER_PATH" "$PLAYBOOKS_USER_PATH" "$USER_WORKFLOW_FOUND"']
         result = subprocess.run(command, env=self.env, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.splitlines(), [str(self.data / "workflows"), str(self.data / "playbooks"), "yes"])
 
     def test_completion_failure_does_not_exit_the_interactive_shell(self):
         self.config.unlink()
-        command = ["bash", "-c", 'source "$ODEV_PATH/odev_completion.sh"\n_odev_source_flags "$ODEV_PATH" new\nprintf "shell-alive\\n"']
+        command = ["bash", "-c", 'source "$ODEV_PATH/odev_completion.sh"\n_odev_source_flags "$ODEV_PATH" create\nprintf "shell-alive\\n"']
         result = subprocess.run(command, env=self.env, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, "shell-alive\n")

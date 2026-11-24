@@ -106,7 +106,7 @@ esac
         self.assertEqual((checkout / "spec_reads").read_text().splitlines(), ["source"])
         self.assertFalse((checkout / "timezone_reads").exists())
         names = dict(line.split("=", 1) for line in batch.splitlines())
-        for key, name in [("BUILD", "build"), ("NEW", "new"), ("GH", "gh_description")]:
+        for key, name in [("BUILD", "build"), ("CREATE", "create"), ("GH", "gh_description")]:
             self.assertEqual(metadata("cmd_description_read.sh", key).strip(), names[name])
         self.assertFalse((checkout / "timezone_reads").exists())
         self.assertIn("Reserve a server for a specific time", metadata("cmd_description_read.sh", "BOOKING_ADD"))
@@ -339,7 +339,7 @@ else:
         for name in ["is_server.sh", "read_yml.py", "booking_is_server.py", "cmdb_get.py", "odev_path.py"]:
             (checkout / "src" / name).symlink_to(ROOT / "src" / name)
         descriptions = "\n".join(name + "=Description" for name in
-            ["build", "get", "ifconfig", "new", "program", "run", "set", "update", "validate", "examine", "gh_description"])
+            ["build", "get", "ifconfig", "create", "program", "run", "set", "update", "validate", "examine", "gh_description"])
         for name, output in [("is_member.sh", "1"), ("required_tools_print.sh", "0"),
                              ("cmd_description_read.sh", descriptions)]:
             helper = checkout / "src" / name

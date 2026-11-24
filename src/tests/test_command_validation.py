@@ -183,10 +183,10 @@ fi''')
             ("run/playbook", ["--name", "missing"], "Playbook does not exist", []),
             ("delete/playbook", ["--name", "missing"], "Playbook does not exist", []),
             ("delete/workflow", ["--name", "missing"], "Workflow does not exist", []),
-            ("new/workflow", ["--template", "missing"], "Template does not exist", ["name:"]),
-            ("new/workflow", ["--name", "../bad"], "Invalid workflow name", []),
-            ("new/playbook", ["--name", "../bad"], "Invalid playbook name", []),
-            ("new/playbook", ["--name", "demo"], "Playbook already exists", []),
+            ("create/workflow", ["--template", "missing"], "Template does not exist", ["name:"]),
+            ("create/workflow", ["--name", "../bad"], "Invalid workflow name", []),
+            ("create/playbook", ["--name", "../bad"], "Invalid playbook name", []),
+            ("create/playbook", ["--name", "demo"], "Playbook already exists", []),
         ]
         for name, args, error, absent in cases:
             with self.subTest(name=name, args=args):
@@ -204,14 +204,14 @@ fi''')
         self.assert_early("delete/playbook", ["--name", "demo"], "Playbook cannot be deleted: demo", [])
 
     def test_new_playbook_without_flags_prompts_before_github_actions(self):
-        status, output = self.dialog("new/playbook", [], [("name: ", "../bad")])
+        status, output = self.dialog("create/playbook", [], [("name: ", "../bad")])
         self.assertNotEqual(status, 0, output)
         self.assertIn("Invalid playbook name: ../bad", output)
         self.assertNotIn("operand expected", output)
         self.assertFalse(self.marker.exists(), output)
 
     def test_new_workflow_without_flags_prompts_before_github_actions(self):
-        status, output = self.dialog("new/workflow", [], [("name: ", "../bad")])
+        status, output = self.dialog("create/workflow", [], [("name: ", "../bad")])
         self.assertNotEqual(status, 0, output)
         self.assertIn("Invalid workflow name: ../bad", output)
         self.assertNotIn("operand expected", output)
@@ -285,5 +285,5 @@ fi''')
 
     def test_upstream_duplicate_is_read_only(self):
         self.env["UPSTREAM_NAMES"] = "taken\n"
-        self.assert_early("new/workflow", ["--name", "taken"], "Workflow already exists: taken", [])
+        self.assert_early("create/workflow", ["--name", "taken"], "Workflow already exists: taken", [])
         self.assertFalse((self.root / "workflows/taken").exists())

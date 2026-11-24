@@ -8,12 +8,12 @@ lower() {
   printf '%s' "${1,,}"
 }
 
-NEW_WFNAME_DESCRIPTION="New description"
-NEW_WFNAME_FLAGS=(
+CREATE_WFNAME_DESCRIPTION="Create description"
+CREATE_WFNAME_FLAGS=(
   "name,n,Project name,-,-"
   "push,p,Push to GitHub,0|1,1"
 )
-NEW_WFNAME_FLAGS_MANDATORY="name,push"
+CREATE_WFNAME_FLAGS_MANDATORY="name,push"
 
 BUILD_WFNAME_DESCRIPTION="Build description"
 BUILD_WFNAME_FLAGS=(

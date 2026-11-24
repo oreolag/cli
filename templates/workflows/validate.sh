@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev new WFNAME
+# example: odev validate WFNAME
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -7,7 +7,7 @@ set -euo pipefail
 #   subcommand: Description (one per line)
 #
 # Example:
-#   cmd_subcommands_read.sh /opt/odev NEW
+#   cmd_subcommands_read.sh /opt/odev CREATE
 #   vllm:        Creates a vLLM project
 #   hugging:     Creates a Hugging Face project
 

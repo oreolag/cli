@@ -131,24 +131,24 @@ IFCONFIG_DESCRIPTION="Data-plane network interface configuration"
 IFCONFIG_FLAGS=(
 )
 
-# new
-NEW_DESCRIPTION="Create a new playbook, project or workflow"
-NEW_FLAGS=(
+# create
+CREATE_DESCRIPTION="Create a new playbook, project or workflow"
+CREATE_FLAGS=(
 )
 # playbook
-NEW_PLAYBOOK_DESCRIPTION="Adds a new playbook to ${bold}$PLAYBOOKS_USER_PATH${normal}"
-NEW_PLAYBOOK_FLAGS=(
+CREATE_PLAYBOOK_DESCRIPTION="Adds a new playbook to ${bold}$PLAYBOOKS_USER_PATH${normal}"
+CREATE_PLAYBOOK_FLAGS=(
   "name,n,Playbook name,-,-"
 )
-NEW_PLAYBOOK_FLAGS_MANDATORY="name"
+CREATE_PLAYBOOK_FLAGS_MANDATORY="name"
 # workflow
-NEW_WORKFLOW_DESCRIPTION="Creates a new accelerated workflow in ${bold}$WORKFLOWS_USER_PATH${normal}"
-NEW_WORKFLOW_FLAGS=(
+CREATE_WORKFLOW_DESCRIPTION="Creates a new accelerated workflow in ${bold}$WORKFLOWS_USER_PATH${normal}"
+CREATE_WORKFLOW_FLAGS=(
   #"fork,f,Create GitHub fork of oreolag/workflows,-,-"
   "name,n,Workflow name,-,-"
   "template,t,Use existing workflow as template,-,-"
 )
-NEW_WORKFLOW_FLAGS_MANDATORY="name"
+CREATE_WORKFLOW_FLAGS_MANDATORY="name"
 
 # program
 PROGRAM_DESCRIPTION="Device programming"

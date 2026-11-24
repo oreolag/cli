@@ -96,7 +96,7 @@ for field in "" ${mandatory_flags//,/ }; do
 done
 
 # delete 
-workflow_link="$("$ODEV_PATH/src/workflow_command_path.sh" "$ODEV_PATH" new "$name")" || exit 1
+workflow_link="$("$ODEV_PATH/src/workflow_command_path.sh" "$ODEV_PATH" create "$name")" || exit 1
 target="$(readlink -f "$workflow_link")"
 if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
   if [[ -d "$WORKFLOWS_USER_PATH/$name" ]]; then
@@ -112,7 +112,7 @@ if [[ "$target" == "$WORKFLOWS_USER_PATH/"* ]]; then
 
     # Collect only this user's links, including links from older installations.
     workflow_links=()
-    for command in new build program run validate delete; do
+    for command in create build program run validate delete; do
       for link in "$WORKFLOW_COMMAND_PATH/$command/$name.sh" "$ODEV_PATH/cmd/$command/$name.sh"; do
         [[ -L "$link" ]] || continue
         target="$(readlink -f "$link")" || continue

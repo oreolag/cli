@@ -10,7 +10,7 @@ Authenticate with GitHub CLI and use an account in `odev-developers`:
 
 ```bash
 gh auth login
-odev new workflow --name my_workflow
+odev create workflow --name my_workflow
 ```
 
 On first use, `odev` creates or reuses your fork of `oreolag/workflows`, clones it
@@ -26,7 +26,7 @@ workflows.
 To start from an existing personal or community workflow:
 
 ```bash
-odev new workflow --name my_nccl --template nccl
+odev create workflow --name my_nccl --template nccl
 ```
 
 ## Implement
@@ -36,7 +36,7 @@ Edit your workflow in your checkout:
 ```text
 ~/odev/workflows/my_workflow/
   cmd_spec.sh
-  new.sh
+  create.sh
   build.sh
   program.sh
   program.yml
@@ -50,7 +50,7 @@ logic at `# add your code here!` and keep the existing command structure.
 
 | Script | Command | Workflow logic |
 |---|---|---|
-| `new.sh` | `odev new my_workflow` | Prepare project files |
+| `create.sh` | `odev create my_workflow` | Prepare project files |
 | `build.sh` | `odev build my_workflow` | Compile or build the project |
 | `program.sh` | `odev program my_workflow` | Configure devices |
 | `run.sh` | `odev run my_workflow` | Execute the application |
@@ -65,7 +65,7 @@ cd "$PROJECTS_PATH/$SUBCOMMAND/$name" || exit 1
 make
 ```
 
-This example assumes `new.sh` prepares a project with a Makefile. The templates
+This example assumes `create.sh` prepares a project with a Makefile. The templates
 provide scaffolding; you implement the application's behavior.
 
 `odev` resolves personal commands through links under
@@ -98,14 +98,14 @@ Read new flags from `V` in the corresponding script, following the generated
 ## Test
 
 ```bash
-odev new my_workflow --help
-odev new my_workflow --name my_project --push 0
+odev create my_workflow --help
+odev create my_workflow --name my_project --push 0
 odev build my_workflow --name my_project
 odev run my_workflow --name my_project
 ```
 
 The default project path is `~/odev/projects/my_workflow/my_project`. In the generated
-`new.sh`, `--push 0` keeps the project local; `--push 1` creates a private GitHub
+`create.sh`, `--push 0` keeps the project local; `--push 1` creates a private GitHub
 repository named `my_workflow-my_project`. This is separate from the workflow fork.
 
 ## Share

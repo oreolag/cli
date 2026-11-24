@@ -122,7 +122,7 @@ sudo cp -f -- "$CHECKOUT_PATH/odev" "$ODEV_PATH/odev"
 # cmd (keep user symlinks)
 sudo mv "$ODEV_PATH/cmd" "$ODEV_PATH/cmd_tmp"
 sudo cp -a "$CHECKOUT_PATH/cmd" "$ODEV_PATH/cmd"
-folders=(new build program run validate delete)
+folders=(create build program run validate delete)
 for dir in "${folders[@]}"; do
   src="$ODEV_PATH/cmd_tmp/$dir"
   dst="$ODEV_PATH/cmd/$dir"

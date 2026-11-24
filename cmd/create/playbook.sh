@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# example: odev new playbook --name test
+# example: odev create playbook --name test
 
 # get script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -9,7 +9,7 @@ Authenticate with GitHub CLI and use an account in `odev-developers`:
 
 ```bash
 gh auth login
-odev new playbook --name my_playbook
+odev create playbook --name my_playbook
 ```
 
 On first use, `odev` creates or reuses your fork of `oreolag/playbooks`, clones it
@@ -103,7 +103,7 @@ odev gh diff --repository <TAB>
 ```
 
 Playbook-name completion reads your checkout and excludes companion `_vars.yml`
-files. `odev new playbook --name` takes a new name rather than an existing one.
+files. `odev create playbook --name` takes a new name rather than an existing one.
 
 ## Share
 

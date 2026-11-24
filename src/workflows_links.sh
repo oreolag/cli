@@ -16,7 +16,7 @@ WORKFLOW_COMMAND_PATH="$ODEV_PATH/users/$username/workflows"
 [[ -d "$WORKFLOWS_USER_PATH/.git" ]] || exit 1
 
 # create symlinks for workflows commands
-for command in new build program run validate delete; do
+for command in create build program run validate delete; do
   # Remove obsolete links, but never regular files or another user's links.
   for link in "$WORKFLOW_COMMAND_PATH/$command/"*.sh; do
     [[ -L "$link" ]] || continue

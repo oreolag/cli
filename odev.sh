@@ -40,14 +40,14 @@ if [[ "$installed" == "1" ]]; then
 
     # check on workflows
     #if [ ! -d "$WORKFLOWS_PATH" ]; then
-    #  wf_repo_status="Create a new accelerated workflow with ${bold}odev new workflow${normal}"
+    #  wf_repo_status="Create a new accelerated workflow with ${bold}odev create workflow${normal}"
     #else
     #  wf_repo_status="Continue working on your workflows in ${bold}$WORKFLOWS_PATH${normal}"
     #fi
 
     # check on playbooks
     #if [ ! -d "$PLAYBOOKS_PATH" ]; then
-    #  pb_repo_status="Add a new Ansible playbook with ${bold}odev new playbook${normal}"
+    #  pb_repo_status="Add a new Ansible playbook with ${bold}odev create playbook${normal}"
     #else
     #  pb_repo_status="Find your playbooks in ${bold}$PLAYBOOKS_PATH${normal}"
     #fi
@@ -61,14 +61,14 @@ fi
 # check on community repositories
 # workflows
 if [ ! -d "$WORKFLOWS_PATH" ]; then
-  wf_repo_status="Create a new accelerated workflow with ${bold}odev new workflow${normal}"
+  wf_repo_status="Create a new accelerated workflow with ${bold}odev create workflow${normal}"
 else
   wf_repo_status="Continue working on your workflows in ${bold}$WORKFLOWS_PATH${normal}"
 fi
 
 # playbooks
 if [ ! -d "$PLAYBOOKS_PATH" ]; then
-  pb_repo_status="Add a new Ansible playbook with ${bold}odev new playbook${normal}"
+  pb_repo_status="Add a new Ansible playbook with ${bold}odev create playbook${normal}"
 else
   pb_repo_status="Find your playbooks in ${bold}$PLAYBOOKS_PATH${normal}"
 fi
@@ -150,7 +150,7 @@ print_help() {
   echo "  update:          $update"
   echo ""
   echo "${bold}WORKFLOW COMMANDS${normal}"
-  echo "  new:             $new"
+  echo "  create:          $create"
   echo "  build:           $build"
   echo "  program:         $program"
   echo "  run:             $run"

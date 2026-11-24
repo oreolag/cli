@@ -8,7 +8,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[2]
-COMMANDS = ('new', 'build', 'program', 'run', 'delete', 'validate')
+COMMANDS = ('create', 'build', 'program', 'run', 'delete', 'validate')
 
 
 class WorkflowHelpTests(unittest.TestCase):
@@ -54,9 +54,9 @@ class WorkflowHelpTests(unittest.TestCase):
                 self.assertLess(output.index('INHERITED FLAGS:'), output.index('Created by'))
 
             (community / 'GITHUB_USERNAME').unlink()
-            self.assertNotIn('Created by', help_output('new'))
+            self.assertNotIn('Created by', help_output('create'))
             (community / 'GITHUB_USERNAME').touch()
-            self.assertNotIn('Created by', help_output('new'))
+            self.assertNotIn('Created by', help_output('create'))
 
 
 if __name__ == '__main__':

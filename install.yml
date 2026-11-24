@@ -13,14 +13,13 @@
     all : false
     booking: false
     build: false
-    #constants: false
+    create: false
     delete: false
     examine: false
     get: false
     ifconfig: false
     install: false
     main: false
-    new: false
     program: false
     run: false
     set: false
@@ -54,7 +53,7 @@
           - "ifconfig={{ ifconfig }}"
           - "install={{ install }}"
           - "main={{ main }}"
-          - "new={{ new }}"
+          - "create={{ create }}"
           - "program={{ program }}"
           - "run={{ run }}"
           - "set={{ set }}"
@@ -289,42 +288,42 @@
         - (main or all) | bool
         - cli.local_path is defined
         - not (repo | bool)
-    # new
+    # create
     - block:
-        - name: Copy new.sh script
+        - name: Copy create.sh script
           ansible.builtin.copy:
-            src: "{{ cli.local_path }}/cmd/new.sh"
-            dest: "{{ cli_remote_path }}/odev/cmd/new.sh"
+            src: "{{ cli.local_path }}/cmd/create.sh"
+            dest: "{{ cli_remote_path }}/odev/cmd/create.sh"
             owner: root
             group: root
             mode: "0755"
-        #- name: Copy cmd/new directory from local path
+        #- name: Copy cmd/create directory from local path
         #  ansible.builtin.copy:
-        #    src: "{{ cli.local_path }}/cmd/new/"
-        #    dest: "{{ cli_remote_path }}/odev/cmd/new/"
+        #    src: "{{ cli.local_path }}/cmd/create/"
+        #    dest: "{{ cli_remote_path }}/odev/cmd/create/"
         #    owner: root
         #    group: root
         #    mode: "0755"
         #- name: Delete remote folder first
         #  ansible.builtin.file:
-        #    path: "{{ cli_remote_path }}/odev/cmd/new"
+        #    path: "{{ cli_remote_path }}/odev/cmd/create"
         #    state: absent
-        - name: Copy cmd/new directory from local path (preserve symlinks)
+        - name: Copy cmd/create directory from local path (preserve symlinks)
           ansible.posix.synchronize:
-            src: "{{ cli.local_path }}/cmd/new/"
-            dest: "{{ cli_remote_path }}/odev/cmd/new/"
+            src: "{{ cli.local_path }}/cmd/create/"
+            dest: "{{ cli_remote_path }}/odev/cmd/create/"
             recursive: true
             archive: true
             links: true
             copy_links: false
-        - name: Set ownership on new folder
+        - name: Set ownership on create folder
           ansible.builtin.file:
-            path: "{{ cli_remote_path }}/odev/cmd/new/"
+            path: "{{ cli_remote_path }}/odev/cmd/create/"
             owner: root
             group: root
             recurse: true
       when:
-        - (new or all) | bool
+        - (create or all) | bool
         - cli.local_path is defined
         - not (repo | bool)
     
