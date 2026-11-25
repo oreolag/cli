@@ -178,7 +178,7 @@ fi''')
             ("reserve/add", ["--shared", "missing"], "Invalid user: missing", ["server:", "start ["]),
             ("reserve/share", ["--add", "missing"], "Invalid user: missing", ["booking:"]),
             ("reserve/share", ["--add", "tester", "--remove", "tester"], "Invalid flags", ["booking:"]),
-            ("reserve/list", ["--history", "bad"], "Invalid booking date", []),
+            ("reserve", ["--history", "bad"], "Invalid booking date", []),
             ("run/playbook", ["--inventory", str(self.root / "missing")], "Unknown flag: --inventory", ["name:"]),
             ("run/playbook", ["--name", "missing"], "Playbook does not exist", []),
             ("delete/playbook", ["--name", "missing"], "Playbook does not exist", []),
@@ -261,7 +261,7 @@ fi''')
             ("set/mtu", ["--interface", "0", "--value", "1500"], "EXECUTED"),
             ("run/playbook", ["--name", "demo"], "EXECUTED"),
             ("reserve/add", ["--server", "incus-01", "--date", "2099-01-01", "--start", "14:00"], "BOOKING EXECUTED"),
-            ("reserve/list", ["--history", "2099-01-01"], "BOOKING EXECUTED"),
+            ("reserve", ["--history", "2099-01-01"], "BOOKING EXECUTED"),
             ("reserve/share", ["--booking", "391", "--add", "tester"], "tester\n391\n-"),
             ("reserve/cancel", ["--booking", "391"], "391"),
         ]:

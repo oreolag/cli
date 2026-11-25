@@ -11,23 +11,33 @@ CLI_NAME="$(basename "$(dirname "$SCRIPT_DIR")")"
 SUBCOMMAND="-"
 ODEV_PATH="${ODEV_PATH:-"$(dirname "$SCRIPT_DIR")"}"
 
-# check on booking configuration
-"$ODEV_PATH/src/booking_available.sh" "$ODEV_PATH" --help-only || exit $?
-
-# read command description and subcommands
-KEY="$(printf '%s' "$COMMAND" | tr '[:lower:]' '[:upper:]')"
-command_description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" "$KEY")"
-mapfile -t commands < <("$ODEV_PATH/src/cmd_subcommands_read.sh" "$ODEV_PATH" "$KEY")
-
-# The timezone is already shown in the heading.
-for i in "${!commands[@]}"; do
-  commands[$i]="${commands[$i]%%" (timezone: "*}"
+# Help is available on participating hosts without a Tailscale login.
+mode=--participant
+for arg in "$@"; do
+  [[ "$arg" == --help || "$arg" == -h ]] && mode=--help-only
 done
+"$ODEV_PATH/src/booking_available.sh" "$ODEV_PATH" "$mode" || exit $?
 
-# print help (subcommands are resolved by odev.sh)
-print_range="-"
-print_default="-"
-print_both="-"
-"$ODEV_PATH/src/cmd_help_print.sh" --print \
-  "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$command_description" \
-  "$print_range" "$print_default" "$print_both" "${commands[@]}" -- "$@" && exit 0 || true
+mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" RESERVE)
+if [[ "$mode" == --help-only ]]; then
+  description="$("$ODEV_PATH/src/cmd_description_read.sh" "$ODEV_PATH" RESERVE)" || exit 1
+  mapfile -t commands < <("$ODEV_PATH/src/cmd_subcommands_read.sh" "$ODEV_PATH" RESERVE)
+  exec "$ODEV_PATH/src/cmd_help_print.sh" --print \
+    "$CLI_NAME" "$COMMAND" "$SUBCOMMAND" "$description" 0 0 0 \
+    "${commands[@]}" --flags "${flags[@]}"
+fi
+
+parsed_flags="$("$ODEV_PATH/src/cmd_parse.sh" --params "${flags[@]}" -- "$@")" || exit 1
+list_args=(--list)
+if [[ -n "$parsed_flags" ]]; then
+  date="${parsed_flags#history=}"
+  if [[ "$date" != today && "$date" != yesterday && "$date" != tomorrow ]] &&
+     { [[ ! "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
+       ! booking_day=$(date -d "$date" +%F 2>/dev/null) || [[ "$booking_day" != "$date" ]]; }; then
+    python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_booking_date -- "$date"
+    exit 1
+  fi
+  list_args+=(--date "$date")
+fi
+
+exec python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" "${list_args[@]}"

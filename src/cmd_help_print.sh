@@ -85,7 +85,14 @@ echo ""
 
 # usage
 echo "${bold}USAGE:${normal}"
-if [ "$SUBCOMMAND" = "examine" ] || [ "$SUBCOMMAND" = "update" ]; then
+print_commands=false
+if [[ "$COMMAND" == reserve && "$SUBCOMMAND" == "-" ]]; then
+  echo "  $CLI_NAME $COMMAND [flags]"
+  echo "  $CLI_NAME $COMMAND <command> [flags]"
+  echo ""
+  echo "${bold}COMMANDS:${normal}"
+  print_commands=true
+elif [ "$SUBCOMMAND" = "examine" ] || [ "$SUBCOMMAND" = "update" ]; then
   echo "  $CLI_NAME $SUBCOMMAND [flags]"
   echo ""
   echo "${bold}FLAGS:${normal}"
@@ -99,6 +106,7 @@ elif [ "$SUBCOMMAND" = "ifconfig" ]; then
   echo ""
   echo "${bold}FLAGS:${normal}"
 elif [ ! "$COMMAND" = "" ] && [ "$SUBCOMMAND" = "-" ]; then
+  print_commands=true
   # cmd/create.sh
   #usage="${CLI_NAME} ${COMMAND}"
   echo "  $CLI_NAME $COMMAND [command]"
@@ -119,6 +127,12 @@ fi
 
 # print commands or flags
 for p in ${PARAMS[@]+"${PARAMS[@]}"}; do
+  if [[ "$p" == --flags ]]; then
+    echo ""
+    echo "${bold}FLAGS:${normal}"
+    print_commands=false
+    continue
+  fi
   IFS=',' read -r name short desc range def <<< "$p"
 
   [[ "$range" == "-" ]] && range=""
@@ -147,9 +161,9 @@ for p in ${PARAMS[@]+"${PARAMS[@]}"}; do
     fi
   fi
 
-  if [ ! "$COMMAND" = "" ] && [ "$SUBCOMMAND" = "-" ]; then
+  if [[ "$print_commands" == true ]]; then
     printf "  %-16s %s\n" "$name" "$desc"
-  elif [ ! "$COMMAND" = "" ] && [ ! "$SUBCOMMAND" = "" ]; then
+  elif [[ -n "$COMMAND" && -n "$SUBCOMMAND" ]]; then
     if [[ -n "$short" ]]; then
       printf "  -%-1s, --%-10s %s%s\n" "$short" "$name" "$desc" "$suffix"
     else

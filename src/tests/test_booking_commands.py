@@ -257,6 +257,15 @@ else:
         }
         for name, machines in [(self.local, ["example-managed"])]:
             self.inventory(name, machines)
+            for script, args, expected in [
+                ("cmd/reserve.sh", [], "--list"),
+                ("cmd/reserve.sh", ["--history", "yesterday"], "--list --date yesterday"),
+                ("cmd/get/reserved.sh", [], "--list --active"),
+            ]:
+                with self.subTest(script=script, args=args):
+                    result = self.run_command(*args, script=script)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(result.stdout.strip(), expected)
             for action in ["share"]:
                 with self.subTest(host=name, action=action):
                     args, values = cases[action]
@@ -271,7 +280,7 @@ else:
                       "managed_servers": [self.local], "maximum_duration_hours": 5}]}]:
             self.db.write_text(yaml.safe_dump(data))
             for script, args in [("cmd/reserve.sh", []),
-                                 *[(f"cmd/reserve/{action}.sh", []) for action in ["add", "list", "share", "cancel"]]]:
+                                 *[(f"cmd/reserve/{action}.sh", []) for action in ["add", "share", "cancel"]]]:
                 if any(
                         self.local in entry["managed_servers"] for entry in data["servers"]):
                     continue
@@ -291,23 +300,29 @@ else:
 
     def test_help_and_unknown_action(self):
         self.inventory(self.local, [])
-        self.assertIn("USAGE:", self.run_command().stdout)
-        self.assertEqual(self.run_command("--help").returncode, 0)
-        for action in ["list", "add", "share", "cancel"]:
+        if BASH_MAJOR >= 4:
+            help_result = self.run_command("--help")
+            self.assertEqual(help_result.returncode, 0, help_result.stderr)
+            self.assertIn("USAGE:", help_result.stdout)
+            self.assertIn("COMMANDS:", help_result.stdout)
+            self.assertIn("FLAGS:", help_result.stdout)
+            self.assertIn("--history", help_result.stdout)
+            self.assertNotIn("--active", help_result.stdout)
+        for action in ["add", "share", "cancel"]:
             resolved = subprocess.run(
                 ["bash", str(ROOT / "src/workflow_command_path.sh"), str(ROOT), "reserve", action],
                 env=self.env, capture_output=True, text=True)
             self.assertEqual(resolved.returncode, 0)
             self.assertEqual(resolved.stdout.strip(), str(ROOT / f"cmd/reserve/{action}.sh"))
         unknown = subprocess.run(
-            ["bash", str(ROOT / "src/workflow_command_path.sh"), str(ROOT), "reserve", "new"],
+            ["bash", str(ROOT / "src/workflow_command_path.sh"), str(ROOT), "reserve", "list"],
             env=self.env, capture_output=True, text=True)
         self.assertNotEqual(unknown.returncode, 0)
 
     def test_flag_specs_and_mandatory_flags(self):
         self.inventory(self.local, [])
         expected = {
-            "list": ["active", "history"],
+            "": ["history"],
             "add": ["server", "date", "start", "duration", "shared"],
             "share": ["add", "booking", "remove"],
             "cancel": ["booking"],
@@ -318,18 +333,21 @@ else:
         spec.write_text(source.split("# reserve (", 1)[1].split("# build", 1)[0].split("\n", 1)[1])
         for action, names in expected.items():
             with self.subTest(action=action):
+                key = "RESERVE_" + action.upper() if action else "RESERVE"
                 flags = subprocess.run(
                     ["bash", str(ROOT / "src/cmd_flags_read.sh"), str(ROOT),
-                     "RESERVE_" + action.upper(), "--db", str(spec)],
+                     key, "--db", str(spec)],
                     env={**self.env, "TERM": "xterm"}, capture_output=True, text=True)
                 self.assertEqual(flags.returncode, 0, flags.stderr)
                 self.assertCountEqual([line.split(",")[0] for line in flags.stdout.splitlines()], names)
+                if not action:
+                    continue
                 mandatory = subprocess.run(
                     ["bash", str(ROOT / "src/cmd_mandatory_flags_read.sh"), str(ROOT),
-                     "RESERVE_" + action.upper(), "--db", str(spec)],
+                     key, "--db", str(spec)],
                     env=self.env, capture_output=True, text=True)
                 self.assertEqual(mandatory.returncode, 0, mandatory.stderr)
-                expected_mandatory = {"list": "", "add": "server,start",
+                expected_mandatory = {"add": "server,start",
                                       "share": "booking", "cancel": "booking"}
                 self.assertEqual(mandatory.stdout.strip(), expected_mandatory[action])
 

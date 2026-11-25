@@ -25,20 +25,15 @@ italic=$(tput sitm 2>/dev/null || true)
 normal=$(tput sgr0)
 
 # reserve (action scripts currently echo parameters only)
-RESERVE_DESCRIPTION="Add, cancel, list or share bookings" # (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
+RESERVE_DESCRIPTION="Show server availability and reservations" # (timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
 # Metadata readers set KEY; unrelated commands do not need booking defaults.
 if [[ "${KEY:-RESERVE}" == RESERVE* ]]; then
   if [[ -z "${BOOKING_TIMEZONE:-}" ]]; then
     BOOKING_TIMEZONE="$(bash "$ODEV_PATH/src/booking_timezone.sh" "$ODEV_PATH" 2>/dev/null)" || BOOKING_TIMEZONE="UTC"
   fi
-  RESERVE_FLAGS=()
-  # list
-  RESERVE_LIST_DESCRIPTION="List server availability and bookings" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
-  RESERVE_LIST_FLAGS=(
-    "active,a,Show your active bookings across all services,0|1,0"
-    "history,,Show booking history for date YYYY-MM-DD or today/yesterday/tomorrow,-,-"
+  RESERVE_FLAGS=(
+    "history,,Show reservation history for date YYYY-MM-DD or today/yesterday/tomorrow,-,-"
   )
-  RESERVE_LIST_FLAGS_MANDATORY=""
   # add
   RESERVE_ADD_DESCRIPTION="Reserve a server for a specific time" #(timezone: ${bold:-}$BOOKING_TIMEZONE${normal:-})
   RESERVE_ADD_FLAGS=(
@@ -125,6 +120,10 @@ GET_HOSTS_DESCRIPTION="Show the Ansible inventory for your booked servers"
 GET_HOSTS_FLAGS=(
 )
 GET_HOSTS_FLAGS_MANDATORY=""
+
+# reserved
+GET_RESERVED_DESCRIPTION="Show the servers you can use now"
+GET_RESERVED_FLAGS=()
 
 # ifconfig 
 IFCONFIG_DESCRIPTION="Data-plane network interface configuration"
