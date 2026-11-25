@@ -73,8 +73,17 @@ if [[ -n "$flag" && "$flag" != "--main" && "$flag" != "-m" ]]; then
     exit 1
 fi
 
-# set command flags
-# ...
+# confirm before updating
+if [[ "$flag" == "--main" || "$flag" == "-m" ]]; then
+  printf 'Update odev to main? (y/N): '
+else
+  printf 'Update odev? (y/N): '
+fi
+IFS= read -r answer || exit 0
+case "$answer" in
+  y|Y|yes|YES) ;;
+  *) exit 0 ;;
+esac
 
 # derived
 CHECKOUT_PATH="$TMP_PATH/odev"
