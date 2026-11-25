@@ -57,6 +57,7 @@ apt-get install -y \
     python3 \
     python3-pip \
     python3-yaml \
+    curl \
     gh \
     rsync \
     sqlite3 \
@@ -66,9 +67,26 @@ apt-get install -y \
     sudo
 
 echo ""
-echo "${bold}[INFO] Cloning odev repository...${normal}"
+echo "${bold}[INFO] Finding the latest stable odev release...${normal}"
 
-git clone --recursive "$REPO_URL" "$TMP_PATH/cli"
+if ! release_json="$(curl -fsSL https://api.github.com/repos/oreolag/cli/releases/latest)"; then
+    echo "Could not determine the latest stable odev release. Installation stopped." >&2
+    exit 1
+fi
+if ! release_tag="$(python3 -c '
+import json, sys
+release = json.load(sys.stdin)
+tag = release.get("tag_name")
+if release.get("draft") or release.get("prerelease") or not isinstance(tag, str) or not tag.strip():
+    sys.exit("No published stable odev release was found.")
+print(tag)
+' <<< "$release_json")"; then
+    echo "Could not determine the latest stable odev release. Installation stopped." >&2
+    exit 1
+fi
+
+echo "${bold}[INFO] Cloning odev release $release_tag...${normal}"
+git clone --branch "$release_tag" --recursive "$REPO_URL" "$TMP_PATH/cli"
 
 cd "$TMP_PATH/cli"
 
@@ -79,7 +97,7 @@ ansible-playbook \
     -i localhost, \
     -c local \
     install.yml \
-    --extra-vars "repo=true" #--check
+    --extra-vars "$(python3 -c 'import json, sys; print(json.dumps({"repo": True, "cli_version": sys.argv[1]}))' "$release_tag")"
 
 # install /opt/mgmt
 curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/mgmt/install.sh | sudo bash -s -- odev_plugin

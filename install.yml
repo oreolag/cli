@@ -361,6 +361,24 @@
 
     # repo
     - block:
+        - name: Find the latest stable odev release when no version was supplied
+          ansible.builtin.uri:
+            url: https://api.github.com/repos/oreolag/cli/releases/latest
+            return_content: true
+          register: cli_latest_release
+          when: cli_version is not defined
+
+        - name: Select the odev installation version
+          ansible.builtin.set_fact:
+            cli_install_version: "{{ cli_version | default(cli_latest_release.json.tag_name) }}"
+
+        - name: Require an odev installation version
+          ansible.builtin.assert:
+            that:
+              - cli_install_version is string
+              - cli_install_version | trim | length > 0
+            fail_msg: "Could not determine the odev release to install."
+
         - name: Ensure required packages are installed
           ansible.builtin.apt:
             name:
@@ -386,14 +404,23 @@
           ansible.builtin.git:
             repo: "{{ cli_repository }}"
             dest: "{{ cli_remote_path }}/odev"
-            version: main
+            version: "{{ cli_install_version }}"
             update: true
             force: true
+            track_submodules: false
 
-        - name: Update all submodules
+        - name: Initialize pinned submodule commits
           ansible.builtin.command:
-            cmd: git submodule update --init --recursive --remote --merge
+            cmd: git submodule update --init --recursive
             chdir: "{{ cli_remote_path }}/odev"
+
+        - name: Record the installed odev version
+          ansible.builtin.copy:
+            content: "{{ cli_install_version }}\n"
+            dest: "{{ cli_remote_path }}/odev/VERSION"
+            owner: root
+            group: root
+            mode: "0644"
 
         - name: Rename odev.sh to odev (canonical entrypoint)
           command: mv {{ cli_remote_path }}/odev/odev.sh {{ cli_remote_path }}/odev/odev

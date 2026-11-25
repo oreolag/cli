@@ -101,10 +101,9 @@ if [[ "$flag" == "--main" ]] || [[ "$flag" == "-m" ]]; then
   msg="${COLOR_PASSED}✓${normal} odev updated: main"
   ver="main"
 else
-  tag="$(gh release view --repo oreolag/cli --json tagName -q .tagName)"
-
-  if [[ -z "$tag" ]]; then
-    tag="$(git ls-remote --tags "$ODEV_REPO" | awk -F/ '{print $3}' | sort -V | tail -n1)"
+  if ! tag="$(gh release view --repo oreolag/cli --json tagName -q .tagName)" || [[ -z "$tag" ]]; then
+    echo "Could not determine the latest stable odev release. Update stopped." >&2
+    exit 1
   fi
 
   git clone --branch "$tag" "$ODEV_REPO" "$CHECKOUT_PATH"
