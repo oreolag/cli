@@ -51,7 +51,7 @@ print_both="0"
 flag=$1
 
 # check on flags
-if [[ -n "$flag" && "$flag" != "--tools" && "$flag" != "-t" && "$flag" != "--servers" && "$flag" != "-s" ]]; then
+if [[ -n "$flag" && "$flag" != "--tools" && "$flag" != "-t" ]]; then
     python3 "$ODEV_PATH/src/odev_messages.py" --error unknown_flag -- "$flag"
     exit 1
 fi
@@ -62,12 +62,6 @@ fi
 # print tools
 if [ "$flag" = "--tools" ] || [ "$flag" = "-t" ]; then
   $ODEV_PATH/src/required_tools_print.sh $ODEV_PATH
-  exit 0
-fi
-
-# print servers
-if [ "$flag" = "--servers" ] || [ "$flag" = "-s" ]; then
-  echo "show servers"
   exit 0
 fi
 

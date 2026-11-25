@@ -86,7 +86,6 @@ DELETE_PLAYBOOK_FLAGS_MANDATORY="name"
 EXAMINE_DESCRIPTION="System and device inspection"
 EXAMINE_FLAGS=(
   "tools,t,Show installed tools,-,-"
-  "servers,s,Show server list,-,-"
 )
 
 # get 
