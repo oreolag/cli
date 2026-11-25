@@ -75,13 +75,13 @@ fi
 
 # confirm before updating
 if [[ "$flag" == "--main" || "$flag" == "-m" ]]; then
-  printf 'Update odev to main? (y/N): '
+  printf "Update odev to main? [y/N]: "
 else
-  printf 'Update odev? (y/N): '
+  printf "Update odev? [y/N]: "
 fi
 IFS= read -r answer || exit 0
 case "$answer" in
-  y|Y|yes|YES) ;;
+  [yY]|[yY][eE][sS]) ;;
   *) exit 0 ;;
 esac
 
