@@ -188,6 +188,9 @@ def create_booking(config, owner, request):
     if entry is None or server not in entry["managed_servers"]:
         raise ValueError(message("invalid_server", server))
     day, start = request.get("date", ""), request.get("start", "")
+    start_now = start == "now"
+    if start_now:
+        start = datetime.now(ZoneInfo(config["timezone"])).strftime("%H:%M")
     if not isinstance(day, str) or not isinstance(start, str) or not re.fullmatch(
             r"[0-9]{4}-[0-9]{2}-[0-9]{2} ([01][0-9]|2[0-3]):[0-5][0-9]", f"{day} {start}"):
         raise ValueError(message("invalid_start_time", day, start))
@@ -195,7 +198,7 @@ def create_booking(config, owner, request):
     try:
         local = datetime.strptime(f"{day} {start}", "%Y-%m-%d %H:%M").replace(tzinfo=zone)
         # Reject nonexistent or ambiguous local times at daylight-saving changes.
-        if (local.astimezone(timezone.utc).astimezone(zone).replace(tzinfo=None) != local.replace(tzinfo=None)
+        if not start_now and (local.astimezone(timezone.utc).astimezone(zone).replace(tzinfo=None) != local.replace(tzinfo=None)
                 or local.utcoffset() != local.replace(fold=1).utcoffset()):
             raise ValueError()
         start_time = int(local.timestamp())
@@ -214,6 +217,11 @@ def create_booking(config, owner, request):
         if connection.execute("PRAGMA user_version").fetchone()[0] != 1:
             raise ValueError("Unsupported booking database schema version")
         now = int(time.time())
+        if start_now:
+            if day != datetime.fromtimestamp(now, zone).date().isoformat():
+                raise ValueError(message("invalid_start_time", day, "now"))
+            start_time = now - now % 60
+            end_time = start_time + duration_seconds(request.get("duration"), entry["maximum_duration_hours"])
         if start_time < now - now % 60:
             raise ValueError(message("invalid_start_time", day, start))
         metadata = connection.execute(

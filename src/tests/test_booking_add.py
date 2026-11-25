@@ -48,6 +48,19 @@ class BookingAddTest(unittest.TestCase):
             self.assertEqual(db.execute("SELECT username FROM booking_shares").fetchall(), [("quico",)])
         self.assertEqual(create_booking(self.config, "javier", {**self.request, "start": "16:15"}), "01-0002")
 
+    def test_now_resolves_at_creation_in_service_timezone(self):
+        self.config["timezone"] = "Europe/Madrid"
+        now = int(datetime(2099, 1, 10, 23, 25, 42, tzinfo=timezone.utc).timestamp())
+        request = {**self.request, "date": "2099-01-11", "start": "now", "duration": "1h"}
+        with patch("storage.time.time", return_value=now):
+            with self.assertRaisesRegex(ValueError, "Invalid start time"):
+                create_booking(self.config, "javier", {**request, "date": "2099-01-12"})
+            create_booking(self.config, "javier", request)
+        with sqlite3.connect(self.database) as db:
+            start, end = db.execute("SELECT start_time, end_time FROM bookings").fetchone()
+            self.assertEqual(start, now - now % 60)
+            self.assertEqual(end - start, 3600)
+
     def test_duration_units(self):
         from booking_is_server import duration_seconds
         for value, expected in [("5m", 300), ("60m", 3600), ("1h", 3600), ("2h", 7200), ("300m", 18000)]:

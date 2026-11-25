@@ -42,6 +42,13 @@ resolve_booking_date() {
 
 validate_start_time() {
   local date="$1" start="$2" start_timestamp now
+  if [[ "$start" == "now" ]]; then
+    if [[ -n "$date" && "$date" != "$(TZ="$BOOKING_TIMEZONE" date +%F)" ]]; then
+      python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_start_time -- "$date" "$start"
+      return 1
+    fi
+    return 0
+  fi
   # validate start time (from flags or the interactive prompt)
   if [[ ! "$start" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
     python3 "$ODEV_PATH/src/odev_messages.py" --error invalid_start_value -- "$start"
@@ -112,6 +119,16 @@ for field in "" ${mandatory_flags//,/ }; do
   # run interactive prompt
   if [[ "$field" == "start" ]]; then
     mapfile -t flags < <("$ODEV_PATH/src/cmd_flags_read.sh" "$ODEV_PATH" "$KEY")
+    if [[ "$(resolve_booking_date "$supplied_date")" != "$(TZ="$BOOKING_TIMEZONE" date +%F)" ]]; then
+      read -r hour minute < <(TZ="$BOOKING_TIMEZONE" date '+%H %M')
+      next_minutes=$(( (10#$hour * 60 + 10#$minute) / 5 * 5 + 5 ))
+      printf -v default_start '%02d:%02d' "$(( next_minutes / 60 % 24 ))" "$(( next_minutes % 60 ))"
+      for i in "${!flags[@]}"; do
+        if [[ "${flags[i]}" == start,* ]]; then
+          flags[i]="${flags[i]%,*},$default_start"
+        fi
+      done
+    fi
   fi
   parsed_flags="$("$ODEV_PATH/src/cmd_prompt.sh" --required "$mandatory_flags" --field "$field" --params "${flags[@]}" -- "$parsed_flags")" || exit 1
 

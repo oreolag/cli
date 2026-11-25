@@ -252,7 +252,7 @@ else:
         python.chmod(0o755)
         self.env["PATH"] = self.temp.name + os.pathsep + os.environ["PATH"]
         cases = {
-            "share": (["--booking", "391", "--add", "javier"],
+            "share": (["--reservation", "391", "--add", "javier"],
                       ["--share 391 add javier"]),
         }
         for name, machines in [(self.local, ["example-managed"])]:

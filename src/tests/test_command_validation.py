@@ -262,8 +262,8 @@ fi''')
             ("run/playbook", ["--name", "demo"], "EXECUTED"),
             ("reserve/add", ["--server", "incus-01", "--date", "2099-01-01", "--start", "14:00"], "BOOKING EXECUTED"),
             ("reserve", ["--history", "2099-01-01"], "BOOKING EXECUTED"),
-            ("reserve/share", ["--booking", "391", "--add", "tester"], "tester\n391\n-"),
-            ("reserve/cancel", ["--booking", "391"], "391"),
+            ("reserve/share", ["--reservation", "391", "--add", "tester"], "tester\n391\n-"),
+            ("reserve/cancel", ["--reservation", "391"], "391"),
         ]:
             with self.subTest(name=name):
                 result = self.run_command(name, *args)

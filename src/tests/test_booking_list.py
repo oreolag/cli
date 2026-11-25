@@ -110,9 +110,9 @@ class BookingListTest(unittest.TestCase):
         self.assertEqual(len(set(map(len, lines))), 1)
         self.assertEqual(lines[0], lines[2])
         self.assertEqual(lines[1][1:-1].strip(), self.config["server"]["name"] + " | Date: 2026-10-25 | Timezone: Europe/Madrid")
-        self.assertTrue(lines[3].startswith("| Booking ID"))
-        self.assertEqual(output.getvalue().count("Booking ID"), 1)
-        for value in ["Booking ID", "Shared with", "Europe/Madrid", "01-0001"]:
+        self.assertTrue(lines[3].startswith("| Reservation ID"))
+        self.assertEqual(output.getvalue().count("Reservation ID"), 1)
+        for value in ["Reservation ID", "Shared with", "Europe/Madrid", "01-0001"]:
             self.assertIn(value, output.getvalue())
         for value in ["Status", "Active", "Upcoming", "Expired", "01-0002", "01-0003"]:
             self.assertIn(value, output.getvalue())
@@ -124,6 +124,20 @@ class BookingListTest(unittest.TestCase):
         self.assertNotIn("01-0001", output.getvalue())
         self.assertIn("Active", output.getvalue())
         self.assertIn("Upcoming", output.getvalue())
+
+    def test_free_row_hidden_only_within_five_minutes_of_next_booking(self):
+        self.insert("01-0001", "2026-10-25 14:00", "2026-10-25 15:00")
+        result = list_bookings(self.config, "2026-10-25")
+        start = self.stamp("2026-10-25 14:00")
+        for remaining in (180, 299, 300, 301):
+            with self.subTest(remaining=remaining):
+                output = io.StringIO()
+                with redirect_stdout(output), patch("table.time.time", return_value=start - remaining):
+                    print_bookings(result)
+                free_rows = [line for line in output.getvalue().splitlines() if "Free" in line]
+                self.assertEqual(any("incus-01" in line for line in free_rows), remaining >= 300)
+                self.assertTrue(any("incus-02" in line for line in free_rows))
+                self.assertIn("Upcoming", output.getvalue())
 
     def test_history_includes_cancelled_and_keeps_status(self):
         self.insert("01-0001", "2026-10-25 13:00", "2026-10-25 14:00")

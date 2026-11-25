@@ -83,7 +83,7 @@ for field in "" ${mandatory_flags//,/ }; do
 
   # assign flags
   add=${V[add]:--}
-  booking=${V[booking]:--}
+  reservation=${V[reservation]:--}
   remove=${V[remove]:--}
 
   # validate the user entered in the dialog
@@ -103,4 +103,4 @@ else
   user="$add"
 fi
 python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \
-  --share "$booking" "$action" "$user" || exit 1
+  --share "$reservation" "$action" "$user" || exit 1

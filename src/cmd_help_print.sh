@@ -162,6 +162,8 @@ for p in ${PARAMS[@]+"${PARAMS[@]}"}; do
   fi
 
   if [[ "$print_commands" == true ]]; then
+    # Command readers return a space-separated name and description.
+    read -r name desc <<< "$p"
     printf "  %-16s %s\n" "$name" "$desc"
   elif [[ -n "$COMMAND" && -n "$SUBCOMMAND" ]]; then
     if [[ -n "$short" ]]; then
@@ -174,7 +176,7 @@ done
 
 echo ""
 echo "${bold}INHERITED FLAGS:${normal}"
-echo "  -h, --help      Show this help"
+printf "  -%-1s, --%-10s %s\n" "h" "help" "Show this help"
 
 
 # Resolve the same command as the CLI so personal and community workflows

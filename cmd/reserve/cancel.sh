@@ -44,8 +44,8 @@ if [[ -n "$parsed_flags" ]]; then
 fi
 
 # assign flags
-booking=${V[booking]}
+reservation=${V[reservation]}
 
 # cancel booking
 python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" \
-  --cancel "$booking" || exit 1
+  --cancel "$reservation" || exit 1

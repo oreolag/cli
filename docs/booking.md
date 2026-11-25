@@ -233,8 +233,8 @@ at 16:00 allows another to start at 16:00.
 ## Share
 
 ```bash
-odev reserve share --booking 01-0001 --add javier
-odev reserve share --booking 01-0001 --remove quico
+odev reserve share --reservation 01-0001 --add javier
+odev reserve share --reservation 01-0001 --remove quico
 ```
 
 Only the owner can change sharing on active or upcoming bookings. Add or remove one user per invocation; the flags
@@ -248,7 +248,7 @@ They cannot share or cancel the owner's booking.
 ## Cancel
 
 ```bash
-odev reserve cancel --booking 01-0001
+odev reserve cancel --reservation 01-0001
 ```
 
 Owners and administrators can cancel active or future bookings. Show the server,

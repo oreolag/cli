@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 def print_bookings(result, full_day=False):
     zone = ZoneInfo(result["timezone"])
     now = int(time.time())
-    headers = ["Booking ID", "Server", "Owner", "Start", "End", "Shared with", "Status"]
+    headers = ["Reservation ID", "Server", "Owner", "Start", "End", "Shared with", "Status"]
     own_active = "username" in result
     if own_active:
         headers.insert(2, "Service")
@@ -24,8 +24,9 @@ def print_bookings(result, full_day=False):
         bookings = [row for row in result["bookings"] if row["server"] == server
                     and (full_day or (row.get("cancelled_at") is None and row["end_time"] > now))]
         active = any(row["start_time"] <= now < row["end_time"] for row in bookings)
+        starting_soon = any(0 < row["start_time"] - now < 300 for row in bookings)
         today = datetime.fromtimestamp(now, zone).date().isoformat()
-        if not full_day and (not bookings or (result["date"] == today and not active)):
+        if not full_day and not starting_soon and (not bookings or (result["date"] == today and not active)):
             rows.append(["-", server, "-", "-", "-", "-", "Free"])
         for booking in bookings:
             if own_active and not booking["start_time"] <= now < booking["end_time"]:

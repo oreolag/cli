@@ -41,27 +41,23 @@ if [[ "${KEY:-RESERVE}" == RESERVE* ]]; then
     "duration,,Duration (e.g. 5m or 1h),-,1h"
     "server,s,Server inventory name,-,-"
     "shared,,Users to share the booking with (comma-separated),-,-"
-    "start,,Start time (HH:MM),-,$(
-      read -r hour minute < <(TZ="$BOOKING_TIMEZONE" date '+%H %M')
-      next_minutes=$(( (10#$hour * 60 + 10#$minute) / 5 * 5 + 5 ))
-      printf '%02d:%02d' "$(( next_minutes / 60 % 24 ))" "$(( next_minutes % 60 ))"
-    )"
+    "start,,Start time (HH:MM or now),HH:MM or now,now"
   )
   RESERVE_ADD_FLAGS_MANDATORY="server,start"
   # cancel
   RESERVE_CANCEL_DESCRIPTION="Cancel an active or future booking"
   RESERVE_CANCEL_FLAGS=(
-    "booking,b,Booking ID to cancel,-,-"
+    "reservation,r,Reservation ID to cancel,-,-"
   )
-  RESERVE_CANCEL_FLAGS_MANDATORY="booking"
+  RESERVE_CANCEL_FLAGS_MANDATORY="reservation"
   # share
   RESERVE_SHARE_DESCRIPTION="Share your booking with other users"
   RESERVE_SHARE_FLAGS=(
     "add,a,User to add to the booking,-,-"
-    "booking,b,Booking ID to share,-,-"
-    "remove,r,User to remove from the booking,-,-"
+    "reservation,r,Reservation ID to share,-,-"
+    "remove,,User to remove from the booking,-,-"
   )
-  RESERVE_SHARE_FLAGS_MANDATORY="booking"
+  RESERVE_SHARE_FLAGS_MANDATORY="reservation"
 fi
 
 # build
