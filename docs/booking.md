@@ -48,7 +48,7 @@ Set `timezone` inside each booking server entry, for example `Europe/Madrid` or
 `Europe/Oslo`. Prompts, validation and tables use that service's timezone;
 database timestamps always remain UTC.
 Booking servers support all booking commands. Managed machines can also run
-all four booking subcommands using their assigned service over SSH.
+all reservation commands using their assigned service over SSH.
 On a managed machine, the add prompt defaults to that machine and uses the
 assigned service's timezone. Machines listed
 nowhere return `Command not available: odev reserve`.
@@ -169,9 +169,9 @@ Use the configured `paths.booking_db` if the default path was changed.
 ## List
 
 ```bash
-odev reserve list
-odev reserve list --history 2026-11-01
-odev reserve list --active
+odev reserve
+odev reserve --history 2026-11-01
+odev get reserved
 ```
 
 The default view shows availability and active or upcoming reservations for
@@ -185,9 +185,8 @@ from the other services. Each service uses its own local date. Remote listing
 uses the caller's existing SSH access and requires Ansible on the machine
 running the command. Failed peers are reported by name.
 
-`--active` shows bookings you own or that are shared with you and are active now
+`odev get reserved` shows bookings you own or that are shared with you and are active now
 across all services. The table includes both Service and Owner and uses the local or assigned service's timezone.
-Use it on its own.
 
 ## Add
 
@@ -256,7 +255,7 @@ Owners and administrators can cancel active or future bookings. Show the server,
 date and times before asking for confirmation, with No as the default. Keep
 cancelled bookings as history.
 Administrators are members of `odev-admins`. Cancellation preserves collaborators
-and the booking ID; `odev reserve list --history YYYY-MM-DD` includes the cancelled record.
+and the booking ID; `odev reserve --history YYYY-MM-DD` includes the cancelled record.
 Cancellation releases the reservation immediately. The next session expiry
 check disconnects users who have no other active owned or shared booking.
 
