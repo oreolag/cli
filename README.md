@@ -33,7 +33,7 @@ curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo b
 
 ## Install with Oreol Management
 
-Alternatively, use `omgmt` to install `odev` across your managed cluster. See the [Oreol Management installation guide.](https://oreolag.github.io/docs/mgmt/odev/installation/)
+Alternatively, use `omgmt` to install `odev` across your managed cluster. See the [Oreol MGMT installation guide.](https://oreolag.github.io/docs/mgmt/odev/installation/)
 <!-- docs:cli_readme_installation:end -->
 
 <!-- docs:cli_readme_supported_platforms:start -->
@@ -48,7 +48,7 @@ Additional Linux distributions may work but are not officially validated yet.
 
 <!-- docs:cli_readme_supported_how_it_works:start -->
 ## How It Works
-`odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth. Read more in the [Oreol CLI manual.](https://oreolag.github.io/docs/cli/how-it-works/)
+`odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth. Click [here](https://oreolag.github.io/docs/cli/how-it-works/) to learn more.
 <!-- docs:cli_readme_supported_how_it_works:end -->
 
 ![](examples.gif)
