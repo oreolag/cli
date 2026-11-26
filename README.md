@@ -39,6 +39,7 @@ curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo b
 Alternatively, use `omgmt` to install `odev` across your managed cluster. See the [Oreol Management installation guide.](https://oreolag.github.io/docs/mgmt/odev/installation/)
 <!-- docs:cli_readme_installation:end -->
 
+<!-- docs:cli_readme_supported_platforms:start -->
 ## Supported Platforms
 `odev` currently supports Ubuntu-based Linux distributions. Validated environments include:
 
@@ -46,6 +47,7 @@ Alternatively, use `omgmt` to install `odev` across your managed cluster. See th
 - NVIDIA DGX
 
 Additional Linux distributions may work but are not officially validated yet.
+<!-- docs:cli_readme_supported_platforms:end -->
 
 ## Examples
 
@@ -53,6 +55,7 @@ Additional Linux distributions may work but are not officially validated yet.
 
 ![](examples.gif)
 
+<!-- docs:cli_readme_supported_citation:start -->
 ## Citation
 
 [![Zenodo](https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.20229347-blue)](https://doi.org/10.5281/zenodo.20229347)
@@ -81,3 +84,4 @@ If you use `odev` in your research, development, or publications, please cite th
   url       = {https://doi.org/10.1145/3805700}
 }
 ```
+<!-- docs:cli_readme_supported_citation:end -->
