@@ -48,10 +48,10 @@ Additional Linux distributions may work but are not officially validated yet.
 
 <!-- docs:cli_readme_supported_how_it_works:start -->
 ## How It Works
-`odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth. To get to know more continue [here.](https://oreolag.github.io/docs/cli/how-it-works/) 
+`odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth. Read more in the [Oreol CLI manual.](https://oreolag.github.io/docs/cli/how-it-works/)
+<!-- docs:cli_readme_supported_how_it_works:end -->
 
 ![](examples.gif)
-<!-- docs:cli_readme_supported_how_it_works:end -->
 
 ## Citation
 
