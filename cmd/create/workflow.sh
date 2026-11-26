@@ -170,7 +170,13 @@ if [[ ! -d "$WORKFLOWS_USER_PATH" ]]; then
     fi
   else
     # repo does not exist → create fork
-    gh repo fork oreolag/workflows --clone=false
+    printf "Create fork '%s/workflows'? [y/N]: " "$github_user"
+    IFS= read -r answer || exit 0
+    case "$answer" in
+      [yY]|[yY][eE][sS]) ;;
+      *) exit 0 ;;
+    esac
+    gh repo fork oreolag/workflows --clone=false || exit 1
   fi
   
   # always clone

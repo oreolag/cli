@@ -128,6 +128,12 @@ if [[ ! -e "$PLAYBOOKS_USER_PATH" ]]; then
       exit 1
     fi
   else
+    printf "Create fork '%s/playbooks'? [y/N]: " "$github_user"
+    IFS= read -r answer || exit 0
+    case "$answer" in
+      [yY]|[yY][eE][sS]) ;;
+      *) exit 0 ;;
+    esac
     gh repo fork oreolag/playbooks --clone=false || exit 1
   fi
 
