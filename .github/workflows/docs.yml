@@ -1,0 +1,22 @@
+name: Refresh documentation
+
+on:
+  push:
+    branches: [main]
+    paths: [README.md]
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  refresh:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start documentation build
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_WORKFLOW_TOKEN }}
+        run: gh workflow run pages.yml --repo oreolag/docs --ref main
