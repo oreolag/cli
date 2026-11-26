@@ -94,6 +94,20 @@ class BookingListTest(unittest.TestCase):
         self.config["server"]["managed_servers"] = ["incus-02"]
         self.assertEqual(list_bookings(self.config, "2026-10-25")["bookings"], [])
 
+    def test_free_server_suggestion_uses_inventory_order_and_five_minute_gap(self):
+        now = 1800000000
+        for seconds, expected in [(180, "incus-02"), (300, "incus-01"), (-60, "incus-02")]:
+            with self.subTest(seconds=seconds):
+                result = {"servers": ["incus-01", "incus-02"], "bookings": [
+                    {"server": "incus-01", "start_time": now + seconds, "end_time": now + 3600}]}
+                output = io.StringIO()
+                with patch.object(sys, "argv", ["client.py", "--odev-path", str(self.root),
+                                               "--free-server", "--local-only"]), \
+                        patch.object(client, "local_listing", return_value=result), \
+                        patch("client.time.time", return_value=now), redirect_stdout(output):
+                    client.main()
+                self.assertEqual(output.getvalue().strip(), expected)
+
     def test_invalid_dates(self):
         for day in [None, "2026-2-01", "2026-02-30", "9999-12-31"]:
             with self.subTest(day=day), self.assertRaisesRegex(ValueError, "Invalid booking date"):

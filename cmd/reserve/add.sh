@@ -79,6 +79,9 @@ if [[ -z "$booking_db" ]]; then
 fi
 booking_db="${booking_db:-/opt/booking.yml}"
 default_server="$(python3 "$ODEV_PATH/src/booking_is_server.py" --db "$booking_db" --participant --default-server)" || exit 1
+if [[ "$default_server" == "-" ]]; then
+  default_server="${ODEV_RESERVE_DEFAULT_SERVER:--}"
+fi
 if [[ "$default_server" != "-" ]]; then
   for i in "${!flags[@]}"; do
     if [[ "${flags[i]}" == server,* ]]; then

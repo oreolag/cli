@@ -11,6 +11,7 @@ import socket
 import subprocess
 import sys
 import tempfile
+import time
 from zoneinfo import ZoneInfo
 
 import yaml
@@ -149,6 +150,7 @@ def main():
     parser.add_argument("--active", action="store_true")
     parser.add_argument("--booked-hosts", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--availability", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--free-server", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--local-only", action="store_true")
     parser.add_argument("--cancel")
     parser.add_argument("--cancel-stage", choices=["preview", "confirm"], help=argparse.SUPPRESS)
@@ -166,6 +168,29 @@ def main():
     inventory = load_inventory(inventory_path)
     local = socket.gethostname().split(".")[0]
     entry = next((entry for entry in inventory["servers"] if entry["name"] == local), None)
+    if args.free_server:
+        if entry is not None:
+            now = int(time.time())
+            date = datetime.fromtimestamp(now, ZoneInfo(booking_timezone(inventory_path, local))).date().isoformat()
+            result = local_listing(date)
+            unavailable = {row["server"] for row in result["bookings"]
+                           if row.get("cancelled_at") is None and row["end_time"] > now
+                           and row["start_time"] < now + 300}
+            free = next((server for server in result["servers"] if server not in unavailable), None)
+            if free:
+                print(free)
+                return
+        if not args.local_only:
+            for service in inventory["servers"]:
+                if service["name"] == local:
+                    continue
+                command = ["/usr/bin/python3", str(root / "booking/client.py"), "--odev-path", str(root),
+                           "--local-only", "--free-server"]
+                free = run_remote_booking(root, [service["name"]], command, "check server availability", capture=True).strip()
+                if free:
+                    print(free)
+                    return
+        return
     if args.availability:
         if entry is None:
             raise ValueError(message("command_not_available", "odev reserve"))

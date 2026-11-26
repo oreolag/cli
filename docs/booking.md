@@ -180,6 +180,13 @@ services overlapping the selected day, including expired and cancelled bookings.
 Use `YYYY-MM-DD`, `today`, `yesterday` or `tomorrow`. Relative dates use the
 timezone of each service.
 
+In an interactive terminal, plain `odev reserve` opens the creation dialog after
+the tables when a server is free. On a booking server, the suggested target is
+the first free server in inventory order, checking the local service first.
+On a managed server, the suggestion remains the current machine. Reservations
+starting in less than five minutes do not count as free for this suggestion.
+History and piped output only print tables. Press Ctrl+C to leave the dialog.
+
 Both views print the local or assigned service's table first, then show tables
 from the other services. Each service uses its own local date. Remote listing
 uses the caller's existing SSH access and requires Ansible on the machine

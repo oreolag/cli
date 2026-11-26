@@ -40,4 +40,13 @@ if [[ -n "$parsed_flags" ]]; then
   list_args+=(--date "$date")
 fi
 
-exec python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" "${list_args[@]}"
+python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" "${list_args[@]}" || exit 1
+
+# Offer a reservation after the current availability table in an interactive terminal.
+if [[ $# -eq 0 && -t 0 && -t 1 ]]; then
+  free_server="$(python3 "$ODEV_PATH/booking/client.py" --odev-path "$ODEV_PATH" --free-server)" || exit 1
+  if [[ -n "$free_server" ]]; then
+    echo ""
+    ODEV_RESERVE_DEFAULT_SERVER="$free_server" "$ODEV_PATH/cmd/reserve/add.sh" || exit 1
+  fi
+fi
