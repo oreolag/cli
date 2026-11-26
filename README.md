@@ -17,16 +17,16 @@
   </p>
 </h1>
 
-<!-- docs:intro:start -->
+<!-- docs:cli_readme_intro:start -->
 ```odev``` is the CLI for hetero*genius* computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units, simplifying deployment while enabling reproducible experimentation and consistent performance baselines through hardware-aware execution.
 
 Combined with integrated community [workflows](https://github.com/oreolag/workflows) for popular HPC, ML, and AI environments such as NCCL, Metaflow, and vLLM, ```odev``` empowers researchers and engineers to easily build and run their applications across advanced heterogeneous hardware—including CPUs, GPUs, FPGAs, storage, and high-performance networking systems—to solve real-world problems.
-<!-- docs:intro:end -->
+<!-- docs:cli_readme_intro:end -->
 
 <!-- ## How It Works
 `odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth. -->
 
-<!-- docs:installation:start -->
+<!-- docs:cli_readme_installation:start -->
 ## Install with the Script
 Run the following command on your Linux host (see [Supported Platforms](#supported-platforms)):
 
@@ -37,7 +37,7 @@ curl -H 'Cache-Control: no-cache' -fsSL https://oreol.ch/cli/install.sh | sudo b
 ## Install with Oreol Management
 
 Alternatively, use `omgmt` to install `odev` across your managed cluster. See the [Oreol Management installation guide.](https://oreolag.github.io/docs/mgmt/odev/installation/)
-<!-- docs:installation:end -->
+<!-- docs:cli_readme_installation:end -->
 
 ## Supported Platforms
 `odev` currently supports Ubuntu-based Linux distributions. Validated environments include:
