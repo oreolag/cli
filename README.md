@@ -18,7 +18,7 @@
 </h1>
 
 <!-- docs:cli_readme_intro:start -->
-Oreol CLI, or ```odev```, is a command-line interface that helps you set up and use your Oreol cluster from your terminal or scripts.
+Oreol CLI, or ```odev```, is a command-line interface that helps you prepare and use your Oreol cluster from your terminal or scripts.
 
 Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units, simplifying deployment while enabling reproducible experimentation and consistent performance baselines through hardware-aware execution.
 
