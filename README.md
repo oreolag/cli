@@ -52,7 +52,7 @@ Additional Linux distributions may work but are not officially validated yet.
 ## How It Works
 `odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth. Click [here](https://oreolag.github.io/docs/cli/how-it-works/) to learn more.
 
-### Integrated reservation system
+### Integrated Reservation System
 `odev` includes a lightweight, configurable reservation system hosted on a designated server. Users can reserve resources for their work and use the integrated Ansible tooling to configure remote hosts and program supported devices. Setting ```--hosts all``` targets all hosts reserved by the current user:
 
 ```bash
