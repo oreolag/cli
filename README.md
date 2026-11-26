@@ -18,7 +18,8 @@
 </h1>
 
 <!-- docs:cli_readme_intro:start -->
-```odev``` is the CLI for hetero*genius* computing. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units, simplifying deployment while enabling reproducible experimentation and consistent performance baselines through hardware-aware execution.
+
+Oreol CLI, or ```odev```, is the command-line interface for hetero*genius* computing, helping you manage and use your Oreol cluster from your terminal or scripts. Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units, simplifying deployment while enabling reproducible experimentation and consistent performance baselines through hardware-aware execution.
 
 Combined with integrated community [playbooks](https://github.com/oreolag/workflows) and [workflows](https://github.com/oreolag/workflows) for popular HPC, ML, and AI environments, ```odev``` empowers researchers and engineers to easily build and run their applications across advanced heterogeneous hardware—including CPUs, GPUs, FPGAs, storage, and high-performance networking systems—to solve real-world problems.
 <!-- docs:cli_readme_intro:end -->
