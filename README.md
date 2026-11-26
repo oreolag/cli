@@ -55,12 +55,12 @@ Additional Linux distributions may work but are not officially validated yet.
 
 ![](examples.gif)
 
-<!-- docs:cli_readme_supported_citation:start -->
 ## Citation
 
 [![Zenodo](https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.20229347-blue)](https://doi.org/10.5281/zenodo.20229347)
 [![ACM](https://img.shields.io/badge/ACM-10.1145%2F3805700-green)](https://doi.org/10.1145/3805700)
 
+<!-- docs:cli_readme_supported_citation:start -->
 If you use `odev` in your research, development, or publications, please cite the following references:
 
 ```bibtex
