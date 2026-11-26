@@ -23,9 +23,6 @@
 Combined with integrated community [workflows](https://github.com/oreolag/workflows) for popular HPC, ML, and AI environments such as NCCL, Metaflow, and vLLM, ```odev``` empowers researchers and engineers to easily build and run their applications across advanced heterogeneous hardware—including CPUs, GPUs, FPGAs, storage, and high-performance networking systems—to solve real-world problems.
 <!-- docs:cli_readme_intro:end -->
 
-<!-- ## How It Works
-`odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth. -->
-
 <!-- docs:cli_readme_installation:start -->
 ## Install with the Script
 Run the following command on your Linux host (see [Supported Platforms](#supported-platforms)):
@@ -49,11 +46,12 @@ Alternatively, use `omgmt` to install `odev` across your managed cluster. See th
 Additional Linux distributions may work but are not officially validated yet.
 <!-- docs:cli_readme_supported_platforms:end -->
 
-## Examples
-
-`odev` supports Tab completion for command names and workflows.
+<!-- docs:cli_readme_supported_how_it_works:start -->
+## How It Works
+`odev` treats NUMA-local heterogeneous resources as composable execution units. A workload can run inside a single NUMA unit for maximum locality, or across multiple NUMA units when larger models or distributed applications require more accelerators, memory, storage, or network bandwidth. To get to know more continue [here.](https://oreolag.github.io/docs/cli/how-it-works/) 
 
 ![](examples.gif)
+<!-- docs:cli_readme_supported_how_it_works:end -->
 
 ## Citation
 
