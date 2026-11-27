@@ -18,11 +18,11 @@
 </h1>
 
 <!-- docs:cli_readme_intro:start -->
-Oreol CLI, or ```odev```, is a command-line interface that helps you prepare and use your Oreol cluster from your terminal or scripts.
+Oreol CLI, or ```odev```, is a command-line interface to your Oreol cluster for use in your terminal or scripts.
 
-Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` abstracts NUMA-local heterogeneous resources as topology-aware computing units, simplifying deployment while enabling reproducible experimentation and consistent performance baselines through hardware-aware execution.
+Building on the Heterogeneous Accelerated Compute Cluster CLI developed at ETH Zurich (see [hdev](https://github.com/fpgasystems/hdev) on GitHub), ```odev``` combines an integrated reservation system with automation through Ansible [playbooks](https://github.com/oreolag/workflows) to help you configure your infrastructure to meet your application requirements.
 
-Combined with integrated community [playbooks](https://github.com/oreolag/workflows) and [workflows](https://github.com/oreolag/workflows) for popular HPC, ML, and AI environments, ```odev``` empowers researchers and engineers to easily build and run their applications across advanced heterogeneous hardware—including CPUs, GPUs, FPGAs, storage, and high-performance networking systems—to solve real-world problems.
+Community [workflows](https://github.com/oreolag/workflows) for popular HPC, ML, and AI environments bring together infrastructure configuration, device programming, and application execution across CPUs, GPUs, FPGAs, storage, and high-performance networking. By coordinating how applications use these resources, ```odev``` simplifies deployment and supports reproducible experimentation. Planned NUMA-aware execution will extend this approach by keeping workloads close to the devices and memory they use.
 <!-- docs:cli_readme_intro:end -->
 
 <!-- docs:cli_readme_installation:start -->
