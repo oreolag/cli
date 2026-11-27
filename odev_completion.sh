@@ -158,12 +158,20 @@ _odev_completions() {
     fi
   fi
 
-  # Generated inventory groups for playbooks, MTU and workflow programming.
+  # Generated inventory groups and hosts for playbooks, MTU and workflow programming.
   if [[ $cword -ge 3 && "$prev" == "--hosts" &&
         ( ( "${words[1]}" == "run" && "${words[2]}" == "playbook" ) ||
           ( "${words[1]}" == "set" && "${words[2]}" == "mtu" ) ||
           "${words[1]}" == "program" ) ]]; then
-    COMPREPLY=( $(compgen -W "local remote all" -- "$cur") )
+    local inventory="$INVENTORY_PATH/hosts_$(id -un)" host_names=""
+    if [[ -r "$inventory" ]]; then
+      host_names="$(awk '
+        /^[[:space:]]*($|#|;)/ { next }
+        /^[[:space:]]*\[/ { skip = ($0 ~ /:(vars|children)[[:space:]]*\]/); next }
+        !skip { print $1 }
+      ' "$inventory")"
+    fi
+    COMPREPLY=( $(compgen -W "$(printf '%s\n' local remote all $host_names | sort -u)" -- "$cur") )
     return 0
   fi
 
